@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:columnCount="5"
+    android:columnOrderPreserved="false"
+    android:orientation="vertical"
+    android:useDefaultMargins="true"
+    tools:context=".oauth.OAuthFlowApp">
+
+
+    <Button
+        android:visibility="gone"
+        android:id="@+id/btn_launch_oauth"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Launch Nest Auth" />
+
+    <TextView
+        android:id="@+id/response_code"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/fillin"
+        android:typeface="normal" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/editPincode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="8"
+            android:hint="@string/pincode"
+            android:inputType="textShortMessage|textCapCharacters|textNoSuggestions" />
+
+        <Button
+            android:id="@+id/btn_use_pincode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:text="Use Pincode" />
+    </LinearLayout>
+
+    <WebView
+        android:id="@+id/webView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+/>
+</LinearLayout>
