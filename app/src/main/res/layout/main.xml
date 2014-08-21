@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+
+        <Button
+            android:id="@+id/buttonConnectNest"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Connect to Nest" />
+
+        <Button
+            android:id="@+id/buttonForget"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Forget Nest" />
+
+        <Button
+            android:id="@+id/buttonGetNestInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Get Nest Info" />
+
+    </LinearLayout>
+
+
+    <TextView
+        android:id="@+id/structure_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Name"
+
+        />
+
+    <TextView
+        android:id="@+id/away_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Away Status" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/ETAminutes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="3"
+            android:inputType="number"
+            android:maxLength="3" />
+
+        <Button
+            android:id="@+id/buttonSendETA"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Send ETA" />
+        <Button
+            android:id="@+id/buttonSetAtHome"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="At Home" />
+        <Button
+            android:id="@+id/buttonSetAtWork"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="At Work" />
+    </LinearLayout>
+
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.MapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</LinearLayout>
