@@ -1,5 +1,12 @@
 .gradle
+
 /local.properties
+
+# Android Studio
+.idea
 /.idea/workspace.xml
-.DS_Store
+*.iml
 /build
+
+
+.DS_Store
