@@ -1,5 +1,6 @@
 package net.mceoin.cominghome;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -47,9 +48,18 @@ public class NestUtils {
     public static final String MSG_GET_OTHERS = "get_others";
     public static final String MSG_AWAY = "away";
 
-    public static void getInfo(String access_token, Handler handler) {
+    public static final String POST_ACTION_IF_AWAY_SET_HOME = "if-away-set-home";
+
+    public static void getInfo(Context context, String access_token, Handler handler, String post_action) {
+        if (context==null) {
+            Log.e(TAG, "missing context");
+            return;
+        }
+
         RequestStructures requestStructures = new RequestStructures();
         requestStructures.setHandler(handler);
+        requestStructures.setPostAction(post_action);
+        requestStructures.setAccessToken(access_token);
         requestStructures.execute(access_token);
     }
 
@@ -88,8 +98,17 @@ public class NestUtils {
         String structure_id;
         String structure_name;
         String away_status="";
+        private String post_action;
+        private Context context;
+        private String access_token;
 
         private Handler handler;
+
+        public void setAccessToken(String access_token) { this.access_token = access_token; }
+
+        public void setContext(Context context) { this.context = context; }
+
+        public void setPostAction(String post_action) { this.post_action = post_action; }
 
         public void setHandler(Handler handler) {
             this.handler = handler;
@@ -105,14 +124,21 @@ public class NestUtils {
             if (debug) {
                 Log.d(TAG, "onPostExecute");
             }
-            Message msg = Message.obtain();
-            Bundle b = new Bundle();
-            b.putString("type", MSG_STRUCTURES);
-            b.putString("structure_id", structure_id);
-            b.putString("structure_name", structure_name);
-            b.putString("away_status", away_status);
-            msg.setData(b);
-            handler.sendMessage(msg);
+            if (handler!=null) {
+                Message msg = Message.obtain();
+                Bundle b = new Bundle();
+                b.putString("type", MSG_STRUCTURES);
+                b.putString("structure_id", structure_id);
+                b.putString("structure_name", structure_name);
+                b.putString("away_status", away_status);
+                msg.setData(b);
+                handler.sendMessage(msg);
+            }
+            if (post_action.equals(POST_ACTION_IF_AWAY_SET_HOME)) {
+                if ((away_status.equals("away")) || (away_status.equals("auto-away"))) {
+                    sendAwayStatus(access_token,null,structure_id,"home");
+                }
+            }
         }
 
         protected void onProgressUpdate(Integer... progress) {
@@ -422,18 +448,20 @@ public class NestUtils {
             if (debug) {
                 Log.d(TAG, "onPostExecute");
             }
-            Message msg = Message.obtain();
-            Bundle b = new Bundle();
-            b.putString("type", MSG_AWAY);
-            String status;
-            if (error) {
-                status="error";
-            } else {
-                status="ok";
+            if (handler!=null) {
+                Message msg = Message.obtain();
+                Bundle b = new Bundle();
+                b.putString("type", MSG_AWAY);
+                String status;
+                if (error) {
+                    status = "error";
+                } else {
+                    status = "ok";
+                }
+                b.putString("status", status);
+                msg.setData(b);
+                handler.sendMessage(msg);
             }
-            b.putString("status", status);
-            msg.setData(b);
-            handler.sendMessage(msg);
         }
 
         protected void onProgressUpdate(Integer... progress) {

@@ -87,10 +87,10 @@ public class FenceHandling {
         String access_token = prefs.getString(OAuthFlowApp.PREF_ACCESS_TOKEN, "");
 
         if (!access_token.isEmpty()) {
-            NestUtils.getInfo(access_token, handler);
+            NestUtils.getInfo(context, access_token, null,NestUtils.POST_ACTION_IF_AWAY_SET_HOME);
 
             if (!structure_id.isEmpty()) {
-                BackendUtils.updateStatus(context, handler, structure_id, "home");
+                BackendUtils.updateStatus(context, null, structure_id, "home");
             }
 
             // Loop so this thread stays alive in order to receive the handler message

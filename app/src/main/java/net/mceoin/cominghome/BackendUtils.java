@@ -1,10 +1,12 @@
 package net.mceoin.cominghome;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -32,6 +34,11 @@ public class BackendUtils {
     public static void updateStatus(Context context, Handler handler, String structure_id,
                                     String away_status) {
         if (debug) Log.d(TAG, "updateStatus(,,," + away_status + ")");
+        if (context==null) {
+            Log.e(TAG, "missing context");
+            return;
+        }
+
         if ((away_status==null) || (away_status.isEmpty())) return;
 
         UpdateStatusAsyncTask updateStatusAsyncTask = new UpdateStatusAsyncTask();
@@ -71,15 +78,20 @@ public class BackendUtils {
         protected String doInBackground(Void... params) {
 
             HttpClient httpClient = new DefaultHttpClient();
-            HttpPost httpPost = new HttpPost("https://coming-home-666.appspot.com/status"); // 10.0.2.2 is localhost's IP address in Android emulator
+            String url = "https://" + BackendConstants.appEngineHost + "/status";
+            HttpPost httpPost = new HttpPost(url);
             try {
+
+                String InstallationId = Installation.id(context);
                 // Add name data to request
                 List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
                 nameValuePairs.add(new BasicNameValuePair("request", "set"));
-                nameValuePairs.add(new BasicNameValuePair("installation_id", MainActivity.InstallationId));
+                nameValuePairs.add(new BasicNameValuePair("installation_id", InstallationId));
                 nameValuePairs.add(new BasicNameValuePair("structure_id", structure_id));
                 nameValuePairs.add(new BasicNameValuePair("away_status", away_status));
                 httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+
+                if (debug) { Log.d(TAG,"parameters = "+nameValuePairs.toString()); }
 
                 // Execute HTTP Post Request
                 HttpResponse response = httpClient.execute(httpPost);
@@ -141,12 +153,15 @@ public class BackendUtils {
         protected String doInBackground(Void... params) {
 
             HttpClient httpClient = new DefaultHttpClient();
-            HttpPost httpPost = new HttpPost("https://coming-home-666.appspot.com/status"); // 10.0.2.2 is localhost's IP address in Android emulator
+            String url = "https://" + BackendConstants.appEngineHost + "/status";
+            HttpPost httpPost = new HttpPost(url);
             try {
+                String InstallationId = Installation.id(context);
+
                 // Add name data to request
                 List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
                 nameValuePairs.add(new BasicNameValuePair("request", "getothers"));
-                nameValuePairs.add(new BasicNameValuePair("installation_id", MainActivity.InstallationId));
+                nameValuePairs.add(new BasicNameValuePair("installation_id", InstallationId));
                 nameValuePairs.add(new BasicNameValuePair("structure_id", structure_id));
                 httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
