@@ -59,7 +59,7 @@ public class MainActivity extends FragmentActivity implements
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final boolean debug = true;
 
-    public static String InstallationId;
+    private static String InstallationId;
 
     private static final String KEY_IN_RESOLUTION = "is_in_resolution";
     public static final String PREFS_STRUCTURE_ID = "structure_id";
@@ -238,7 +238,7 @@ public class MainActivity extends FragmentActivity implements
         getNestInfo.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
                 if (!access_token.isEmpty()) {
-                    NestUtils.getInfo(access_token, handler);
+                    NestUtils.getInfo(getApplicationContext(), access_token, handler, null);
                 }
             }
         });

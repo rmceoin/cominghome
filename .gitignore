@@ -8,5 +8,7 @@
 *.iml
 /build
 
+backend/build/
+
 
 .DS_Store

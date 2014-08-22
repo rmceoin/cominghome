@@ -1,3 +1,8 @@
+/**
+  * Copy this file to Constants.java and update the CLIENT_ID and CLIENT_SECRET with what is
+  * provided by the Nest Developer site.
+  *
+  */
 package net.mceoin.cominghome.oauth;
 
 public class Constants {
