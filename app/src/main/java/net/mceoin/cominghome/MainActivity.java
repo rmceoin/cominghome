@@ -74,8 +74,6 @@ public class MainActivity extends FragmentActivity implements
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final boolean debug = true;
 
-    private static String InstallationId;
-
     private static final String KEY_IN_RESOLUTION = "is_in_resolution";
     public static final String PREFS_STRUCTURE_ID = "structure_id";
     public static final String PREFS_STRUCTURE_NAME = "structure_name";
@@ -224,7 +222,7 @@ public class MainActivity extends FragmentActivity implements
         prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         access_token = prefs.getString(OAuthFlowApp.PREF_ACCESS_TOKEN, "");
 
-        InstallationId = Installation.id(this);
+        Installation.id(this);
 
         setContentView(R.layout.main);
 
@@ -274,12 +272,15 @@ public class MainActivity extends FragmentActivity implements
 
         ETAminutes = (EditText) findViewById(R.id.ETAminutes);
 
+        playServicesConnected();
+
         startLocationService(getApplicationContext());
 
         map = ((MapFragment) getFragmentManager()
                 .findFragmentById(R.id.map)).getMap();
 
-        map.setMyLocationEnabled(true);
+        if (map!=null)
+            map.setMyLocationEnabled(true);
 
         mLocationClient = new LocationClient(this, this, this);
 
@@ -382,13 +383,15 @@ public class MainActivity extends FragmentActivity implements
             } else {
                 iconId = R.drawable.my_briefcase;
             }
-            marker = map.addMarker(new MarkerOptions()
-                    .icon(BitmapDescriptorFactory.fromResource(iconId))
-                    .title(geofenceId)
-                    .position(current));
-            mapMarkers.put(geofenceId, marker);
+            if (map!=null) {
+                marker = map.addMarker(new MarkerOptions()
+                        .icon(BitmapDescriptorFactory.fromResource(iconId))
+                        .title(geofenceId)
+                        .position(current));
+                mapMarkers.put(geofenceId, marker);
+            }
         }
-        if (move) map.moveCamera(CameraUpdateFactory.newLatLngZoom(current, 13));
+        if ((move)&&(map!=null)) map.moveCamera(CameraUpdateFactory.newLatLngZoom(current, 13));
     }
 
     private void updateGeofences() {
@@ -528,7 +531,7 @@ public class MainActivity extends FragmentActivity implements
 
     private void retryConnecting() {
         mIsInResolution = false;
-        if (!mGoogleApiClient.isConnecting()) {
+        if ((mGoogleApiClient!=null) && (!mGoogleApiClient.isConnecting())) {
             mGoogleApiClient.connect();
         }
     }
@@ -648,7 +651,7 @@ public class MainActivity extends FragmentActivity implements
      *
      * @return true if Google Play services is available, otherwise false
      */
-    private boolean servicesConnected() {
+    private boolean playServicesConnected() {
 
         // Check that Google Play services is available
         int resultCode =
