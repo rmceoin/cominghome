@@ -55,6 +55,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -121,6 +123,7 @@ public class MainActivity extends FragmentActivity implements
 
     GoogleMap map;
     Map<String, Marker> mapMarkers = new HashMap<String, Marker>();
+    Map<String, Circle> mapCircles = new HashMap<String, Circle>();
 
 //    private static final long GEOFENCE_EXPIRATION_IN_HOURS = 12;
 //    private static final long GEOFENCE_EXPIRATION_IN_MILLISECONDS =
@@ -373,19 +376,35 @@ public class MainActivity extends FragmentActivity implements
     private void updateMarker(double latitude, double longitude, String geofenceId, boolean move) {
         LatLng current = new LatLng(latitude, longitude);
         Marker marker;
+        Circle circle;
         if (mapMarkers.containsKey(geofenceId)) {
             marker = mapMarkers.get(geofenceId);
             marker.setPosition(current);
+
+            circle = mapCircles.get(geofenceId);
+            if (circle!=null) {
+                circle.setCenter(current);
+            } else {
+                Log.e(TAG,"missing circle for "+geofenceId);
+            }
         } else {
             int iconId;
             if (geofenceId.equals(FENCE_HOME)) {
-                iconId = R.drawable.gnome_go_home;
+                iconId = R.drawable.home;
             } else {
                 iconId = R.drawable.my_briefcase;
             }
             if (map!=null) {
+
+                CircleOptions circleOptions = new CircleOptions()
+                        .center(current)
+                        .radius(fenceRadius); // In meters
+                circle = map.addCircle(circleOptions);
+                mapCircles.put(geofenceId, circle);
+
                 marker = map.addMarker(new MarkerOptions()
                         .icon(BitmapDescriptorFactory.fromResource(iconId))
+                        .anchor(0.5f, 0.5f)
                         .title(geofenceId)
                         .position(current));
                 mapMarkers.put(geofenceId, marker);
