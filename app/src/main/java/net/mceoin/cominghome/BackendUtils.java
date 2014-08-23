@@ -16,12 +16,10 @@
 package net.mceoin.cominghome;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -46,19 +44,18 @@ public class BackendUtils {
     public static final String TAG = BackendUtils.class.getSimpleName();
     public static final boolean debug = true;
 
-    public static void updateStatus(Context context, Handler handler, String structure_id,
+    public static void updateStatus(Context context, String structure_id,
                                     String away_status) {
-        if (debug) Log.d(TAG, "updateStatus(,,," + away_status + ")");
-        if (context==null) {
+        if (debug) Log.d(TAG, "updateStatus(,," + away_status + ")");
+        if (context == null) {
             Log.e(TAG, "missing context");
             return;
         }
 
-        if ((away_status==null) || (away_status.isEmpty())) return;
+        if ((away_status == null) || (away_status.isEmpty())) return;
 
         UpdateStatusAsyncTask updateStatusAsyncTask = new UpdateStatusAsyncTask();
         updateStatusAsyncTask.setContext(context);
-        updateStatusAsyncTask.setHandler(handler);
         updateStatusAsyncTask.setStructureId(structure_id);
         updateStatusAsyncTask.setAwayStatus(away_status);
         updateStatusAsyncTask.execute();
@@ -71,14 +68,8 @@ public class BackendUtils {
         private String structure_id;
         private String away_status;
 
-        private Handler handler;
-
         public void setContext(Context context) {
             this.context = context;
-        }
-
-        public void setHandler(Handler handler) {
-            this.handler = handler;
         }
 
         public void setAwayStatus(String away_status) {
@@ -106,7 +97,9 @@ public class BackendUtils {
                 nameValuePairs.add(new BasicNameValuePair("away_status", away_status));
                 httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
-                if (debug) { Log.d(TAG,"parameters = "+nameValuePairs.toString()); }
+                if (debug) {
+                    Log.d(TAG, "parameters = " + nameValuePairs.toString());
+                }
 
                 // Execute HTTP Post Request
                 HttpResponse response = httpClient.execute(httpPost);
@@ -127,15 +120,15 @@ public class BackendUtils {
             if (debug) Log.d(TAG, "result=" + result);
             if (debug) {
                 if (context != null)
-                Toast.makeText(context, result, Toast.LENGTH_LONG).show();
+                    Toast.makeText(context, result, Toast.LENGTH_LONG).show();
             }
         }
     }
 
     public static void getOthers(Context context, Handler handler, String structure_id
-                                    ) {
+    ) {
         if (debug) Log.d(TAG, "getOthers(,," + structure_id + ")");
-        if ((structure_id==null) || (structure_id.isEmpty())) return;
+        if ((structure_id == null) || (structure_id.isEmpty())) return;
 
         GetOthersAsyncTask getOthersAsyncTask = new GetOthersAsyncTask();
         getOthersAsyncTask.setContext(context);
@@ -201,7 +194,7 @@ public class BackendUtils {
                 if (context != null)
                     Toast.makeText(context, result, Toast.LENGTH_LONG).show();
             }
-            if (handler!=null) {
+            if (handler != null) {
                 Message msg = Message.obtain();
                 Bundle b = new Bundle();
                 b.putString("type", NestUtils.MSG_GET_OTHERS);
