@@ -100,12 +100,15 @@ public class FenceHandling {
         prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String structure_id = prefs.getString(MainActivity.PREFS_STRUCTURE_ID, "");
         String access_token = prefs.getString(OAuthFlowApp.PREF_ACCESS_TOKEN, "");
+        boolean tellNest = prefs.getBoolean(PrefsFragment.key_tell_nest_on_arrival_home, true);
 
         if (!access_token.isEmpty()) {
-            NestUtils.getInfo(context, access_token, null,NestUtils.POST_ACTION_IF_AWAY_SET_HOME);
+            if (tellNest) {
+                NestUtils.getInfo(context, access_token, null, NestUtils.POST_ACTION_IF_AWAY_SET_HOME);
+            }
 
             if (!structure_id.isEmpty()) {
-                BackendUtils.updateStatus(context, null, structure_id, "home");
+                BackendUtils.updateStatus(context, structure_id, "home");
             }
 
             // Loop so this thread stays alive in order to receive the handler message
@@ -124,7 +127,7 @@ public class FenceHandling {
 
         if (!structure_id.isEmpty()) {
             BackendUtils.getOthers(null, handler, structure_id);
-            BackendUtils.updateStatus(context, handler, structure_id, "away");
+            BackendUtils.updateStatus(context, structure_id, "away");
 
             // Loop so this thread stays alive in order to receive the handler message
             if (Looper.myLooper() == null) Looper.prepare();
