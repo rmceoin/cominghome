@@ -27,6 +27,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".SettingsActivity" />
         <activity android:name=".oauth.OAuthFlowApp" />
 
                 <activity android:name=".oauth.PrepareRequestTokenActivity" android:launchMode="singleTask">>
@@ -47,7 +48,7 @@
             android:exported="true"
             android:permission="com.rmceoin.whereyouare.app.permission.LOCATION">
         </service>
-        <service android:name=".ReceiveTransitionsIntentService" android:exported="false"></service>
+        <service android:name=".ReceiveTransitionsIntentService" android:exported="false" />
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyC7hSFr6Xr_tOMlp5VDhaK8x1EUG7PduGE"/>

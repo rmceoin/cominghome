@@ -2,10 +2,9 @@
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/get_others"
-        android:icon="@drawable/ic_notification"
-        android:title="@string/get_others"
-        android:showAsAction="ifRoom"/>
+        android:title="@string/get_others" />
+    <item android:id="@+id/settings"
+        android:title="@string/settings" />
     <item android:id="@+id/help"
-        android:icon="@drawable/ic_notification"
         android:title="@string/about" />
 </menu>

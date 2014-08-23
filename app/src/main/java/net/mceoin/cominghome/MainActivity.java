@@ -459,6 +459,9 @@ public class MainActivity extends FragmentActivity implements
                 if ((structure_id!=null) && (!structure_id.isEmpty()))
                     BackendUtils.getOthers(getApplicationContext(),handler,structure_id);
                 return true;
+            case R.id.settings:
+                startActivity(new Intent(this,SettingsActivity.class));
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }

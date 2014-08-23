@@ -33,5 +33,18 @@
     <string name="disconnected">Client disconnected</string>
 
     <string name="get_others">Get Others</string>
+    <string name="settings">Settings</string>
     <string name="about">About</string>
+
+    <!-- Preferences strings -->
+    <string name="inline_preferences">Settings</string>
+
+    <string name="key_tell_nest_on_arrival_home">tell_nest_on_arrival_home</string>
+    <string name="title_tell_nest_on_arrival_home_preference">Arrival Home</string>
+    <string name="summary_tell_nest_on_arrival_home_preference">Upon arrival, set Nest to home</string>
+
+    <string name="key_tell_nest_on_leaving_home">tell_nest_on_leaving_home</string>
+    <string name="title_tell_nest_on_leaving_home_preference">Leave Home</string>
+    <string name="summary_tell_nest_on_leaving_home_preference">After leaving, set Nest to away</string>
+
 </resources>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="@string/inline_preferences">
+
+        <CheckBoxPreference
+            android:key="@string/key_tell_nest_on_arrival_home"
+            android:title="@string/title_tell_nest_on_arrival_home_preference"
+            android:summary="@string/summary_tell_nest_on_arrival_home_preference"
+            android:defaultValue="true" />
+
+        <CheckBoxPreference
+            android:key="@string/key_tell_nest_on_leaving_home"
+            android:title="@string/title_tell_nest_on_leaving_home_preference"
+            android:summary="@string/summary_tell_nest_on_leaving_home_preference"
+            android:defaultValue="true"/>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
