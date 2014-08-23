@@ -24,6 +24,7 @@ and update
 
 * gnome_go_home.png -- GNOME Desktop Icons
 * my_briefcase.png -- Harwen - Simple
+* home.png -- Author: Deziner Folio, http://www.dezinerfolio.com/
 
 ### Installing App Engine
 
