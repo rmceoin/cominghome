@@ -104,7 +104,7 @@ public class ReceiveTransitionsIntentService extends IntentService {
                 String ids = TextUtils.join(GeofenceUtils.GEOFENCE_ID_DELIMITER,geofenceIds);
                 String transitionType = getTransitionString(transition);
 
-                sendNotification(transitionType, ids);
+//                sendNotification(transitionType, ids);
 
                 // Log the transition type and a message
                 Log.d(TAG,

@@ -58,6 +58,7 @@ public class FenceHandling {
 
     }
 
+/*
     static Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -94,6 +95,7 @@ public class FenceHandling {
 //            Looper.myLooper().quit();
         }
     };
+*/
 
     private static void arrivedHome(Context context) {
         if (debug) Log.d(TAG, "arrived home");
@@ -105,15 +107,19 @@ public class FenceHandling {
         if (!access_token.isEmpty()) {
             if (tellNest) {
                 NestUtils.getInfo(context, access_token, null, NestUtils.POST_ACTION_IF_AWAY_SET_HOME);
+            } else {
+                if (debug) Log.d(TAG,"don't tell nest");
             }
 
             if (!structure_id.isEmpty()) {
                 BackendUtils.updateStatus(context, structure_id, "home");
+            } else {
+                if (debug) Log.d(TAG,"arrived home, but no structure_id");
             }
 
             // Loop so this thread stays alive in order to receive the handler message
-            if (Looper.myLooper() == null) Looper.prepare();
-            Looper.loop();
+//            if (Looper.myLooper() == null) Looper.prepare();
+//            Looper.loop();
         } else {
             Log.e(TAG, "no access_token");
         }
@@ -124,14 +130,17 @@ public class FenceHandling {
 
         prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String structure_id = prefs.getString(MainActivity.PREFS_STRUCTURE_ID, "");
+        boolean tellNest = prefs.getBoolean(PrefsFragment.key_tell_nest_on_leaving_home, true);
 
         if (!structure_id.isEmpty()) {
-            BackendUtils.getOthers(null, handler, structure_id);
+            if (tellNest) {
+                BackendUtils.getOthers(null, null, structure_id, BackendUtils.POST_ACTION_IF_NOBODY_HOME_SET_AWAY);
+            }
             BackendUtils.updateStatus(context, structure_id, "away");
 
             // Loop so this thread stays alive in order to receive the handler message
-            if (Looper.myLooper() == null) Looper.prepare();
-            Looper.loop();
+//            if (Looper.myLooper() == null) Looper.prepare();
+//            Looper.loop();
         } else {
             Log.e(TAG,"missing structure_id");
         }
