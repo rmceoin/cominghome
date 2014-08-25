@@ -15,13 +15,22 @@
  */
 package net.mceoin.cominghome;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 import android.widget.Toast;
+
+import net.mceoin.cominghome.oauth.OAuthFlowApp;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -43,6 +52,8 @@ import java.util.List;
 public class BackendUtils {
     public static final String TAG = BackendUtils.class.getSimpleName();
     public static final boolean debug = true;
+
+    public static final String POST_ACTION_IF_NOBODY_HOME_SET_AWAY = "if-nobody-home-set-away";
 
     public static void updateStatus(Context context, String structure_id,
                                     String away_status) {
@@ -125,8 +136,8 @@ public class BackendUtils {
         }
     }
 
-    public static void getOthers(Context context, Handler handler, String structure_id
-    ) {
+    public static void getOthers(Context context, Handler handler, String structure_id,
+                                 String post_action) {
         if (debug) Log.d(TAG, "getOthers(,," + structure_id + ")");
         if ((structure_id == null) || (structure_id.isEmpty())) return;
 
@@ -134,6 +145,7 @@ public class BackendUtils {
         getOthersAsyncTask.setContext(context);
         getOthersAsyncTask.setHandler(handler);
         getOthersAsyncTask.setStructureId(structure_id);
+        getOthersAsyncTask.setPostAction(post_action);
         getOthersAsyncTask.execute();
     }
 
@@ -144,6 +156,10 @@ public class BackendUtils {
         private String structure_id;
 
         private Handler handler;
+
+        private String post_action;
+
+        public void setPostAction(String post_action) { this.post_action = post_action; }
 
         public void setContext(Context context) {
             this.context = context;
@@ -194,6 +210,19 @@ public class BackendUtils {
                 if (context != null)
                     Toast.makeText(context, result, Toast.LENGTH_LONG).show();
             }
+            if ((post_action!=null) && (post_action.equals(POST_ACTION_IF_NOBODY_HOME_SET_AWAY))) {
+                if ((result!=null) && (result.equals("No others"))) {
+                    SharedPreferences prefs;
+                    prefs = PreferenceManager.getDefaultSharedPreferences(context);
+                    String access_token = prefs.getString(OAuthFlowApp.PREF_ACCESS_TOKEN, "");
+
+                    if (!access_token.isEmpty()) {
+                        NestUtils.sendAwayStatus(context, access_token, null, structure_id, "away");
+                    } else {
+                        Log.e(TAG,"missing access_token");
+                    }
+                }
+            }
             if (handler != null) {
                 Message msg = Message.obtain();
                 Bundle b = new Bundle();
@@ -204,5 +233,6 @@ public class BackendUtils {
             }
         }
     }
+
 
 }

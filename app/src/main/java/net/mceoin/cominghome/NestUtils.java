@@ -15,12 +15,17 @@
  */
 package net.mceoin.cominghome;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 
 import org.apache.http.HttpEntity;
@@ -46,9 +51,9 @@ import java.util.TimeZone;
 
 /**
  * Nest utility functions
- *
+ * <p/>
  * Some handy info is at:
- *
+ * <p/>
  * http://stackoverflow.com/questions/24601798/acquiring-and-changing-basic-data-on-the-nest-thermostat
  */
 public class NestUtils {
@@ -66,12 +71,13 @@ public class NestUtils {
     public static final String POST_ACTION_IF_AWAY_SET_HOME = "if-away-set-home";
 
     public static void getInfo(Context context, String access_token, Handler handler, String post_action) {
-        if (context==null) {
+        if (context == null) {
             Log.e(TAG, "missing context");
             return;
         }
 
         RequestStructures requestStructures = new RequestStructures();
+        requestStructures.setContext(context);
         requestStructures.setHandler(handler);
         requestStructures.setPostAction(post_action);
         requestStructures.setAccessToken(access_token);
@@ -80,7 +86,7 @@ public class NestUtils {
 
     public static void sendETA(String access_token, Handler handler, String structure_id,
                                String trip_id, int etaMinutes) {
-        if (debug) Log.d(TAG,"sendETA(,,,,"+etaMinutes+")");
+        if (debug) Log.d(TAG, "sendETA(,,,," + etaMinutes + ")");
         SendETA sendEta = new SendETA();
         sendEta.setHandler(handler);
         sendEta.setStructureId(structure_id);
@@ -89,15 +95,15 @@ public class NestUtils {
         sendEta.execute(access_token);
     }
 
-    public static void sendAwayStatus(String access_token, Handler handler, String structure_id,
-                               String away_status) {
-        if (debug) Log.d(TAG,"sendAwayStatus(,,,"+away_status+")");
-        if ((access_token==null) || (access_token.isEmpty())) {
-            Log.e(TAG,"missing access_token");
+    public static void sendAwayStatus(Context context, String access_token, Handler handler, String structure_id,
+                                      String away_status) {
+        if (debug) Log.d(TAG, "sendAwayStatus(,,," + away_status + ")");
+        if ((access_token == null) || (access_token.isEmpty())) {
+            Log.e(TAG, "missing access_token");
             return;
         }
-        if ((structure_id==null) || (structure_id.isEmpty())) {
-            Log.e(TAG,"missing structure_id");
+        if ((structure_id == null) || (structure_id.isEmpty())) {
+            Log.e(TAG, "missing structure_id");
             return;
         }
 
@@ -105,6 +111,7 @@ public class NestUtils {
         sendAwayStatus.setHandler(handler);
         sendAwayStatus.setStructureId(structure_id);
         sendAwayStatus.setAwayStatus(away_status);
+        sendAwayStatus.setContext(context);
         sendAwayStatus.execute(access_token);
     }
 
@@ -112,18 +119,24 @@ public class NestUtils {
 
         String structure_id;
         String structure_name;
-        String away_status="";
+        String away_status = "";
         private String post_action;
         private Context context;
         private String access_token;
 
         private Handler handler;
 
-        public void setAccessToken(String access_token) { this.access_token = access_token; }
+        public void setAccessToken(String access_token) {
+            this.access_token = access_token;
+        }
 
-        public void setContext(Context context) { this.context = context; }
+        public void setContext(Context context) {
+            this.context = context;
+        }
 
-        public void setPostAction(String post_action) { this.post_action = post_action; }
+        public void setPostAction(String post_action) {
+            this.post_action = post_action;
+        }
 
         public void setHandler(Handler handler) {
             this.handler = handler;
@@ -139,7 +152,7 @@ public class NestUtils {
             if (debug) {
                 Log.d(TAG, "onPostExecute");
             }
-            if (handler!=null) {
+            if (handler != null) {
                 Message msg = Message.obtain();
                 Bundle b = new Bundle();
                 b.putString("type", MSG_STRUCTURES);
@@ -151,7 +164,7 @@ public class NestUtils {
             }
             if (post_action.equals(POST_ACTION_IF_AWAY_SET_HOME)) {
                 if ((away_status.equals("away")) || (away_status.equals("auto-away"))) {
-                    sendAwayStatus(access_token,null,structure_id,"home");
+                    sendAwayStatus(context, access_token, null, structure_id, "home");
                 }
             }
         }
@@ -172,7 +185,7 @@ public class NestUtils {
             String url = "https://developer-api.nest.com/structures?auth=" + access_token;
             HttpGet httpGet = new HttpGet(url);
 
-            if (debug) Log.d(TAG,"url="+url);
+            if (debug) Log.d(TAG, "url=" + url);
 
             try {
                 // Execute HTTP Get Request
@@ -211,7 +224,7 @@ public class NestUtils {
                         if (structure.has("away")) {
                             away_status = structure.getString("away");
                         } else {
-                            if (debug) Log.d(TAG,"missing away");
+                            if (debug) Log.d(TAG, "missing away");
                         }
 
                         SharedPreferences.Editor pref = MainActivity.prefs.edit();
@@ -226,7 +239,7 @@ public class NestUtils {
             } catch (IOException e) {
                 logException(e, "RequestStructures: IOException");
             } catch (Exception e) {
-                logException(e,"RequestStructures");
+                logException(e, "RequestStructures");
             }
         }
 
@@ -234,13 +247,14 @@ public class NestUtils {
 
     private static void logException(Exception e, String extra) {
         String msg = "Exception";
-        if ((e!=null) && (e.getLocalizedMessage()!=null)) {
-            msg="Exception: "+e.getLocalizedMessage();
+        if ((e != null) && (e.getLocalizedMessage() != null)) {
+            msg = "Exception: " + e.getLocalizedMessage();
         }
         msg += " " + extra;
         Log.e(TAG, msg);
 
     }
+
     private static class SendETA extends AsyncTask<String, Integer, Double> {
 
         private String trip_id;
@@ -248,8 +262,8 @@ public class NestUtils {
         private int etaMinutes;
 
         private Handler handler;
-        private boolean error=false;
-        private String errorResult="";
+        private boolean error = false;
+        private String errorResult = "";
 
         public void setHandler(Handler handler) {
             this.handler = handler;
@@ -282,9 +296,9 @@ public class NestUtils {
             b.putString("type", MSG_ETA);
             String status;
             if (error) {
-                status="error";
+                status = "error";
             } else {
-                status="ok";
+                status = "ok";
             }
             b.putString("status", status);
             msg.setData(b);
@@ -323,7 +337,7 @@ public class NestUtils {
                 Date now = new Date();
                 long t = now.getTime();
                 Date begin = new Date(t + (etaMinutes * ONE_MINUTE_IN_MILLIS));
-                Date end = new Date(t + ((etaMinutes+5) * ONE_MINUTE_IN_MILLIS));
+                Date end = new Date(t + ((etaMinutes + 5) * ONE_MINUTE_IN_MILLIS));
                 // date must be in ISO 8601 format
                 SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss+00:00");
                 TimeZone tz = TimeZone.getTimeZone("UTC");
@@ -339,10 +353,12 @@ public class NestUtils {
                     Log.d(TAG, "estimated_arrival_window_end=" + endString);
                 }
 
-                OutputStreamWriter wr= new OutputStreamWriter(urlConnection.getOutputStream());
+                OutputStreamWriter wr = new OutputStreamWriter(urlConnection.getOutputStream());
                 wr.write(keyArg.toString());
                 wr.flush();
-                if (debug) { Log.d(TAG,keyArg.toString()); }
+                if (debug) {
+                    Log.d(TAG, keyArg.toString());
+                }
 
                 boolean redirect = false;
 
@@ -374,7 +390,7 @@ public class NestUtils {
 
                     System.out.println("Redirect to URL : " + newUrl);
 
-                    wr= new OutputStreamWriter(urlConnection.getOutputStream());
+                    wr = new OutputStreamWriter(urlConnection.getOutputStream());
                     wr.write(keyArg.toString());
                     wr.flush();
 
@@ -387,19 +403,19 @@ public class NestUtils {
                 }
                 if ((statusCode == 200) || (statusCode == 400)) {
                     InputStream response;
-                    if (statusCode==200) {
-                        response=urlConnection.getInputStream();
+                    if (statusCode == 200) {
+                        response = urlConnection.getInputStream();
                     } else {
-                        response=urlConnection.getErrorStream();
-                        error=true;
+                        response = urlConnection.getErrorStream();
+                        error = true;
                     }
                     BufferedReader reader = new BufferedReader(new InputStreamReader(response));
                     String line;
                     while ((line = reader.readLine()) != null) {
                         builder.append(line);
                     }
-                    if (debug) Log.d(TAG,"response="+builder.toString());
-                    if (statusCode==400) {
+                    if (debug) Log.d(TAG, "response=" + builder.toString());
+                    if (statusCode == 400) {
                         JSONObject object = new JSONObject(builder.toString());
                         Iterator<String> keys = object.keys();
                         while (keys.hasNext()) {
@@ -413,7 +429,7 @@ public class NestUtils {
                         }
                     }
                 } else {
-                    error=true;
+                    error = true;
                 }
 
             } catch (ClientProtocolException e) {
@@ -438,8 +454,14 @@ public class NestUtils {
         private String away_status;
 
         private Handler handler;
-        private boolean error=false;
-        private String errorResult="";
+        private boolean error = false;
+        private String errorResult = "";
+
+        private Context context;
+
+        public void setContext(Context context) {
+            this.context = context;
+        }
 
         public void setHandler(Handler handler) {
             this.handler = handler;
@@ -463,7 +485,16 @@ public class NestUtils {
             if (debug) {
                 Log.d(TAG, "onPostExecute");
             }
-            if (handler!=null) {
+            if (context != null) {
+                String status;
+                if (error) {
+                    status = away_status + " errored";
+                } else {
+                    status = away_status;
+                }
+                sendNotification(context, status);
+            }
+            if (handler != null) {
                 Message msg = Message.obtain();
                 Bundle b = new Bundle();
                 b.putString("type", MSG_AWAY);
@@ -513,10 +544,12 @@ public class NestUtils {
                 JSONObject keyArg = new JSONObject();
                 keyArg.put("away", away_status);
 
-                OutputStreamWriter wr= new OutputStreamWriter(urlConnection.getOutputStream());
+                OutputStreamWriter wr = new OutputStreamWriter(urlConnection.getOutputStream());
                 wr.write(payload);
                 wr.flush();
-                if (debug) { Log.d(TAG,keyArg.toString()); }
+                if (debug) {
+                    Log.d(TAG, keyArg.toString());
+                }
 
                 boolean redirect = false;
 
@@ -548,7 +581,7 @@ public class NestUtils {
 
                     System.out.println("Redirect to URL : " + newUrl);
 
-                    wr= new OutputStreamWriter(urlConnection.getOutputStream());
+                    wr = new OutputStreamWriter(urlConnection.getOutputStream());
                     wr.write(payload);
                     wr.flush();
 
@@ -560,29 +593,31 @@ public class NestUtils {
                     Log.d(TAG, "statusCode=" + statusCode);
                 if ((statusCode == 200) || (statusCode == 400)) {
                     InputStream response;
-                    if (statusCode==200) {
-                        response=urlConnection.getInputStream();
+                    if (statusCode == 200) {
+                        response = urlConnection.getInputStream();
                     } else {
-                        response=urlConnection.getErrorStream();
-                        error=true;
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(response));
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        builder.append(line);
-                    }
-                    if (debug) Log.d(TAG,"response="+builder.toString());
-                    JSONObject object = new JSONObject(builder.toString());
-                    Iterator<String> keys = object.keys();
-                    while (keys.hasNext()) {
-                        String key = keys.next();
-                        if ((statusCode==400) && (key.equals("error"))) {
-                            errorResult = object.getString("error");
-                            if (debug) { Log.d(TAG,"errorResult="+errorResult); }
+                        response = urlConnection.getErrorStream();
+                        error = true;
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(response));
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            builder.append(line);
+                        }
+                        if (debug) Log.d(TAG, "response=" + builder.toString());
+                        JSONObject object = new JSONObject(builder.toString());
+                        Iterator<String> keys = object.keys();
+                        while (keys.hasNext()) {
+                            String key = keys.next();
+                            if ((statusCode == 400) && (key.equals("error"))) {
+                                errorResult = object.getString("error");
+                                if (debug) {
+                                    Log.d(TAG, "errorResult=" + errorResult);
+                                }
+                            }
                         }
                     }
-                    }
                 } else {
-                    error=true;
+                    error = true;
                 }
 
             } catch (ClientProtocolException e) {
@@ -599,6 +634,50 @@ public class NestUtils {
             }
         }
 
+    }
+
+    /**
+     * Posts a notification in the notification bar when a transition is detected.
+     * If the user clicks the notification, control goes to the main Activity.
+     *
+     * @param transitionType The type of transition that occurred.
+     */
+    public static void sendNotification(Context context, String transitionType) {
+
+        // Create an explicit content Intent that starts the main Activity
+        Intent notificationIntent =
+                new Intent(context, MainActivity.class);
+
+        // Construct a task stack
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+
+        // Adds the main Activity to the task stack as the parent
+        stackBuilder.addParentStack(MainActivity.class);
+
+        // Push the content Intent onto the stack
+        stackBuilder.addNextIntent(notificationIntent);
+
+        // Get a PendingIntent containing the entire back stack
+        PendingIntent notificationPendingIntent =
+                stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        // Get a notification builder that's compatible with platform versions >= 4
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
+
+        // Set the notification contents
+        builder.setSmallIcon(R.drawable.ic_notification)
+                .setContentTitle(
+                        context.getString(R.string.nest_transition_notification_title,
+                                transitionType))
+                .setContentText(context.getString(R.string.nest_transition_notification_text))
+                .setContentIntent(notificationPendingIntent);
+
+        // Get an instance of the Notification manager
+        NotificationManager mNotificationManager =
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        // Issue the notification
+        mNotificationManager.notify(0, builder.build());
     }
 
 

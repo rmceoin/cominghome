@@ -30,7 +30,9 @@ import java.io.RandomAccessFile;
 import java.util.UUID;
 
 /**
- * Created by randy on 4/6/14.
+ * Handle creating a unique identifier for the specific installation of the application
+ * that the end user is running.  This is used by the backend to differentiate one
+ * phone/tablet from another.
  */
 public class Installation {
     public static final String TAG = "Installation";
@@ -39,9 +41,13 @@ public class Installation {
     private static String sID = null;
     private static final String INSTALLATION = "INSTALLATION";
 
+    /**
+     * Retrieve a unique identifier.
+     *
+     * @param context
+     * @return String unique identifier
+     */
     public synchronized static String id(Context context) {
-        if (debug) Log.d(TAG, "id(" + context + ")");
-
         if (sID == null) {
             File installation = new File(context.getFilesDir(), INSTALLATION);
             try {

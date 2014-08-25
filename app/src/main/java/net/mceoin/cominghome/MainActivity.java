@@ -457,7 +457,8 @@ public class MainActivity extends FragmentActivity implements
         switch (item.getItemId()) {
             case R.id.get_others:
                 if ((structure_id!=null) && (!structure_id.isEmpty()))
-                    BackendUtils.getOthers(getApplicationContext(),handler,structure_id);
+                    BackendUtils.getOthers(getApplicationContext(),handler,structure_id,null);
+                NestUtils.sendNotification(this,"away");
                 return true;
             case R.id.settings:
                 startActivity(new Intent(this,SettingsActivity.class));
