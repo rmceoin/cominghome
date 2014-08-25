@@ -55,6 +55,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
@@ -79,6 +80,8 @@ public class MainActivity extends FragmentActivity implements
     private static final String KEY_IN_RESOLUTION = "is_in_resolution";
     public static final String PREFS_STRUCTURE_ID = "structure_id";
     public static final String PREFS_STRUCTURE_NAME = "structure_name";
+    public static final String PREFS_LAST_MAP_LATITUDE = "last_map_latitude";
+    public static final String PREFS_LAST_MAP_LONGITUDE = "last_map_longitude";
 
     /**
      * Request code for auto Google Play Services error resolution.
@@ -282,8 +285,16 @@ public class MainActivity extends FragmentActivity implements
         map = ((MapFragment) getFragmentManager()
                 .findFragmentById(R.id.map)).getMap();
 
-        if (map!=null)
+        if (map!=null) {
             map.setMyLocationEnabled(true);
+            
+            float lastLatitude=prefs.getFloat(PREFS_LAST_MAP_LATITUDE,0);
+            float lastLongitude=prefs.getFloat(PREFS_LAST_MAP_LONGITUDE,0);
+            if ((lastLatitude!=0) && (lastLongitude!=0)) {
+                LatLng current = new LatLng(lastLatitude, lastLongitude);
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(current, 13));
+            }
+        }
 
         mLocationClient = new LocationClient(this, this, this);
 
@@ -517,6 +528,19 @@ public class MainActivity extends FragmentActivity implements
         BackendUtils.updateStatus(getApplicationContext(), structure_id, away_status);
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        if (map!=null) {
+            SharedPreferences.Editor editor = prefs.edit();
+
+            CameraPosition cameraPosition=map.getCameraPosition();
+            editor.putFloat(PREFS_LAST_MAP_LATITUDE,(float)cameraPosition.target.latitude);
+            editor.putFloat(PREFS_LAST_MAP_LONGITUDE, (float) cameraPosition.target.longitude);
+            editor.apply();
+        }
+    }
     /**
      * Called when activity gets invisible. Connection to Play Services needs to
      * be disconnected as soon as an activity is invisible.
