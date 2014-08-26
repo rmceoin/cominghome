@@ -29,6 +29,7 @@ dependencies {
   compile 'com.google.appengine:appengine-endpoints:1.9.9'
   compile 'com.google.appengine:appengine-endpoints-deps:1.9.9'
   compile 'javax.servlet:servlet-api:2.5'
+  compile 'org.json:json:+'
 }
 
 appengine {

@@ -287,7 +287,7 @@ public class MainActivity extends FragmentActivity implements
 
         if (map!=null) {
             map.setMyLocationEnabled(true);
-            
+
             float lastLatitude=prefs.getFloat(PREFS_LAST_MAP_LATITUDE,0);
             float lastLongitude=prefs.getFloat(PREFS_LAST_MAP_LONGITUDE,0);
             if ((lastLatitude!=0) && (lastLongitude!=0)) {

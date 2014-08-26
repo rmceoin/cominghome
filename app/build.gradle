@@ -24,7 +24,7 @@ dependencies {
 //    compile 'com.google.android.gms:play-services:4.2.42'
     compile 'com.google.android.gms:play-services:4.4.52'
 //    compile 'com.google.android.gms:play-services:5.2.08'
-    compile 'oauth.signpost:signpost-core:1.2.1.2'
-    compile 'oauth.signpost:signpost-commonshttp4:1.2.1.2'
+//    compile 'oauth.signpost:signpost-core:1.2.1.2'
+//    compile 'oauth.signpost:signpost-commonshttp4:1.2.1.2'
 //    compile 'org.json:json:+'
 }
