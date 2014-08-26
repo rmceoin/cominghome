@@ -15,8 +15,15 @@
  */
 package net.mceoin.cominghome.backend;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.logging.Logger;
 
 import javax.servlet.http.*;
@@ -29,6 +36,8 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
+
+import org.json.JSONObject;
 
 /**
  * This originally was based on:
@@ -55,7 +64,7 @@ public class MyServlet extends HttpServlet {
         String installation_id = req.getParameter("installation_id");
         String structure_id = req.getParameter("structure_id");
 
-        log.info("installation_id="+installation_id+" structure_id="+structure_id);
+        log.info("installation_id=" + installation_id + " structure_id=" + structure_id);
 
         if ((installation_id == null) || (installation_id.isEmpty())) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing installation_id");
@@ -72,12 +81,13 @@ public class MyServlet extends HttpServlet {
             return;
         }
 
-        log.info("request = "+request);
+        log.info("request = " + request);
 
         if (request.equals("set")) {
             String away_status = req.getParameter("away_status");
+            String access_token = req.getParameter("access_token");
 
-            log.info("set with away_status = "+away_status);
+            log.info("set with away_status = " + away_status + " access_token = " + access_token);
 
             if ((away_status == null) || (away_status.isEmpty())) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing away_status");
@@ -97,6 +107,10 @@ public class MyServlet extends HttpServlet {
 
             DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
             datastore.put(status);
+
+            if (!access_token.isEmpty())
+                tellNestAwayStatus(access_token, structure_id, away_status);
+
         } else if (request.equals("getothers")) {
 
             DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -116,7 +130,7 @@ public class MyServlet extends HttpServlet {
                 String away_status = (String) result.getProperty("away_status");
                 Date date = (Date) result.getProperty("date");
 
-                if ((!installation_ID.equals(installation_id)) && (away_status!=null)) {
+                if ((!installation_ID.equals(installation_id)) && (away_status != null)) {
                     if (away_status.equals("home")) {
                         resp.setContentType("text/plain");
                         resp.getWriter().println("At home " + installation_ID + " " + date);
@@ -130,6 +144,114 @@ public class MyServlet extends HttpServlet {
 
         } else {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid request");
-       }
+        }
+    }
+
+    private boolean tellNestAwayStatus(String access_token, String structure_id, String away_status) {
+
+        String urlString = "https://developer-api.nest.com/structures/" + structure_id + "/away?auth=" + access_token;
+        log.info("url=" + urlString);
+
+        StringBuilder builder = new StringBuilder();
+        boolean error = false;
+
+        HttpURLConnection urlConnection = null;
+        try {
+            URL url = new URL(urlString);
+            urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestMethod("PUT");
+            urlConnection.setDoOutput(true);
+            urlConnection.setDoInput(true);
+            urlConnection.setChunkedStreamingMode(0);
+
+            urlConnection.setRequestProperty("Content-Type", "application/json; charset=utf8");
+
+            String payload = "\"" + away_status + "\"";
+
+//            JSONObject keyArg = new JSONObject();
+//            keyArg.put("away", away_status);
+
+            OutputStreamWriter wr = new OutputStreamWriter(urlConnection.getOutputStream());
+            wr.write(payload);
+            wr.flush();
+            log.info(payload);
+
+            boolean redirect = false;
+
+            // normally, 3xx is redirect
+            int status = urlConnection.getResponseCode();
+            if (status != HttpURLConnection.HTTP_OK) {
+                if (status == HttpURLConnection.HTTP_MOVED_TEMP
+                        || status == HttpURLConnection.HTTP_MOVED_PERM
+                        || status == 307    // Temporary redirect
+                        || status == HttpURLConnection.HTTP_SEE_OTHER)
+                    redirect = true;
+            }
+
+//            System.out.println("Response Code ... " + status);
+
+            if (redirect) {
+
+                // get redirect url from "location" header field
+                String newUrl = urlConnection.getHeaderField("Location");
+
+                // open the new connnection again
+                urlConnection = (HttpURLConnection) new URL(newUrl).openConnection();
+                urlConnection.setRequestMethod("PUT");
+                urlConnection.setDoOutput(true);
+                urlConnection.setDoInput(true);
+                urlConnection.setChunkedStreamingMode(0);
+                urlConnection.setRequestProperty("Content-Type", "application/json; charset=utf8");
+                urlConnection.setRequestProperty("Accept", "application/json");
+
+//                System.out.println("Redirect to URL : " + newUrl);
+
+                wr = new OutputStreamWriter(urlConnection.getOutputStream());
+                wr.write(payload);
+                wr.flush();
+
+            }
+
+            int statusCode = urlConnection.getResponseCode();
+
+            log.info("statusCode=" + statusCode);
+            if ((statusCode == 200)) {
+                error = false;
+            } else if (statusCode == 400) {
+                error = true;
+                InputStream response;
+                response = urlConnection.getErrorStream();
+                error = true;
+                BufferedReader reader = new BufferedReader(new InputStreamReader(response));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    builder.append(line);
+                }
+                log.info("response=" + builder.toString());
+                JSONObject object = new JSONObject(builder.toString());
+                
+                Iterator<String> keys = object.keys();
+                while (keys.hasNext()) {
+                    String key = keys.next();
+                    if (key.equals("error")) {
+                        String errorResult = object.getString("error");
+                        log.info("errorResult=" + errorResult);
+                    }
+                }
+            } else {
+                error = true;
+            }
+
+        } catch (IOException e) {
+            log.warning("IO");
+        } catch (Exception e) {
+            log.warning("other");
+
+        } finally {
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+            }
+        }
+        return error;
     }
 }

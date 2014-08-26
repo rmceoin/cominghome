@@ -63,20 +63,6 @@ public class OAuthFlowApp extends Activity {
         setContentView(R.layout.oauth_new);
         this.prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-        Button launchOauth = (Button) findViewById(R.id.btn_launch_oauth);
-
-/*
-        launchOauth.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                WebView webView = (WebView) findViewById(R.id.webView);
-                webView.getSettings().setJavaScriptEnabled(true);
-                webView.getSettings().setLoadWithOverviewMode(true);
-                webView.getSettings().setUseWideViewPort(false);
-                webView.loadUrl(Constants.AUTHORIZE_URL);
-            }
-        });
-*/
-
         Button usePincode = (Button) findViewById(R.id.btn_use_pincode);
         usePincode.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -165,10 +151,8 @@ public class OAuthFlowApp extends Activity {
                 }
 
             } catch (ClientProtocolException e) {
-                // TODO Auto-generated catch block
                 Log.e(TAG, e.getLocalizedMessage());
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 Log.e(TAG, e.getLocalizedMessage());
             } catch (Exception e) {
                 Log.e(TAG, e.getLocalizedMessage());

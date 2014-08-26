@@ -15,18 +15,13 @@
  */
 package net.mceoin.cominghome;
 
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -99,6 +94,9 @@ public class BackendUtils {
             HttpPost httpPost = new HttpPost(url);
             try {
 
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+                String access_token = prefs.getString(OAuthFlowApp.PREF_ACCESS_TOKEN, "");
+
                 String InstallationId = Installation.id(context);
                 // Add name data to request
                 List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
@@ -106,6 +104,7 @@ public class BackendUtils {
                 nameValuePairs.add(new BasicNameValuePair("installation_id", InstallationId));
                 nameValuePairs.add(new BasicNameValuePair("structure_id", structure_id));
                 nameValuePairs.add(new BasicNameValuePair("away_status", away_status));
+                nameValuePairs.add(new BasicNameValuePair("access_token", access_token));
                 httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
                 if (debug) {
