@@ -531,6 +531,7 @@ public class NestUtils {
             try {
                 URL url = new URL(urlString);
                 urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestProperty("User-Agent","ComingHome/1.0");
                 urlConnection.setRequestMethod("PUT");
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);

@@ -525,7 +525,7 @@ public class MainActivity extends FragmentActivity implements
         } else {
             sendETAButton.setEnabled(true);
         }
-        BackendUtils.updateStatus(getApplicationContext(), structure_id, away_status);
+        BackendUtils.updateStatus(getApplicationContext(), structure_id, away_status,false);
     }
 
     @Override

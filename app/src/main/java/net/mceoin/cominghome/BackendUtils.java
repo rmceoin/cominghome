@@ -51,7 +51,7 @@ public class BackendUtils {
     public static final String POST_ACTION_IF_NOBODY_HOME_SET_AWAY = "if-nobody-home-set-away";
 
     public static void updateStatus(Context context, String structure_id,
-                                    String away_status) {
+                                    String away_status, boolean tellNest) {
         if (debug) Log.d(TAG, "updateStatus(,," + away_status + ")");
         if (context == null) {
             Log.e(TAG, "missing context");
@@ -64,6 +64,7 @@ public class BackendUtils {
         updateStatusAsyncTask.setContext(context);
         updateStatusAsyncTask.setStructureId(structure_id);
         updateStatusAsyncTask.setAwayStatus(away_status);
+        updateStatusAsyncTask.setTellNest(tellNest);
         updateStatusAsyncTask.execute();
     }
 
@@ -73,6 +74,9 @@ public class BackendUtils {
 
         private String structure_id;
         private String away_status;
+        private boolean tellNest;
+
+        public void setTellNest(boolean tellNest) { this.tellNest = tellNest; }
 
         public void setContext(Context context) {
             this.context = context;
@@ -98,6 +102,11 @@ public class BackendUtils {
                 String access_token = prefs.getString(OAuthFlowApp.PREF_ACCESS_TOKEN, "");
 
                 String InstallationId = Installation.id(context);
+                String tellNestString;
+                if (tellNest)
+                    tellNestString="true";
+                else
+                    tellNestString="false";
                 // Add name data to request
                 List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
                 nameValuePairs.add(new BasicNameValuePair("request", "set"));
@@ -105,12 +114,14 @@ public class BackendUtils {
                 nameValuePairs.add(new BasicNameValuePair("structure_id", structure_id));
                 nameValuePairs.add(new BasicNameValuePair("away_status", away_status));
                 nameValuePairs.add(new BasicNameValuePair("access_token", access_token));
+                nameValuePairs.add(new BasicNameValuePair("tell_nest", tellNestString));
                 httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
                 if (debug) {
                     Log.d(TAG, "parameters = " + nameValuePairs.toString());
                 }
 
+                httpPost.setHeader("User-Agent","ComingHome/1.0");
                 // Execute HTTP Post Request
                 HttpResponse response = httpClient.execute(httpPost);
                 if (response.getStatusLine().getStatusCode() == 200) {
