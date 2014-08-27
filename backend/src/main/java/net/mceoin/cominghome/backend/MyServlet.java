@@ -86,16 +86,16 @@ public class MyServlet extends HttpServlet {
         if (request.equals("set")) {
             String away_status = req.getParameter("away_status");
             String access_token = req.getParameter("access_token");
+            String tell_nest = req.getParameter("tell_nest");
 
-            log.info("set with away_status = " + away_status + " access_token = " + access_token);
+            log.info("set with away_status = " + away_status + " access_token = " + access_token +
+                    " tell_nest = " + tell_nest);
 
             if ((away_status == null) || (away_status.isEmpty())) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing away_status");
                 return;
             }
 
-            resp.setContentType("text/plain");
-            resp.getWriter().println("Updated to " + away_status);
 
             Key statusKey = KeyFactory.createKey("status", installation_id);
             Date date = new Date();
@@ -108,43 +108,81 @@ public class MyServlet extends HttpServlet {
             DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
             datastore.put(status);
 
-            if (!access_token.isEmpty())
-                tellNestAwayStatus(access_token, structure_id, away_status);
-
-        } else if (request.equals("getothers")) {
-
-            DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-
-            Query findStructureQuery = new Query(KIND_STATUS);
-
-            Query.Filter structureFilter =
-                    new Query.FilterPredicate("structure_id",
-                            Query.FilterOperator.EQUAL,
-                            structure_id);
-            findStructureQuery.setFilter(structureFilter);
-            findStructureQuery.addSort("date", Query.SortDirection.DESCENDING);
-
-            PreparedQuery pq = datastore.prepare(findStructureQuery);
-            for (Entity result : pq.asIterable(FetchOptions.Builder.withLimit(10))) {
-                String installation_ID = (String) result.getProperty("installation_id");
-                String away_status = (String) result.getProperty("away_status");
-                Date date = (Date) result.getProperty("date");
-
-                if ((!installation_ID.equals(installation_id)) && (away_status != null)) {
-                    if (away_status.equals("home")) {
-                        resp.setContentType("text/plain");
-                        resp.getWriter().println("At home " + installation_ID + " " + date);
-                        return;
+            String nestResult = "";
+            if (tell_nest.equals("true")) {
+                if (!access_token.isEmpty()) {
+                    boolean doit=true;
+                    if (away_status.equals("away")) {
+                        // only check for others still at home if we're setting to away
+                        boolean others = checkOthersAtHome(installation_id, structure_id);
+                        if (others) {
+                            doit=false;
+                        }
+                    }
+                    if (doit) {
+                        boolean nestError = tellNestAwayStatus(access_token, structure_id, away_status);
+                        if (nestError) {
+                            nestResult = " with Nest error";
+                        } else {
+                            nestResult = " with Nest";
+                        }
                     }
                 }
             }
 
             resp.setContentType("text/plain");
-            resp.getWriter().println("No others");
+            resp.getWriter().println("Updated to " + away_status + nestResult);
+
+        } else if (request.equals("getothers")) {
+
+            boolean others = checkOthersAtHome(installation_id, structure_id);
+
+            resp.setContentType("text/plain");
+            if (others) {
+                resp.getWriter().println("Others at home");
+            } else {
+                resp.getWriter().println("No others at home");
+            }
 
         } else {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid request");
         }
+    }
+
+    /**
+     * Check for anybody else still at home
+     *
+     * @param installation_id Nest installation_id of user
+     * @param structure_id Nest structure_id of user
+     * @return true if somebody else is still home
+     */
+    private boolean checkOthersAtHome(String installation_id, String structure_id) {
+        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+
+        Query findStructureQuery = new Query(KIND_STATUS);
+
+        Query.Filter structureFilter =
+                new Query.FilterPredicate("structure_id",
+                        Query.FilterOperator.EQUAL,
+                        structure_id);
+        findStructureQuery.setFilter(structureFilter);
+        findStructureQuery.addSort("date", Query.SortDirection.DESCENDING);
+
+        PreparedQuery pq = datastore.prepare(findStructureQuery);
+        for (Entity result : pq.asIterable(FetchOptions.Builder.withLimit(10))) {
+            String installation_ID = (String) result.getProperty("installation_id");
+            String away_status = (String) result.getProperty("away_status");
+//            Date date = (Date) result.getProperty("date");
+
+            if ((!installation_ID.equals(installation_id)) && (away_status != null)) {
+                if (away_status.equals("home")) {
+                    log.info("found somebody else at home");
+                    return true;
+                }
+            }
+        }
+        log.info("nobody else home");
+        return false;
     }
 
     private boolean tellNestAwayStatus(String access_token, String structure_id, String away_status) {
@@ -159,6 +197,7 @@ public class MyServlet extends HttpServlet {
         try {
             URL url = new URL(urlString);
             urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestProperty("User-Agent","ComingHomeBackend/1.0");
             urlConnection.setRequestMethod("PUT");
             urlConnection.setDoOutput(true);
             urlConnection.setDoInput(true);
@@ -229,10 +268,10 @@ public class MyServlet extends HttpServlet {
                 }
                 log.info("response=" + builder.toString());
                 JSONObject object = new JSONObject(builder.toString());
-                
-                Iterator<String> keys = object.keys();
+
+                Iterator keys = object.keys();
                 while (keys.hasNext()) {
-                    String key = keys.next();
+                    String key = (String) keys.next();
                     if (key.equals("error")) {
                         String errorResult = object.getString("error");
                         log.info("errorResult=" + errorResult);
