@@ -56,6 +56,7 @@ public class FenceHandling {
 
     private static void arrivedHome(Context context) {
         if (debug) Log.d(TAG, "arrived home");
+        HistoryUpdate.add(context,"Geofence arrived home");
         prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String structure_id = prefs.getString(MainActivity.PREFS_STRUCTURE_ID, "");
         String access_token = prefs.getString(OAuthFlowApp.PREF_ACCESS_TOKEN, "");
@@ -81,6 +82,7 @@ public class FenceHandling {
 
     private static void leftHome(Context context) {
         if (debug) Log.d(TAG, "left home");
+        HistoryUpdate.add(context,"Geofence left home");
 
         prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String structure_id = prefs.getString(MainActivity.PREFS_STRUCTURE_ID, "");

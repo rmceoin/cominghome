@@ -143,6 +143,7 @@ public class BackendUtils {
                 if (context != null)
                     Toast.makeText(context, result, Toast.LENGTH_LONG).show();
             }
+            if (context!=null) HistoryUpdate.add(context,result);
         }
     }
 

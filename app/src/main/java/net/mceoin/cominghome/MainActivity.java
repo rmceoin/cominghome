@@ -48,7 +48,6 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -96,7 +95,7 @@ public class MainActivity extends FragmentActivity implements
     /**
      * Google API client.
      */
-    private GoogleApiClient mGoogleApiClient;
+//    private GoogleApiClient mGoogleApiClient;
 
     /**
      * Determines if the client is in a resolution state, and
@@ -149,7 +148,7 @@ public class MainActivity extends FragmentActivity implements
     private GeofenceRequester mGeofenceRequester;
 
     // Store the current request
-    private GeofenceUtils.REQUEST_TYPE mRequestType;
+//    private GeofenceUtils.REQUEST_TYPE mRequestType;
 
 
     Handler handler = new Handler() {
@@ -191,8 +190,8 @@ public class MainActivity extends FragmentActivity implements
  * Define a request code to send to Google Play services
  * This code is returned in Activity.onActivityResult
  */
-    private final static int
-            CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
+//    private final static int
+//            CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 
     public static class ErrorDialogFragment extends DialogFragment {
         // Global field to contain the error dialog
@@ -326,6 +325,12 @@ public class MainActivity extends FragmentActivity implements
         loadFences();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        doUnbindService();
+    }
     private void loadFences() {
 
         homeGeofence = mGeofenceStorage.getGeofence(FENCE_HOME);
@@ -474,6 +479,9 @@ public class MainActivity extends FragmentActivity implements
             case R.id.settings:
                 startActivity(new Intent(this,SettingsActivity.class));
                 return true;
+            case R.id.history:
+                startActivity(new Intent(this,HistoryList.class));
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -547,9 +555,9 @@ public class MainActivity extends FragmentActivity implements
      */
     @Override
     protected void onStop() {
-        if (mGoogleApiClient != null) {
-            mGoogleApiClient.disconnect();
-        }
+//        if (mGoogleApiClient != null) {
+//            mGoogleApiClient.disconnect();
+//        }
         mLocationClient.disconnect();
         super.onStop();
     }
@@ -578,9 +586,9 @@ public class MainActivity extends FragmentActivity implements
 
     private void retryConnecting() {
         mIsInResolution = false;
-        if ((mGoogleApiClient!=null) && (!mGoogleApiClient.isConnecting())) {
-            mGoogleApiClient.connect();
-        }
+//        if ((mGoogleApiClient!=null) && (!mGoogleApiClient.isConnecting())) {
+//            mGoogleApiClient.connect();
+//        }
     }
 
     /**
