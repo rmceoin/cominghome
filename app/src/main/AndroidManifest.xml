@@ -30,14 +30,9 @@
         <activity android:name=".SettingsActivity" />
         <activity android:name=".oauth.OAuthFlowApp" />
 
-                <activity android:name=".oauth.PrepareRequestTokenActivity" android:launchMode="singleTask">>
-                        <intent-filter>
-                                <action android:name="android.intent.action.VIEW" />
-                                <category android:name="android.intent.category.DEFAULT" />
-                                <category android:name="android.intent.category.BROWSABLE" />
-                                <data android:scheme="x-oauthflow" android:host="callback" />
-                        </intent-filter>
-                </activity>
+        <activity android:name=".HistoryList" />
+        <provider android:name="HistoryProvider" android:exported="false"
+            android:authorities="net.mceoin.cominghome.history" />
 
         <meta-data
             android:name="com.google.android.gms.version"

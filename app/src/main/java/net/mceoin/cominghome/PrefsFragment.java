@@ -15,15 +15,15 @@
  */
 package net.mceoin.cominghome;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
-import android.preference.PreferenceManager;
 
 public class PrefsFragment extends PreferenceFragment {
 
     public static final String key_tell_nest_on_arrival_home="tell_nest_on_arrival_home";
     public static final String key_tell_nest_on_leaving_home="tell_nest_on_leaving_home";
+
+    public static final String PREFERENCE_HISTORY_ENTRIES = "history_entries";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

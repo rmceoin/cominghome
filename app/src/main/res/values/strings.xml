@@ -41,6 +41,13 @@
     </string>
     <string name="nest_transition_notification_text">Coming Home Update</string>
 
+    <string name="history">History</string>
+    <string name="delete">Delete</string>
+    <string name="delete_all">Delete All</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="dialog_delete_history_msg">Are you sure you want to delete all?</string>
+
     <!-- Preferences strings -->
     <string name="inline_preferences">Settings</string>
 
