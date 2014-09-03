@@ -54,7 +54,7 @@ public final class HistoryValues {
         /**
          * The default sort order for this table
          */
-        public static final String DEFAULT_SORT_ORDER = "modified DESC";
+        public static final String DEFAULT_SORT_ORDER = "created DESC";
 
         /**
          * The log entry itself
