@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package net.mceoin.cominghome;
 
 import android.content.Context;
@@ -35,6 +36,7 @@ public class FenceHandling {
     public final static boolean debug = true;
 
     private static SharedPreferences prefs;
+    private static FenceHandlingAlarm alarm= new FenceHandlingAlarm();
 
     public static void process(int transition, List<Geofence> geofences, Context context) {
         for (Geofence geofence : geofences) {
@@ -56,6 +58,10 @@ public class FenceHandling {
 
     private static void arrivedHome(Context context) {
         if (debug) Log.d(TAG, "arrived home");
+
+        // make sure there isn't an alarm set from a leftHome event
+        alarm.CancelAlarm(context);
+
         HistoryUpdate.add(context,"Geofence arrived home");
         prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String structure_id = prefs.getString(MainActivity.PREFS_STRUCTURE_ID, "");
@@ -82,17 +88,17 @@ public class FenceHandling {
 
     private static void leftHome(Context context) {
         if (debug) Log.d(TAG, "left home");
+
         HistoryUpdate.add(context,"Geofence left home");
 
         prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String structure_id = prefs.getString(MainActivity.PREFS_STRUCTURE_ID, "");
-        boolean tellNest = prefs.getBoolean(PrefsFragment.key_tell_nest_on_leaving_home, true);
 
         if (!structure_id.isEmpty()) {
-//            if (tellNest) {
-//                BackendUtils.getOthers(null, null, structure_id, BackendUtils.POST_ACTION_IF_NOBODY_HOME_SET_AWAY);
-//            }
-            BackendUtils.updateStatus(context, structure_id, "away",tellNest);
+            // set an alarm to wait before we tell nest we're home.
+            // sometimes the phone's geolocation will bounce out of an area and
+            // then come back.
+            alarm.SetAlarm(context,5);
 
         } else {
             Log.e(TAG, "missing structure_id");
