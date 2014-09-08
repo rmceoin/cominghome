@@ -27,6 +27,7 @@ import com.google.android.gms.location.LocationClient.OnAddGeofencesResultListen
 
 import android.app.Activity;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
 import android.os.Bundle;
@@ -56,7 +57,7 @@ public class GeofenceRequester
     public final static String TAG = GeofenceRequester.class.getSimpleName();
 
     // Storage for a reference to the calling client
-    private final Activity mActivity;
+    private final Context mActivity;
 
     // Stores the PendingIntent used to send geofence transitions back to the app
     private PendingIntent mGeofencePendingIntent;
@@ -73,7 +74,7 @@ public class GeofenceRequester
      */
     private boolean mInProgress;
 
-    public GeofenceRequester(Activity activityContext) {
+    public GeofenceRequester(Context activityContext) {
         // Save the context
         mActivity = activityContext;
 
@@ -348,19 +349,19 @@ public class GeofenceRequester
          */
         if (connectionResult.hasResolution()) {
 
-            try {
-                // Start an Activity that tries to resolve the error
-                connectionResult.startResolutionForResult(mActivity,
-                        GeofenceUtils.CONNECTION_FAILURE_RESOLUTION_REQUEST);
-
-            /*
-             * Thrown if Google Play services canceled the original
-             * PendingIntent
-             */
-            } catch (SendIntentException e) {
-                // Log the error
-                e.printStackTrace();
-            }
+//            try {
+//                // Start an Activity that tries to resolve the error
+//                connectionResult.startResolutionForResult(mActivity,
+//                        GeofenceUtils.CONNECTION_FAILURE_RESOLUTION_REQUEST);
+//
+//            /*
+//             * Thrown if Google Play services canceled the original
+//             * PendingIntent
+//             */
+//            } catch (SendIntentException e) {
+//                // Log the error
+//                e.printStackTrace();
+//            }
 
         /*
          * If no resolution is available, put the error code in

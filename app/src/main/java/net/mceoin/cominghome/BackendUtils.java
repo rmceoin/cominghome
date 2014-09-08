@@ -41,6 +41,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+//TODO: use Android Volley
+// http://www.androidhive.info/2014/05/android-working-with-volley-library-1/
+
 /**
  * Backend Utilities
  */

@@ -21,17 +21,58 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import com.google.android.gms.location.Geofence;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * Startup the LocationService at boot time
+ * Register GeoFences at boot time
  */
 public class BootCompletedReceiver extends BroadcastReceiver {
 
     private final static String TAG = BootCompletedReceiver.class.getSimpleName();
     private final static boolean debug = true;
 
+    private GeofenceRequester mGeofenceRequester;
+    List<Geofence> mCurrentGeofences;
+
     @Override
     public void onReceive(Context context, Intent arg1) {
         if (debug) Log.d(TAG, "starting service...");
 //        context.startService(new Intent(context, LocationService.class));
+
+        mGeofenceRequester = new GeofenceRequester(context);
+
+
+        SimpleGeofenceStore mGeofenceStorage = new SimpleGeofenceStore(context);
+        // Instantiate the current List of geofences
+        mCurrentGeofences = new ArrayList<Geofence>();
+
+        SimpleGeofence homeGeofence = mGeofenceStorage.getGeofence(MainActivity.FENCE_HOME);
+        if (homeGeofence !=null) {
+            mCurrentGeofences.add(homeGeofence.toGeofence());
+        }
+        SimpleGeofence workGeofence = mGeofenceStorage.getGeofence(MainActivity.FENCE_WORK);
+        if (workGeofence !=null) {
+            mCurrentGeofences.add(workGeofence.toGeofence());
+        }
+
+        if (!mCurrentGeofences.isEmpty()) {
+            updateGeofences();
+        }
+
     }
+
+    private void updateGeofences() {
+
+        // Start the request. Fail if there's already a request in progress
+        try {
+            // Try to add geofences
+            mGeofenceRequester.addGeofences(mCurrentGeofences);
+        } catch (UnsupportedOperationException e) {
+            Log.e(TAG,"already queued");
+        }
+    }
+
 }
