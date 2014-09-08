@@ -15,21 +15,19 @@
  */
 package net.mceoin.cominghome;
 
+import android.app.ActivityManager;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender.SendIntentException;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
@@ -279,8 +277,6 @@ public class MainActivity extends FragmentActivity implements
 
         playServicesConnected();
 
-        startLocationService(getApplicationContext());
-
         map = ((MapFragment) getFragmentManager()
                 .findFragmentById(R.id.map)).getMap();
 
@@ -325,12 +321,20 @@ public class MainActivity extends FragmentActivity implements
         loadFences();
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        doUnbindService();
+    /**
+     * Call using isMyServiceRunning(MyService.class)
+     * http://stackoverflow.com/questions/600207/how-to-check-if-a-service-is-running-in-android
+     */
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
+
     private void loadFences() {
 
         homeGeofence = mGeofenceStorage.getGeofence(FENCE_HOME);
@@ -452,11 +456,6 @@ public class MainActivity extends FragmentActivity implements
                 Log.d(TAG, "Got location update: " + latitude + ", " + longitude);
             if (map != null) {
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(current, 13));
-            }
-            if (mBoundLocationService != null) {
-                long lastUpdate = mBoundLocationService.timeAtLastUpdate;
-                if (debug) Log.d(TAG, "time at last update=" + lastUpdate);
-//                mBoundLocationService.checkin();
             }
         }
     };
@@ -651,54 +650,6 @@ public class MainActivity extends FragmentActivity implements
         // Display the connection status
         Toast.makeText(this, "Disconnected. Please re-connect.",
                 Toast.LENGTH_SHORT).show();
-    }
-
-    public static void startLocationService(Context context) {
-        // Explicitly start LocationService
-        Intent intent = new Intent(context, LocationService.class);
-        context.startService(intent);
-        doBindService(context);
-    }
-
-    static LocationService mBoundLocationService = null;
-
-    private static ServiceConnection mConnection = new ServiceConnection() {
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            // This is called when the connection with the service has been
-            // established, giving us the service object we can use to
-            // interact with the service.  Because we have bound to a explicit
-            // service that we know is running in our own process, we can
-            // cast its IBinder to a concrete class and directly access it.
-            mBoundLocationService = ((LocationService.LocationBinder) service).getService();
-
-        }
-
-        public void onServiceDisconnected(ComponentName className) {
-            // This is called when the connection with the service has been
-            // unexpectedly disconnected -- that is, its process crashed.
-            // Because it is running in our same process, we should never
-            // see this happen.
-            mBoundLocationService = null;
-        }
-    };
-    private static boolean mIsBound = false;
-
-    static void doBindService(Context context) {
-        // Establish a connection with the service.  We use an explicit
-        // class name because we want a specific service implementation that
-        // we know will be running in our own process (and thus won't be
-        // supporting component replacement by other applications).
-        context.bindService(new Intent(context,
-                LocationService.class), mConnection, Context.BIND_AUTO_CREATE);
-        mIsBound = true;
-    }
-
-    void doUnbindService() {
-        if (mIsBound) {
-            // Detach our existing connection.
-            unbindService(mConnection);
-            mIsBound = false;
-        }
     }
 
     /**
