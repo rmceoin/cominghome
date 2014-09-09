@@ -25,29 +25,44 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+/**
+ * Wait for about 15 minutes before telling the backend or Nest that we've left home.
+ * This is needed because sometimes the phone will bounce out of the area briefly.
+ */
 public class FenceHandlingAlarm extends BroadcastReceiver {
 
     public final static String TAG = FenceHandlingAlarm.class.getSimpleName();
     public final static boolean debug = true;
 
+    private static boolean gotFirstTrigger;
+
     @Override
     public void onReceive(Context context, Intent intent) {
         if (debug) Log.d(TAG,"onReceive()");
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        String structure_id = prefs.getString(MainActivity.PREFS_STRUCTURE_ID, "");
-        boolean tellNest = prefs.getBoolean(PrefsFragment.key_tell_nest_on_leaving_home, true);
+        if (gotFirstTrigger) {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+            String structure_id = prefs.getString(MainActivity.PREFS_STRUCTURE_ID, "");
+            boolean tellNest = prefs.getBoolean(PrefsFragment.key_tell_nest_on_leaving_home, true);
 
-        BackendUtils.updateStatus(context, structure_id, "away",tellNest);
+            BackendUtils.updateStatus(context, structure_id, "away", tellNest);
 
-        CancelAlarm(context);
+            CancelAlarm(context);
+        }else {
+            gotFirstTrigger=true;
+            if (debug) Log.d(TAG,"wait for next alarm");
+        }
     }
 
-    public void SetAlarm(Context context, int minutes) {
+    public void SetAlarm(Context context) {
+        if (debug) Log.d(TAG,"SetAlarm()");
+        gotFirstTrigger=false;
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent i = new Intent(context, FenceHandlingAlarm.class);
         PendingIntent pi = PendingIntent.getBroadcast(context, 0, i, 0);
-        am.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), 1000 * 60 * minutes, pi); // Millisec * Second * Minute
+        am.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                AlarmManager.INTERVAL_FIFTEEN_MINUTES,
+                AlarmManager.INTERVAL_FIFTEEN_MINUTES, pi);
     }
 
     public void CancelAlarm(Context context) {

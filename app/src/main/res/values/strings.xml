@@ -33,6 +33,7 @@
     <string name="disconnected">Client disconnected</string>
 
     <string name="get_others">Get Others</string>
+    <string name="fake_left">Fake Left</string>
     <string name="settings">Settings</string>
     <string name="about">About</string>
 

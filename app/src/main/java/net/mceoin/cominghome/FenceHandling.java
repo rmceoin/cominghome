@@ -51,6 +51,14 @@ public class FenceHandling {
                     default:
                         Log.e(TAG, "unknown transition: " + transition);
                 }
+            } else if (geofence.getRequestId().equals(MainActivity.FENCE_WORK)) {
+                switch (transition) {
+                    case Geofence.GEOFENCE_TRANSITION_EXIT:
+                        leftWork(context);
+                        break;
+                    default:
+                        Log.e(TAG, "unknown transition: " + transition);
+                }
             }
         }
 
@@ -86,7 +94,7 @@ public class FenceHandling {
         }
     }
 
-    private static void leftHome(Context context) {
+    public static void leftHome(Context context) {
         if (debug) Log.d(TAG, "left home");
 
         HistoryUpdate.add(context,"Geofence left home");
@@ -98,10 +106,22 @@ public class FenceHandling {
             // set an alarm to wait before we tell nest we're home.
             // sometimes the phone's geolocation will bounce out of an area and
             // then come back.
-            alarm.SetAlarm(context,5);
+            alarm.SetAlarm(context);
 
         } else {
             Log.e(TAG, "missing structure_id");
+        }
+    }
+
+    public static void leftWork(Context context) {
+        if (debug) Log.d(TAG, "left work");
+
+        HistoryUpdate.add(context,"Geofence left work");
+
+        if (LocationService.isRunning(context)) {
+            if (debug) Log.d(TAG,"LocationService is running");
+        } else {
+            if (debug) Log.d(TAG,"LocationService is not running");
         }
     }
 }

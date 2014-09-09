@@ -325,8 +325,8 @@ public class MainActivity extends FragmentActivity implements
      * Call using isMyServiceRunning(MyService.class)
      * http://stackoverflow.com/questions/600207/how-to-check-if-a-service-is-running-in-android
      */
-    private boolean isMyServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+    public static boolean isMyServiceRunning(Context context, Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
             if (serviceClass.getName().equals(service.service.getClassName())) {
                 return true;
@@ -466,6 +466,7 @@ public class MainActivity extends FragmentActivity implements
         inflater.inflate(R.menu.main, menu);
         return true;
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
@@ -474,6 +475,11 @@ public class MainActivity extends FragmentActivity implements
                 if ((structure_id!=null) && (!structure_id.isEmpty()))
                     BackendUtils.getOthers(getApplicationContext(),handler,structure_id,null);
                 NestUtils.sendNotification(this,"away");
+                return true;
+            case R.id.fake_left:
+                if ((structure_id!=null) && (!structure_id.isEmpty())) {
+                    FenceHandling.leftHome(getApplicationContext());
+                }
                 return true;
             case R.id.settings:
                 startActivity(new Intent(this,SettingsActivity.class));

@@ -64,6 +64,10 @@ public class LocationService extends Service implements GooglePlayServicesClient
 
     LocationClient mLocationClient;
 
+    public static boolean isRunning(Context context) {
+        return MainActivity.isMyServiceRunning(context, LocationService.class);
+    }
+
     public LocationService() {
     }
 
