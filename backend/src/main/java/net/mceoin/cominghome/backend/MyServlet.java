@@ -23,7 +23,9 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.servlet.http.*;
@@ -108,7 +110,8 @@ public class MyServlet extends HttpServlet {
             DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
             datastore.put(status);
 
-            String nestResult = "";
+            String nest_result = "Not told";
+            String others_status = "Not checked";
             if (tell_nest.equals("true")) {
                 if (!access_token.isEmpty()) {
                     boolean doit=true;
@@ -116,33 +119,53 @@ public class MyServlet extends HttpServlet {
                         // only check for others still at home if we're setting to away
                         boolean others = checkOthersAtHome(installation_id, structure_id);
                         if (others) {
+                            others_status="True";
                             doit=false;
+                        } else {
+                            others_status="False";
                         }
                     }
                     if (doit) {
                         boolean nestError = tellNestAwayStatus(access_token, structure_id, away_status);
                         if (nestError) {
-                            nestResult = " with Nest error";
+                            nest_result = "Error";
                         } else {
-                            nestResult = " with Nest";
+                            nest_result = "Success";
                         }
                     }
                 }
             }
 
-            resp.setContentType("text/plain");
-            resp.getWriter().println("Updated to " + away_status + nestResult);
+            resp.setContentType("application/json");
+
+            Map<String, String> params = new HashMap<String, String>();
+            params.put("result", "success");
+            params.put("nest_result", nest_result);
+            params.put("others_status", others_status);
+            JSONObject jsonResponse = new JSONObject(params);
+
+            resp.getWriter().print(jsonResponse.toString());
+//            resp.getWriter().println("Updated to " + away_status + nestResult);
 
         } else if (request.equals("getothers")) {
 
             boolean others = checkOthersAtHome(installation_id, structure_id);
+            String othersResult;
 
-            resp.setContentType("text/plain");
             if (others) {
-                resp.getWriter().println("Others at home");
+                othersResult="Others at home";
             } else {
-                resp.getWriter().println("No others at home");
+                othersResult="No others at home";
             }
+
+            resp.setContentType("application/json");
+
+            Map<String, String> params = new HashMap<String, String>();
+            params.put("result", "success");
+            params.put("others_result", othersResult);
+            JSONObject jsonResponse = new JSONObject(params);
+
+            resp.getWriter().print(jsonResponse.toString());
 
         } else {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid request");
