@@ -41,11 +41,13 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -61,27 +63,9 @@ public class BackendUtils {
 
     public static final String POST_ACTION_IF_NOBODY_HOME_SET_AWAY = "if-nobody-home-set-away";
 
-    public static void updateStatusOld(Context context, String structure_id,
-                                    String away_status, boolean tellNest) {
-        if (debug) Log.d(TAG, "updateStatus(,," + away_status + ")");
-        if (context == null) {
-            Log.e(TAG, "missing context");
-            return;
-        }
-
-        if ((away_status == null) || (away_status.isEmpty())) return;
-
-        UpdateStatusAsyncTask updateStatusAsyncTask = new UpdateStatusAsyncTask();
-        updateStatusAsyncTask.setContext(context);
-        updateStatusAsyncTask.setStructureId(structure_id);
-        updateStatusAsyncTask.setAwayStatus(away_status);
-        updateStatusAsyncTask.setTellNest(tellNest);
-        updateStatusAsyncTask.execute();
-    }
-
     public static void updateStatus(Context context, String structure_id,
-                                       String away_status, boolean tellNest)  {
-        if (debug) Log.d(TAG, "updateStatusNew(,," + away_status + ","+tellNest+")");
+                                    String away_status, boolean tellNest) {
+        if (debug) Log.d(TAG, "updateStatusNew(,," + away_status + "," + tellNest + ")");
         if (context == null) {
             Log.e(TAG, "missing context");
             return;
@@ -108,8 +92,7 @@ public class BackendUtils {
         params.put("away_status", away_status);
         params.put("access_token", access_token);
         params.put("tell_nest", tellNestString);
-//        JSONObject jsonParams = new JSONObject(params);
-        if (debug) Log.d(TAG,"params="+params.toString());
+        if (debug) Log.d(TAG, "params=" + params.toString());
 
         String url = "https://" + BackendConstants.appEngineHost + "/status";
 
@@ -119,98 +102,45 @@ public class BackendUtils {
 
                     @Override
                     public void onResponse(JSONObject response) {
-                        if (debug) Log.d(TAG, "response="+response.toString());
+                        if (debug) Log.d(TAG, "response=" + response.toString());
+
+                        Map<String, String> updateResult = parseJSON(response.toString());
+                        String result = updateResult.get("result");
+                        String nest_result = updateResult.get("nest_result");
+
+                        Context context = AppController.getInstance().getApplicationContext();
+                        HistoryUpdate.add(context, "Backend updated: "+nest_result);
                     }
                 }, new Response.ErrorListener() {
 
             @Override
             public void onErrorResponse(VolleyError error) {
-                if (debug) Log.d(TAG,"volley error="+error.getLocalizedMessage());
+                if (debug) Log.d(TAG, "volley error=" + error.getLocalizedMessage());
+                Context context = AppController.getInstance().getApplicationContext();
+                HistoryUpdate.add(context, error.getLocalizedMessage());
                 VolleyLog.d(TAG, "Error: " + error.getMessage());
             }
         });
         AppController.getInstance().addToRequestQueue(updateStatusReq, tag_update_status);
     }
 
-    private static class UpdateStatusAsyncTask extends AsyncTask<Void, Void, String> {
+    public static Map parseJSON(String input) {
+        Map<String, String> result = new HashMap<String, String>();
 
-        private Context context;
-
-        private String structure_id;
-        private String away_status;
-        private boolean tellNest;
-
-        public void setTellNest(boolean tellNest) {
-            this.tellNest = tellNest;
-        }
-
-        public void setContext(Context context) {
-            this.context = context;
-        }
-
-        public void setAwayStatus(String away_status) {
-            this.away_status = away_status;
-        }
-
-        public void setStructureId(String structure_id) {
-            this.structure_id = structure_id;
-        }
-
-        @Override
-        protected String doInBackground(Void... params) {
-
-            HttpClient httpClient = new DefaultHttpClient();
-            String url = "https://" + BackendConstants.appEngineHost + "/status";
-            HttpPost httpPost = new HttpPost(url);
-            try {
-
-                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-                String access_token = prefs.getString(OAuthFlowApp.PREF_ACCESS_TOKEN, "");
-
-                String InstallationId = Installation.id(context);
-                String tellNestString;
-                if (tellNest)
-                    tellNestString = "true";
-                else
-                    tellNestString = "false";
-                // Add name data to request
-                List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
-                nameValuePairs.add(new BasicNameValuePair("request", "set"));
-                nameValuePairs.add(new BasicNameValuePair("installation_id", InstallationId));
-                nameValuePairs.add(new BasicNameValuePair("structure_id", structure_id));
-                nameValuePairs.add(new BasicNameValuePair("away_status", away_status));
-                nameValuePairs.add(new BasicNameValuePair("access_token", access_token));
-                nameValuePairs.add(new BasicNameValuePair("tell_nest", tellNestString));
-                httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-
-                if (debug) {
-                    Log.d(TAG, "parameters = " + nameValuePairs.toString());
-                }
-
-                httpPost.setHeader("User-Agent", "ComingHome/1.0");
-                // Execute HTTP Post Request
-                HttpResponse response = httpClient.execute(httpPost);
-                if (response.getStatusLine().getStatusCode() == 200) {
-                    return EntityUtils.toString(response.getEntity());
-                }
-                return "Error: " + response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase();
-
-            } catch (ClientProtocolException e) {
-                return e.getMessage();
-            } catch (IOException e) {
-                return e.getMessage();
+        JSONObject object = null;
+        try {
+            object = new JSONObject(input);
+            Iterator<String> keys = object.keys();
+            while (keys.hasNext()) {
+                String key = keys.next();
+                String value = object.getString(key);
+                result.put(key, value);
             }
+        } catch (JSONException e) {
+            Log.e(TAG, "error parsing JSON");
+            return result;
         }
-
-        @Override
-        protected void onPostExecute(String result) {
-            if (debug) Log.d(TAG, "result=" + result);
-            if (debug) {
-                if (context != null)
-                    Toast.makeText(context, result, Toast.LENGTH_LONG).show();
-            }
-            if (context != null) HistoryUpdate.add(context, result);
-        }
+        return result;
     }
 
     public static void getOthers(Context context, Handler handler, String structure_id,
