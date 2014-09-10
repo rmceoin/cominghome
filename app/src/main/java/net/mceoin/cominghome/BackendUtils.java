@@ -25,6 +25,11 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+
 import net.mceoin.cominghome.oauth.OAuthFlowApp;
 
 import org.apache.http.HttpResponse;
@@ -36,10 +41,13 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 //TODO: use Android Volley
 // http://www.androidhive.info/2014/05/android-working-with-volley-library-1/
@@ -53,7 +61,7 @@ public class BackendUtils {
 
     public static final String POST_ACTION_IF_NOBODY_HOME_SET_AWAY = "if-nobody-home-set-away";
 
-    public static void updateStatus(Context context, String structure_id,
+    public static void updateStatusOld(Context context, String structure_id,
                                     String away_status, boolean tellNest) {
         if (debug) Log.d(TAG, "updateStatus(,," + away_status + ")");
         if (context == null) {
@@ -71,6 +79,59 @@ public class BackendUtils {
         updateStatusAsyncTask.execute();
     }
 
+    public static void updateStatus(Context context, String structure_id,
+                                       String away_status, boolean tellNest)  {
+        if (debug) Log.d(TAG, "updateStatusNew(,," + away_status + ","+tellNest+")");
+        if (context == null) {
+            Log.e(TAG, "missing context");
+            return;
+        }
+
+        if ((away_status == null) || (away_status.isEmpty())) return;
+        // Tag used to cancel the request
+        String tag_update_status = "update_status_req";
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        final String access_token = prefs.getString(OAuthFlowApp.PREF_ACCESS_TOKEN, "");
+
+        String InstallationId = Installation.id(context);
+        String tellNestString;
+        if (tellNest)
+            tellNestString = "true";
+        else
+            tellNestString = "false";
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("request", "set");
+        params.put("installation_id", InstallationId);
+        params.put("structure_id", structure_id);
+        params.put("away_status", away_status);
+        params.put("access_token", access_token);
+        params.put("tell_nest", tellNestString);
+//        JSONObject jsonParams = new JSONObject(params);
+        if (debug) Log.d(TAG,"params="+params.toString());
+
+        String url = "https://" + BackendConstants.appEngineHost + "/status";
+
+        CustomVolleyRequest updateStatusReq = new CustomVolleyRequest(Request.Method.POST,
+                url, params,
+                new Response.Listener<JSONObject>() {
+
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        if (debug) Log.d(TAG, "response="+response.toString());
+                    }
+                }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                if (debug) Log.d(TAG,"volley error="+error.getLocalizedMessage());
+                VolleyLog.d(TAG, "Error: " + error.getMessage());
+            }
+        });
+        AppController.getInstance().addToRequestQueue(updateStatusReq, tag_update_status);
+    }
+
     private static class UpdateStatusAsyncTask extends AsyncTask<Void, Void, String> {
 
         private Context context;
@@ -79,7 +140,9 @@ public class BackendUtils {
         private String away_status;
         private boolean tellNest;
 
-        public void setTellNest(boolean tellNest) { this.tellNest = tellNest; }
+        public void setTellNest(boolean tellNest) {
+            this.tellNest = tellNest;
+        }
 
         public void setContext(Context context) {
             this.context = context;
@@ -107,9 +170,9 @@ public class BackendUtils {
                 String InstallationId = Installation.id(context);
                 String tellNestString;
                 if (tellNest)
-                    tellNestString="true";
+                    tellNestString = "true";
                 else
-                    tellNestString="false";
+                    tellNestString = "false";
                 // Add name data to request
                 List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
                 nameValuePairs.add(new BasicNameValuePair("request", "set"));
@@ -124,7 +187,7 @@ public class BackendUtils {
                     Log.d(TAG, "parameters = " + nameValuePairs.toString());
                 }
 
-                httpPost.setHeader("User-Agent","ComingHome/1.0");
+                httpPost.setHeader("User-Agent", "ComingHome/1.0");
                 // Execute HTTP Post Request
                 HttpResponse response = httpClient.execute(httpPost);
                 if (response.getStatusLine().getStatusCode() == 200) {
@@ -146,7 +209,7 @@ public class BackendUtils {
                 if (context != null)
                     Toast.makeText(context, result, Toast.LENGTH_LONG).show();
             }
-            if (context!=null) HistoryUpdate.add(context,result);
+            if (context != null) HistoryUpdate.add(context, result);
         }
     }
 
@@ -173,7 +236,9 @@ public class BackendUtils {
 
         private String post_action;
 
-        public void setPostAction(String post_action) { this.post_action = post_action; }
+        public void setPostAction(String post_action) {
+            this.post_action = post_action;
+        }
 
         public void setContext(Context context) {
             this.context = context;
@@ -224,8 +289,8 @@ public class BackendUtils {
                 if (context != null)
                     Toast.makeText(context, result, Toast.LENGTH_LONG).show();
             }
-            if ((post_action!=null) && (post_action.equals(POST_ACTION_IF_NOBODY_HOME_SET_AWAY))) {
-                if ((result!=null) && (result.equals("No others"))) {
+            if ((post_action != null) && (post_action.equals(POST_ACTION_IF_NOBODY_HOME_SET_AWAY))) {
+                if ((result != null) && (result.equals("No others"))) {
                     SharedPreferences prefs;
                     prefs = PreferenceManager.getDefaultSharedPreferences(context);
                     String access_token = prefs.getString(OAuthFlowApp.PREF_ACCESS_TOKEN, "");
@@ -233,7 +298,7 @@ public class BackendUtils {
                     if (!access_token.isEmpty()) {
                         NestUtils.sendAwayStatus(context, access_token, null, structure_id, "away");
                     } else {
-                        Log.e(TAG,"missing access_token");
+                        Log.e(TAG, "missing access_token");
                     }
                 }
             }
