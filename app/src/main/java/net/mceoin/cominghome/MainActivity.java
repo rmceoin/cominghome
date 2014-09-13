@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender.SendIntentException;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
@@ -481,10 +482,10 @@ public class MainActivity extends FragmentActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
-            case R.id.get_others:
-                if ((structure_id!=null) && (!structure_id.isEmpty()))
-                    BackendUtils.getOthers(getApplicationContext(),handler,structure_id,null);
-                NestUtils.sendNotification(this,"away");
+            case R.id.fake_arrived:
+                if ((structure_id!=null) && (!structure_id.isEmpty())) {
+                    FenceHandling.arrivedHome(getApplicationContext());
+                }
                 return true;
             case R.id.fake_left:
                 if ((structure_id!=null) && (!structure_id.isEmpty())) {
@@ -548,7 +549,7 @@ public class MainActivity extends FragmentActivity implements
         } else {
             sendETAButton.setEnabled(true);
         }
-        BackendUtils.updateStatus(getApplicationContext(), structure_id, away_status,false);
+//        BackendUtils.updateStatus(getApplicationContext(), structure_id, away_status,false);
     }
 
     @Override
@@ -682,7 +683,14 @@ public class MainActivity extends FragmentActivity implements
         // If Google Play services is available
         if (ConnectionResult.SUCCESS == resultCode) {
 
-            if (debug) Log.d(TAG, "Google Play services available");
+            int v=0;
+            try {
+                v = getPackageManager().getPackageInfo("com.google.android.gms", 0).versionCode;
+            } catch (PackageManager.NameNotFoundException e) {
+                e.printStackTrace();
+            }
+            if (debug) Log.d(TAG, "Google Play services available: client "+
+                    GooglePlayServicesUtil.GOOGLE_PLAY_SERVICES_VERSION_CODE + " package "+v);
             return true;
 
             // Google Play services was not available for some reason

@@ -51,7 +51,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-//TODO: use Android Volley
+// Helpful info at:
+//
 // http://www.androidhive.info/2014/05/android-working-with-volley-library-1/
 
 /**
@@ -110,6 +111,8 @@ public class BackendUtils {
 
                         Context context = AppController.getInstance().getApplicationContext();
                         HistoryUpdate.add(context, "Backend updated: "+nest_result);
+
+                        NestUtils.sendNotification(context, nest_result);
                     }
                 }, new Response.ErrorListener() {
 
