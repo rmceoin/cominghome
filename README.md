@@ -11,7 +11,7 @@ Leave OAuth Redirect URI empty.  This app uses PIN authentication.
 
 Permissions needed:
 
-* Away - Read
+* Away - Read/Write
 * ETA - Write
 
 Copy app/src/main/java/net/mceoin/cominghome/oauth/Constants.java-template to Constants.java
