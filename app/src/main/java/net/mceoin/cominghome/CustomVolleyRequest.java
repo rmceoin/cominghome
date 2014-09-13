@@ -30,6 +30,10 @@ import com.android.volley.toolbox.HttpHeaderParser;
 /**
  * Snagged from
  * http://stackoverflow.com/questions/19837820/volley-jsonobjectrequest-post-request-not-working
+ *
+ * If troubleshooting, turn on Volley debug logging with:
+ *   adb shell setprop log.tag.Volley VERBOSE
+
  */
 public class CustomVolleyRequest extends Request<JSONObject> {
 

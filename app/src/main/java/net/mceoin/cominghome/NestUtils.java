@@ -15,6 +15,7 @@
  */
 package net.mceoin.cominghome;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -758,7 +759,7 @@ public class NestUtils {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
 
         // Set the notification contents
-        builder.setSmallIcon(R.drawable.ic_notification)
+        builder.setSmallIcon(R.drawable.home)
                 .setContentTitle(
                         context.getString(R.string.nest_transition_notification_title,
                                 transitionType))

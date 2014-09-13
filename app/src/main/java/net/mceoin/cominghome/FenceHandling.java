@@ -64,7 +64,7 @@ public class FenceHandling {
 
     }
 
-    private static void arrivedHome(Context context) {
+    public static void arrivedHome(Context context) {
         if (debug) Log.d(TAG, "arrived home");
 
         // make sure there isn't an alarm set from a leftHome event

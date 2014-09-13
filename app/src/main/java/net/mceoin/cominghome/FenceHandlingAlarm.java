@@ -41,6 +41,8 @@ public class FenceHandlingAlarm extends BroadcastReceiver {
         if (debug) Log.d(TAG,"onReceive()");
 
         if (gotFirstTrigger) {
+            //TODO: should track the time from setting alarm to now to ensure sufficient time has passed
+
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
             String structure_id = prefs.getString(MainActivity.PREFS_STRUCTURE_ID, "");
             boolean tellNest = prefs.getBoolean(PrefsFragment.key_tell_nest_on_leaving_home, true);
