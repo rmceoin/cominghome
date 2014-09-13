@@ -15,6 +15,17 @@
  */
 package net.mceoin.cominghome.backend;
 
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
+
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,18 +39,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import javax.servlet.http.*;
-
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.FetchOptions;
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
-import com.google.appengine.api.datastore.PreparedQuery;
-import com.google.appengine.api.datastore.Query;
-
-import org.json.JSONObject;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * This originally was based on:
@@ -83,7 +85,13 @@ public class MyServlet extends HttpServlet {
             return;
         }
 
-        log.info("request = " + request);
+        String request_id = req.getParameter("request_id");
+        if ((request_id == null) || (request_id.isEmpty())) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing request_id");
+            return;
+        }
+
+        log.info("request = " + request + " request_id = " + request_id);
 
         if (request.equals("set")) {
             String away_status = req.getParameter("away_status");
@@ -113,15 +121,15 @@ public class MyServlet extends HttpServlet {
             String others_status = "Not checked";
             if (tell_nest.equals("true")) {
                 if (!access_token.isEmpty()) {
-                    boolean doit=true;
+                    boolean doit = true;
                     if (away_status.equals("away")) {
                         // only check for others still at home if we're setting to away
                         boolean others = checkOthersAtHome(installation_id, structure_id);
                         if (others) {
-                            others_status="True";
-                            doit=false;
+                            others_status = "True";
+                            doit = false;
                         } else {
-                            others_status="False";
+                            others_status = "False";
                         }
                     }
                     if (doit) {
@@ -146,9 +154,9 @@ public class MyServlet extends HttpServlet {
             String othersResult;
 
             if (others) {
-                othersResult="Others at home";
+                othersResult = "Others at home";
             } else {
-                othersResult="No others at home";
+                othersResult = "No others at home";
             }
 
             resp.setContentType("application/json");
@@ -169,7 +177,7 @@ public class MyServlet extends HttpServlet {
      * Check for anybody else still at home
      *
      * @param installation_id Nest installation_id of user
-     * @param structure_id Nest structure_id of user
+     * @param structure_id    Nest structure_id of user
      * @return true if somebody else is still home
      */
     private boolean checkOthersAtHome(String installation_id, String structure_id) {
@@ -208,112 +216,111 @@ public class MyServlet extends HttpServlet {
 
         StringBuilder builder = new StringBuilder();
         boolean error = false;
-        String errorResult="";
+        String errorResult = "";
 
         HttpURLConnection urlConnection = null;
         try {
-            int attempts=3;
-            while (attempts-->0) {
-                URL url = new URL(urlString);
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestProperty("User-Agent", "ComingHomeBackend/1.0");
+            URL url = new URL(urlString);
+            urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestProperty("User-Agent", "ComingHomeBackend/1.0");
+            urlConnection.setRequestMethod("PUT");
+            urlConnection.setDoOutput(true);
+            urlConnection.setDoInput(true);
+            urlConnection.setChunkedStreamingMode(0);
+
+            urlConnection.setRequestProperty("Content-Type", "application/json; charset=utf8");
+
+            String payload = "\"" + away_status + "\"";
+
+            OutputStreamWriter wr = new OutputStreamWriter(urlConnection.getOutputStream());
+            wr.write(payload);
+            wr.flush();
+            log.info(payload);
+
+            boolean redirect = false;
+
+            // normally, 3xx is redirect
+            int status = urlConnection.getResponseCode();
+            if (status != HttpURLConnection.HTTP_OK) {
+                if (status == HttpURLConnection.HTTP_MOVED_TEMP
+                        || status == HttpURLConnection.HTTP_MOVED_PERM
+                        || status == 307    // Temporary redirect
+                        || status == HttpURLConnection.HTTP_SEE_OTHER)
+                    redirect = true;
+            }
+
+//            System.out.println("Response Code ... " + status);
+
+            if (redirect) {
+
+                // get redirect url from "location" header field
+                String newUrl = urlConnection.getHeaderField("Location");
+
+                // open the new connnection again
+                urlConnection = (HttpURLConnection) new URL(newUrl).openConnection();
                 urlConnection.setRequestMethod("PUT");
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
                 urlConnection.setChunkedStreamingMode(0);
-
                 urlConnection.setRequestProperty("Content-Type", "application/json; charset=utf8");
-
-                String payload = "\"" + away_status + "\"";
-
-//            JSONObject keyArg = new JSONObject();
-//            keyArg.put("away", away_status);
-
-                OutputStreamWriter wr = new OutputStreamWriter(urlConnection.getOutputStream());
-                wr.write(payload);
-                wr.flush();
-                log.info(payload);
-
-                boolean redirect = false;
-
-                // normally, 3xx is redirect
-                int status = urlConnection.getResponseCode();
-                if (status != HttpURLConnection.HTTP_OK) {
-                    if (status == HttpURLConnection.HTTP_MOVED_TEMP
-                            || status == HttpURLConnection.HTTP_MOVED_PERM
-                            || status == 307    // Temporary redirect
-                            || status == HttpURLConnection.HTTP_SEE_OTHER)
-                        redirect = true;
-                }
-
-//            System.out.println("Response Code ... " + status);
-
-                if (redirect) {
-
-                    // get redirect url from "location" header field
-                    String newUrl = urlConnection.getHeaderField("Location");
-
-                    // open the new connnection again
-                    urlConnection = (HttpURLConnection) new URL(newUrl).openConnection();
-                    urlConnection.setRequestMethod("PUT");
-                    urlConnection.setDoOutput(true);
-                    urlConnection.setDoInput(true);
-                    urlConnection.setChunkedStreamingMode(0);
-                    urlConnection.setRequestProperty("Content-Type", "application/json; charset=utf8");
-                    urlConnection.setRequestProperty("Accept", "application/json");
+                urlConnection.setRequestProperty("Accept", "application/json");
 
 //                System.out.println("Redirect to URL : " + newUrl);
 
-                    wr = new OutputStreamWriter(urlConnection.getOutputStream());
-                    wr.write(payload);
-                    wr.flush();
+                wr = new OutputStreamWriter(urlConnection.getOutputStream());
+                wr.write(payload);
+                wr.flush();
 
+            }
+
+            int statusCode = urlConnection.getResponseCode();
+
+            log.info("statusCode=" + statusCode);
+            if ((statusCode == HttpURLConnection.HTTP_OK)) {
+                error = false;
+            } else if (statusCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                // bad auth
+                error = true;
+                errorResult = "Unauthorized";
+            } else if (statusCode == HttpURLConnection.HTTP_BAD_REQUEST) {
+                error = true;
+                InputStream response;
+                response = urlConnection.getErrorStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(response));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    builder.append(line);
                 }
+                log.info("response=" + builder.toString());
+                JSONObject object = new JSONObject(builder.toString());
 
-                int statusCode = urlConnection.getResponseCode();
-
-                log.info("statusCode=" + statusCode);
-                if ((statusCode == 200)) {
-                    error = false;
-                    attempts=0; // stop any retries
-                } else if (statusCode == 400) {
-                    error = true;
-                    InputStream response;
-                    response = urlConnection.getErrorStream();
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(response));
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        builder.append(line);
+                Iterator keys = object.keys();
+                while (keys.hasNext()) {
+                    String key = (String) keys.next();
+                    if (key.equals("error")) {
+                        // error = Internal Error on bad structure_id
+                        errorResult = object.getString("error");
+                        log.info("errorResult=" + errorResult);
                     }
-                    log.info("response=" + builder.toString());
-                    JSONObject object = new JSONObject(builder.toString());
-
-                    Iterator keys = object.keys();
-                    while (keys.hasNext()) {
-                        String key = (String) keys.next();
-                        if (key.equals("error")) {
-                            // error = Internal Error on bad structure_id
-                            errorResult = object.getString("error");
-                            log.info("errorResult=" + errorResult);
-                        }
-                    }
-                } else {
-                    error = true;
                 }
+            } else {
+                error = true;
+                errorResult = Integer.toString(statusCode);
             }
 
         } catch (IOException e) {
-            log.warning("IO");
+            errorResult = e.getLocalizedMessage();
+            log.warning("IOException: " + errorResult);
         } catch (Exception e) {
-            log.warning("other");
-
+            errorResult = e.getLocalizedMessage();
+            log.warning("Exception: " + errorResult);
         } finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();
             }
         }
         if (error) {
-            return "Error";
+            return "Error: " + errorResult;
         } else {
             return "Success";
         }

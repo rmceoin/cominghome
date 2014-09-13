@@ -50,6 +50,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 // Helpful info at:
 //
@@ -86,8 +87,11 @@ public class BackendUtils {
         else
             tellNestString = "false";
 
+        UUID request_id = UUID.randomUUID();
+
         Map<String, String> params = new HashMap<String, String>();
         params.put("request", "set");
+        params.put("request_id", request_id.toString());
         params.put("installation_id", InstallationId);
         params.put("structure_id", structure_id);
         params.put("away_status", away_status);
