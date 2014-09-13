@@ -77,12 +77,6 @@ public class FenceHandling {
         boolean tellNest = prefs.getBoolean(PrefsFragment.key_tell_nest_on_arrival_home, true);
 
         if (!access_token.isEmpty()) {
-            if (tellNest) {
-                NestUtils.getInfo(context, access_token, null, NestUtils.POST_ACTION_IF_AWAY_SET_HOME);
-            } else {
-                if (debug) Log.d(TAG, "don't tell nest");
-            }
-
             if (!structure_id.isEmpty()) {
                 BackendUtils.updateStatus(context, structure_id, "home",tellNest);
             } else {
