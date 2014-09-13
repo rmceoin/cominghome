@@ -65,7 +65,7 @@ public class BackendUtils {
 
     public static void updateStatus(Context context, String structure_id,
                                     String away_status, boolean tellNest) {
-        if (debug) Log.d(TAG, "updateStatusNew(,," + away_status + "," + tellNest + ")");
+        if (debug) Log.d(TAG, "updateStatus(,," + away_status + "," + tellNest + ")");
         if (context == null) {
             Log.e(TAG, "missing context");
             return;
@@ -76,7 +76,7 @@ public class BackendUtils {
         String tag_update_status = "update_status_req";
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        final String access_token = prefs.getString(OAuthFlowApp.PREF_ACCESS_TOKEN, "");
+        String access_token = prefs.getString(OAuthFlowApp.PREF_ACCESS_TOKEN, "");
 
         String InstallationId = Installation.id(context);
         String tellNestString;
@@ -105,7 +105,7 @@ public class BackendUtils {
                         if (debug) Log.d(TAG, "response=" + response.toString());
 
                         Map<String, String> updateResult = parseJSON(response.toString());
-                        String result = updateResult.get("result");
+//                        String result = updateResult.get("result");
                         String nest_result = updateResult.get("nest_result");
 
                         Context context = AppController.getInstance().getApplicationContext();
@@ -124,10 +124,16 @@ public class BackendUtils {
         AppController.getInstance().addToRequestQueue(updateStatusReq, tag_update_status);
     }
 
-    public static Map parseJSON(String input) {
+    /**
+     * Very simple parsing of JSON.  Only works for one level deep of strings.
+     *
+     * @param input JSON String
+     * @return Map of keys to values
+     */
+    public static Map<String, String> parseJSON(String input) {
         Map<String, String> result = new HashMap<String, String>();
 
-        JSONObject object = null;
+        JSONObject object;
         try {
             object = new JSONObject(input);
             Iterator<String> keys = object.keys();

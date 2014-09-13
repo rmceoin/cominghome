@@ -24,9 +24,18 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
+
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.JsonObjectRequest;
+
+import net.mceoin.cominghome.oauth.OAuthFlowApp;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -35,6 +44,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -46,7 +56,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.TimeZone;
 
 /**
@@ -60,9 +72,6 @@ public class NestUtils {
     public static final String TAG = NestUtils.class.getSimpleName();
     public static final boolean debug = true;
 
-    public static final String PREF_STRUCTURE_ID = "structure_id";
-    public static final String PREF_STRUCTURE_NAME = "structure_name";
-
     public static final String MSG_STRUCTURES = "structures";
     public static final String MSG_ETA = "eta";
     public static final String MSG_GET_OTHERS = "get_others";
@@ -70,7 +79,7 @@ public class NestUtils {
 
     public static final String POST_ACTION_IF_AWAY_SET_HOME = "if-away-set-home";
 
-    public static void getInfo(Context context, String access_token, Handler handler, String post_action) {
+    public static void getInfoOld(Context context, String access_token, Handler handler, String post_action) {
         if (context == null) {
             Log.e(TAG, "missing context");
             return;
@@ -82,6 +91,87 @@ public class NestUtils {
         requestStructures.setPostAction(post_action);
         requestStructures.setAccessToken(access_token);
         requestStructures.execute(access_token);
+    }
+
+    public static void getInfo(Context context, String access_token) {
+        if (debug) Log.d(TAG, "getInfo()");
+        if (context == null) {
+            Log.e(TAG, "missing context");
+            return;
+        }
+
+        // Tag used to cancel the request
+        String tag_update_status = "nest_info_req";
+
+        String url = "https://developer-api.nest.com/structures?auth=" + access_token;
+
+        JsonObjectRequest updateStatusReq = new JsonObjectRequest(Request.Method.GET,
+                url, null,
+                new Response.Listener<JSONObject>() {
+
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        if (debug) Log.d(TAG, "response=" + response.toString());
+
+                        // {
+                        // "structure_id":"njBTS-gAhF1mJ8_oF23ne7JNDyx1m1hULWixOD6IQWEe-SFA",
+                        // "thermostats":["n232323jy8Xr1HVc2OGqICVP45i-Mc"],
+                        // "smoke_co_alarms":["pt00ag34grggZchI7ICVPddi-Mc"],
+                        // "country_code":"US",
+                        // "away":"home"
+                        // "name":"Home"
+                        // }
+
+                        String structure_id="";
+                        String structure_name="";
+                        String away_status="";
+
+                        JSONObject structures;
+                        try {
+                            structures = new JSONObject(response.toString());
+                            Iterator<String> keys = structures.keys();
+                            while (keys.hasNext()) {
+                                String structure = keys.next();
+                                JSONObject value = structures.getJSONObject(structure);
+                                if (debug) Log.d(TAG,"value="+value);
+                                structure_id = value.getString("structure_id");
+                                structure_name = value.getString("name");
+                                away_status = value.getString("away");
+                            }
+                        } catch (JSONException e) {
+                            Log.e(TAG, "error parsing JSON");
+                            return;
+                        }
+
+                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(AppController.getInstance().getApplicationContext());
+                        SharedPreferences.Editor pref = prefs.edit();
+                        pref.putString(MainActivity.PREFS_STRUCTURE_ID, structure_id);
+                        pref.putString(MainActivity.PREFS_STRUCTURE_NAME, structure_name);
+                        pref.putString(MainActivity.PREFS_LAST_AWAY_STATUS, away_status);
+                        pref.apply();
+
+//                        if (handler != null) {
+//                            Message msg = Message.obtain();
+//                            Bundle b = new Bundle();
+//                            b.putString("type", MSG_STRUCTURES);
+//                            b.putString("structure_id", structure_id);
+//                            b.putString("structure_name", structure_name);
+//                            b.putString("away_status", away_status);
+//                            msg.setData(b);
+//                            handler.sendMessage(msg);
+//                        }
+                    }
+                }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                if (debug) Log.d(TAG, "getInfo volley error=" + error.getLocalizedMessage());
+                Context context = AppController.getInstance().getApplicationContext();
+                HistoryUpdate.add(context, error.getLocalizedMessage());
+                VolleyLog.d(TAG, "getInfo Error: " + error.getMessage());
+            }
+        });
+        AppController.getInstance().addToRequestQueue(updateStatusReq, tag_update_status);
     }
 
     public static void sendETA(String access_token, Handler handler, String structure_id,
@@ -182,6 +272,8 @@ public class NestUtils {
             // curl -X PUT -d ' {"trip_id":"sample-trip-id","estimated_arrival_window_begin":"2014-07-04T10:48:11+00:00","estimated_arrival_window_end":"2014-07-04T18:48:11+00:00"}'
             //"http://developer-api.nest.com/structures/5af48890-b516-11e3-9eff-123139166438/eta.json?auth=c.VG6bfzyOxAltaih6P4v..."
 
+            // curl -L https://developer-api.nest.com/structures?auth=c.pP7r4ByOx...
+
             String url = "https://developer-api.nest.com/structures?auth=" + access_token;
             HttpGet httpGet = new HttpGet(url);
 
@@ -228,8 +320,8 @@ public class NestUtils {
                         }
 
                         SharedPreferences.Editor pref = MainActivity.prefs.edit();
-                        pref.putString(PREF_STRUCTURE_ID, structure_id);
-                        pref.putString(PREF_STRUCTURE_NAME, structure_name);
+                        pref.putString(MainActivity.PREFS_STRUCTURE_ID, structure_id);
+                        pref.putString(MainActivity.PREFS_STRUCTURE_NAME, structure_name);
                         pref.apply();
                     }
                 }

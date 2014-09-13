@@ -77,6 +77,7 @@ public class MainActivity extends FragmentActivity implements
     private static final String KEY_IN_RESOLUTION = "is_in_resolution";
     public static final String PREFS_STRUCTURE_ID = "structure_id";
     public static final String PREFS_STRUCTURE_NAME = "structure_name";
+    public static final String PREFS_LAST_AWAY_STATUS = "last_away_status";
     public static final String PREFS_LAST_MAP_LATITUDE = "last_map_latitude";
     public static final String PREFS_LAST_MAP_LONGITUDE = "last_map_longitude";
 
@@ -224,6 +225,9 @@ public class MainActivity extends FragmentActivity implements
         }
         prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         access_token = prefs.getString(OAuthFlowApp.PREF_ACCESS_TOKEN, "");
+        structure_name = prefs.getString(PREFS_STRUCTURE_NAME, "");
+        structure_id = prefs.getString(PREFS_STRUCTURE_ID, "");
+        away_status = prefs.getString(PREFS_LAST_AWAY_STATUS, "");
 
         Installation.id(this);
 
@@ -254,11 +258,12 @@ public class MainActivity extends FragmentActivity implements
         getNestInfo.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
                 if (!access_token.isEmpty()) {
-                    NestUtils.getInfo(getApplicationContext(), access_token, handler, null);
+                    NestUtils.getInfo(getApplicationContext(), access_token);
                 }
             }
         });
         structureNameText = (TextView) findViewById(R.id.structure_name);
+        structureNameText.setText(structure_name);
 
         sendETAButton = (Button) findViewById(R.id.buttonSendETA);
         sendETAButton.setOnClickListener(new View.OnClickListener() {
@@ -273,6 +278,11 @@ public class MainActivity extends FragmentActivity implements
         });
         awayStatusText = (TextView) findViewById(R.id.away_status);
 
+        if (away_status.isEmpty()) {
+            awayStatusText.setText("Checking status");
+        } else {
+            awayStatusText.setText(away_status);
+        }
         ETAminutes = (EditText) findViewById(R.id.ETAminutes);
 
         playServicesConnected();
