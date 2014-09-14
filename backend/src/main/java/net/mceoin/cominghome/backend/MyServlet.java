@@ -144,6 +144,7 @@ public class MyServlet extends HttpServlet {
             params.put("result", "success");
             params.put("nest_result", nest_result);
             params.put("others_status", others_status);
+            params.put("away_status", away_status);
             JSONObject jsonResponse = new JSONObject(params);
 
             resp.getWriter().print(jsonResponse.toString());

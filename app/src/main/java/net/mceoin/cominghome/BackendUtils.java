@@ -110,13 +110,15 @@ public class BackendUtils {
                         if (debug) Log.d(TAG, "response=" + response.toString());
 
                         Map<String, String> updateResult = parseJSON(response.toString());
-//                        String result = updateResult.get("result");
                         String nest_result = updateResult.get("nest_result");
+                        String away_status = updateResult.get("away_status");
 
                         Context context = AppController.getInstance().getApplicationContext();
-                        HistoryUpdate.add(context, "Backend updated: "+nest_result);
+                        HistoryUpdate.add(context, "Backend updated: Nest "+nest_result);
 
-                        NestUtils.sendNotification(context, nest_result);
+                        if (nest_result.equals("Success")) {
+                            NestUtils.sendNotification(context, away_status);
+                        }
                     }
                 }, new Response.ErrorListener() {
 
