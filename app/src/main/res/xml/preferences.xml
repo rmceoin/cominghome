@@ -17,6 +17,12 @@
             android:summary="@string/summary_tell_nest_on_leaving_home_preference"
             android:defaultValue="true"/>
 
+        <CheckBoxPreference
+            android:key="@string/key_notifications"
+            android:title="@string/title_notifications_preference"
+            android:summary="@string/summary_notifications_preference"
+            android:defaultValue="true"/>
+
     </PreferenceCategory>
 
 </PreferenceScreen>

@@ -61,4 +61,8 @@
     <string name="title_tell_nest_on_leaving_home_preference">Leave Home</string>
     <string name="summary_tell_nest_on_leaving_home_preference">After leaving, set Nest to away</string>
 
+    <string name="key_notifications">notifications</string>
+    <string name="title_notifications_preference">Notifications</string>
+    <string name="summary_notifications_preference">After updating Nest, show notification</string>
+
 </resources>

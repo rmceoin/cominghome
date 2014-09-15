@@ -35,13 +35,19 @@ public class FenceHandlingAlarm extends BroadcastReceiver {
     public final static boolean debug = true;
 
     private static boolean gotFirstTrigger;
+    private static long alarmStartTime;
 
     @Override
     public void onReceive(Context context, Intent intent) {
         if (debug) Log.d(TAG,"onReceive()");
 
         if (gotFirstTrigger) {
-            //TODO: should track the time from setting alarm to now to ensure sufficient time has passed
+            long currentTime = System.currentTimeMillis();
+            long timeElapsedSeconds = (currentTime - alarmStartTime)/1000;
+            if (timeElapsedSeconds < (10 * 60)) {
+                if (debug) Log.d(TAG,"not enough time has passed");
+                return;
+            }
 
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
             String structure_id = prefs.getString(MainActivity.PREFS_STRUCTURE_ID, "");
@@ -62,6 +68,7 @@ public class FenceHandlingAlarm extends BroadcastReceiver {
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent i = new Intent(context, FenceHandlingAlarm.class);
         PendingIntent pi = PendingIntent.getBroadcast(context, 0, i, 0);
+        alarmStartTime=System.currentTimeMillis();
         am.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                 AlarmManager.INTERVAL_FIFTEEN_MINUTES,
                 AlarmManager.INTERVAL_FIFTEEN_MINUTES, pi);
