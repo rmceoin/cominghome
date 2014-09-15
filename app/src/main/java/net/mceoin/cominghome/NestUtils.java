@@ -738,6 +738,14 @@ public class NestUtils {
      */
     public static void sendNotification(Context context, String transitionType) {
 
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        boolean notifications = prefs.getBoolean(MainActivity.PREFS_NOTIFICATIONS, true);
+
+        if (!notifications) {
+            if (debug) Log.d(TAG,"notifications are turned off");
+            return;
+        }
+
         // Create an explicit content Intent that starts the main Activity
         Intent notificationIntent =
                 new Intent(context, MainActivity.class);
