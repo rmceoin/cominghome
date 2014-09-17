@@ -68,6 +68,10 @@ public class LocationService extends Service implements GooglePlayServicesClient
         return MainActivity.isMyServiceRunning(context, LocationService.class);
     }
 
+    public static void startService() {
+        AppController.getInstance().startService(new Intent(AppController.getInstance().getApplicationContext(), LocationService.class));
+    }
+
     public LocationService() {
     }
 
@@ -90,9 +94,9 @@ public class LocationService extends Service implements GooglePlayServicesClient
     }
 
     public class LocationBinder extends Binder {
-        LocationService getService() {
-            return LocationService.this;
-        }
+//        LocationService getService() {
+//            return LocationService.this;
+//        }
     }
 
     private final IBinder mBinder = new LocationBinder();
@@ -162,7 +166,7 @@ public class LocationService extends Service implements GooglePlayServicesClient
             criteria.setAccuracy(Criteria.ACCURACY_FINE);
             String provider = locationManager.getBestProvider(criteria, true);
 
-            provider = LocationManager.GPS_PROVIDER;
+//            provider = LocationManager.GPS_PROVIDER;
             Location location = locationManager.getLastKnownLocation(provider);
             if (mLocationClient.isConnected()) {
                 location = mLocationClient.getLastLocation();
