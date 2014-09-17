@@ -115,7 +115,8 @@ public class FenceHandling {
         if (LocationService.isRunning(context)) {
             if (debug) Log.d(TAG,"LocationService is running");
         } else {
-            if (debug) Log.d(TAG,"LocationService is not running");
+            if (debug) Log.d(TAG,"Starting LocationService");
+            LocationService.startService();
         }
     }
 }

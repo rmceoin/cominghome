@@ -34,37 +34,30 @@ public class FenceHandlingAlarm extends BroadcastReceiver {
     public final static String TAG = FenceHandlingAlarm.class.getSimpleName();
     public final static boolean debug = true;
 
-    private static boolean gotFirstTrigger;
     private static long alarmStartTime;
 
     @Override
     public void onReceive(Context context, Intent intent) {
         if (debug) Log.d(TAG,"onReceive()");
 
-        if (gotFirstTrigger) {
-            long currentTime = System.currentTimeMillis();
-            long timeElapsedSeconds = (currentTime - alarmStartTime)/1000;
-            if (timeElapsedSeconds < (10 * 60)) {
-                if (debug) Log.d(TAG,"not enough time has passed");
-                return;
-            }
-
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-            String structure_id = prefs.getString(MainActivity.PREFS_STRUCTURE_ID, "");
-            boolean tellNest = prefs.getBoolean(PrefsFragment.key_tell_nest_on_leaving_home, true);
-
-            BackendUtils.updateStatus(context, structure_id, "away", tellNest);
-
-            CancelAlarm(context);
-        }else {
-            gotFirstTrigger=true;
-            if (debug) Log.d(TAG,"wait for next alarm");
+        long currentTime = System.currentTimeMillis();
+        long timeElapsedSeconds = (currentTime - alarmStartTime)/1000;
+        if (timeElapsedSeconds < (10 * 60)) {
+            if (debug) Log.d(TAG,"not enough time has passed: "+timeElapsedSeconds+" = "+currentTime+" - "+alarmStartTime+"/1000");
+            return;
         }
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        String structure_id = prefs.getString(MainActivity.PREFS_STRUCTURE_ID, "");
+        boolean tellNest = prefs.getBoolean(PrefsFragment.key_tell_nest_on_leaving_home, true);
+
+        BackendUtils.updateStatus(context, structure_id, "away", tellNest);
+
+        CancelAlarm(context);
     }
 
     public void SetAlarm(Context context) {
         if (debug) Log.d(TAG,"SetAlarm()");
-        gotFirstTrigger=false;
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent i = new Intent(context, FenceHandlingAlarm.class);
         PendingIntent pi = PendingIntent.getBroadcast(context, 0, i, 0);

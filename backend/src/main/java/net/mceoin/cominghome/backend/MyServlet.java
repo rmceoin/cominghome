@@ -134,11 +134,16 @@ public class MyServlet extends HttpServlet {
                     }
                     if (doit) {
                         String nest_away_status = getNestAwayStatus(access_token);
-                        if (!nest_away_status.equals(away_status)) {
-                            nest_result = tellNestAwayStatus(access_token, structure_id, away_status);
+                        log.info("nest_away_status=" + nest_away_status);
+                        if (nest_away_status.contains("Error")) {
+                            nest_result = nest_away_status;
                         } else {
-                            log.info("Nest already set to "+nest_away_status);
-                            nest_result = "Already "+away_status;
+                            if (!nest_away_status.equals(away_status)) {
+                                nest_result = tellNestAwayStatus(access_token, structure_id, away_status);
+                            } else {
+                                log.info("Nest already set to " + nest_away_status);
+                                nest_result = "Already " + away_status;
+                            }
                         }
                     }
                 }
@@ -335,7 +340,7 @@ public class MyServlet extends HttpServlet {
 
     private String getNestAwayStatus(String access_token) {
 
-        String away_status="";
+        String away_status = "";
 
         String urlString = "https://developer-api.nest.com/structures?auth=" + access_token;
         log.info("url=" + urlString);
@@ -445,9 +450,11 @@ public class MyServlet extends HttpServlet {
             }
 
         } catch (IOException e) {
+            error = true;
             errorResult = e.getLocalizedMessage();
             log.warning("IOException: " + errorResult);
         } catch (Exception e) {
+            error = true;
             errorResult = e.getLocalizedMessage();
             log.warning("Exception: " + errorResult);
         } finally {
@@ -456,8 +463,7 @@ public class MyServlet extends HttpServlet {
             }
         }
 
-
-
-       return away_status;
+        if (error) away_status = "Error: "+errorResult;
+        return away_status;
     }
 }
