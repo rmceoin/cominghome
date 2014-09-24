@@ -74,11 +74,10 @@ public class FenceHandling {
         prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String structure_id = prefs.getString(MainActivity.PREFS_STRUCTURE_ID, "");
         String access_token = prefs.getString(OAuthFlowApp.PREF_ACCESS_TOKEN, "");
-        boolean tellNest = prefs.getBoolean(PrefsFragment.key_tell_nest_on_arrival_home, true);
 
         if (!access_token.isEmpty()) {
             if (!structure_id.isEmpty()) {
-                BackendUtils.updateStatus(context, structure_id, "home",tellNest);
+                new StatusArrivedHome(context).execute();
             } else {
                 if (debug) Log.d(TAG, "arrived home, but no structure_id");
             }
