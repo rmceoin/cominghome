@@ -21,8 +21,7 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
+import android.os.Bundle;
 import android.util.Log;
 
 /**
@@ -34,34 +33,41 @@ public class FenceHandlingAlarm extends BroadcastReceiver {
     public final static String TAG = FenceHandlingAlarm.class.getSimpleName();
     public final static boolean debug = true;
 
-    private static long alarmStartTime;
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (debug) Log.d(TAG,"onReceive()");
+        if (debug) Log.d(TAG, "onReceive()");
+
 
         long currentTime = System.currentTimeMillis();
-        long timeElapsedSeconds = (currentTime - alarmStartTime)/1000;
+        long alarmStartTime = intent.getLongExtra("start", 0);
+        long timeElapsedSeconds = (currentTime - alarmStartTime) / 1000;
+        if (debug)
+            Log.d(TAG, "extra alarmStartTime=" + alarmStartTime + " timeElapsedSeconds=" + timeElapsedSeconds);
         if (timeElapsedSeconds < (10 * 60)) {
-            if (debug) Log.d(TAG,"not enough time has passed: "+timeElapsedSeconds+" = "+currentTime+" - "+alarmStartTime+"/1000");
+            if (debug)
+                Log.d(TAG, "not enough time has passed: " + timeElapsedSeconds + " = " + currentTime + " - " + alarmStartTime + "/1000");
             return;
         }
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        String structure_id = prefs.getString(MainActivity.PREFS_STRUCTURE_ID, "");
-        boolean tellNest = prefs.getBoolean(PrefsFragment.key_tell_nest_on_leaving_home, true);
-
-        BackendUtils.updateStatus(context, structure_id, "away", tellNest);
+        new StatusLeftHome(context).execute();
 
         CancelAlarm(context);
     }
 
     public void SetAlarm(Context context) {
-        if (debug) Log.d(TAG,"SetAlarm()");
+        if (debug) Log.d(TAG, "SetAlarm()");
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent i = new Intent(context, FenceHandlingAlarm.class);
+
+        long alarmStartTime = System.currentTimeMillis();
+
+        Bundle mBundle = new Bundle();
+        mBundle.putLong("start", alarmStartTime);
+        i.putExtras(mBundle);
         PendingIntent pi = PendingIntent.getBroadcast(context, 0, i, 0);
-        alarmStartTime=System.currentTimeMillis();
+        if (debug) Log.d(TAG, "alarmStartTime=" + alarmStartTime);
+
         am.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                 AlarmManager.INTERVAL_FIFTEEN_MINUTES,
                 AlarmManager.INTERVAL_FIFTEEN_MINUTES, pi);

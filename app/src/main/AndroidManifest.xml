@@ -2,19 +2,20 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="net.mceoin.cominghome" >
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
-<!--    <uses-permission android:name="android.permission.WAKE_LOCK" /> -->
+    <!-- <uses-permission android:name="android.permission.WAKE_LOCK" /> -->
+
 
     <!-- this is used by Google Maps API -->
     <uses-feature
         android:glEsVersion="0x00020000"
-        android:required="true"/>
+        android:required="true" />
 
     <application
         android:name=".AppController"
@@ -33,31 +34,39 @@
         </activity>
         <activity android:name=".SettingsActivity" />
         <activity android:name=".oauth.OAuthFlowApp" />
-
         <activity android:name=".HistoryList" />
-        <provider android:name="HistoryProvider" android:exported="false"
-            android:authorities="net.mceoin.cominghome.history" />
 
-        <receiver android:process=":remote" android:name=".FenceHandlingAlarm" />
+        <provider
+            android:name=".HistoryProvider"
+            android:authorities="net.mceoin.cominghome.history"
+            android:exported="false" />
 
+        <receiver
+            android:name=".FenceHandlingAlarm"
+            android:process=":remote" />
         <receiver android:name=".BootCompletedReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
+
         <service
             android:name=".LocationService"
             android:enabled="true"
             android:exported="true"
-            android:permission="com.rmceoin.whereyouare.app.permission.LOCATION">
+            android:permission="com.rmceoin.whereyouare.app.permission.LOCATION" >
         </service>
-        <service android:name=".ReceiveTransitionsIntentService" android:exported="false" />
+        <service
+            android:name=".ReceiveTransitionsIntentService"
+            android:exported="false" />
+
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyC7hSFr6Xr_tOMlp5VDhaK8x1EUG7PduGE"/>
+            android:value="AIzaSyC7hSFr6Xr_tOMlp5VDhaK8x1EUG7PduGE" />
     </application>
 
 </manifest>

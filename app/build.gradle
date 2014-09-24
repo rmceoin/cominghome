@@ -22,9 +22,10 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 //    compile 'com.google.android.gms:play-services:4.4.52'
-    compile 'com.google.android.gms:play-services:5.0.89'
 
     // Handy mirror of Volley
     // https://github.com/mcxiaoke/android-volley
+    compile 'com.google.android.gms:play-services:5.0.89'
     compile 'com.mcxiaoke.volley:library:1.0.6'
+    compile project(path: ':api', configuration: 'android-endpoints')
 }
