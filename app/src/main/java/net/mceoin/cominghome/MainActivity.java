@@ -493,6 +493,11 @@ public class MainActivity extends FragmentActivity implements
                     FenceHandling.leftHome(getApplicationContext());
                 }
                 return true;
+            case R.id.fake_left_work:
+                if ((structure_id!=null) && (!structure_id.isEmpty())) {
+                    FenceHandling.leftWork(getApplicationContext());
+                }
+                return true;
             case R.id.settings:
                 startActivity(new Intent(this,SettingsActivity.class));
                 return true;

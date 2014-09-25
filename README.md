@@ -26,7 +26,7 @@ and update
 * my_briefcase.png -- Harwen - Simple
 * home.png -- Author: Deziner Folio, http://www.dezinerfolio.com/
 
-### Installing App Engine
+### Installing Cloud Endpoints
 
-./gradlew backend:appengineUpdate
+./gradlew api:appengineUpdate
 
