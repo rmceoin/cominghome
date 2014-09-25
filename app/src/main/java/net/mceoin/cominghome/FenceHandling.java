@@ -17,12 +17,15 @@
 package net.mceoin.cominghome;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.google.android.gms.location.Geofence;
 
+import net.mceoin.cominghome.cloud.StatusArrivedHome;
 import net.mceoin.cominghome.oauth.OAuthFlowApp;
 
 import java.util.List;
@@ -113,6 +116,8 @@ public class FenceHandling {
 
         if (LocationService.isRunning(context)) {
             if (debug) Log.d(TAG,"LocationService is running");
+            Intent intent = new Intent(LocationService.START_TRACKING);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
         } else {
             if (debug) Log.d(TAG,"Starting LocationService");
             LocationService.startService();

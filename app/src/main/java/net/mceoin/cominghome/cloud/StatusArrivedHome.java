@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.mceoin.cominghome;
+package net.mceoin.cominghome.cloud;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -24,13 +24,18 @@ import android.util.Log;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 
+import net.mceoin.cominghome.HistoryUpdate;
+import net.mceoin.cominghome.Installation;
+import net.mceoin.cominghome.MainActivity;
+import net.mceoin.cominghome.NestUtils;
+import net.mceoin.cominghome.PrefsFragment;
 import net.mceoin.cominghome.api.myApi.MyApi;
 import net.mceoin.cominghome.api.myApi.model.StatusBean;
 import net.mceoin.cominghome.oauth.OAuthFlowApp;
 
 import java.io.IOException;
 
-class StatusArrivedHome extends AsyncTask<Void, Void, StatusBean> {
+public class StatusArrivedHome extends AsyncTask<Void, Void, StatusBean> {
     private static final String TAG = StatusArrivedHome.class.getSimpleName();
     private static final boolean debug = true;
 
@@ -41,7 +46,7 @@ class StatusArrivedHome extends AsyncTask<Void, Void, StatusBean> {
     private String InstallationId;
     private boolean tell_nest;
 
-    StatusArrivedHome(Context context) {
+    public StatusArrivedHome(Context context) {
         this.context = context;
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);

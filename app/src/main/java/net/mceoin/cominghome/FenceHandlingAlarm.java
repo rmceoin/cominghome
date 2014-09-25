@@ -24,6 +24,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
+import net.mceoin.cominghome.cloud.StatusLeftHome;
+
 /**
  * Wait for about 15 minutes before telling the backend or Nest that we've left home.
  * This is needed because sometimes the phone will bounce out of the area briefly.

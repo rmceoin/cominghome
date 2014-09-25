@@ -16,8 +16,10 @@
 package net.mceoin.cominghome;
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -57,10 +59,12 @@ public class LocationService extends Service implements GooglePlayServicesClient
     int secondsToSleep = 30;
     boolean runBackgroundThread;
     boolean checkinRequested = false;
-    private static final int MAXSLEEP_WHILE_NOT_MOVING = 15 * 60;
+    boolean trackingETA = false;
+    private static final int MAXSLEEP_WHILE_NOT_MOVING = 30 * 60;
     private static final int MAXSLEEP_WHILE_MOVING = 5 * 60;
 
     public static final String LOCATION_CHANGED = "net.mceoin.cominghome.LocationService.LocationChanged";
+    public static final String START_TRACKING = "net.mceoin.cominghome.LocationService.StartTracking";
 
     LocationClient mLocationClient;
 
@@ -75,6 +79,20 @@ public class LocationService extends Service implements GooglePlayServicesClient
     public LocationService() {
     }
 
+    private BroadcastReceiver mStartTrackingReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (debug) Log.d(TAG, "Need to start tracking");
+            if (backgroundThread != null) {
+                if (debug) Log.d(TAG, "interrupting background thread");
+                secondsToSleep = 30;
+                trackingETA = true;
+                backgroundThread.interrupt();
+            } else {
+                Log.e(TAG,"no background thread");
+            }
+        }
+    };
     @Override
     public void onConnected(Bundle bundle) {
         if (debug) Log.d(TAG, "onConnected()");
@@ -115,16 +133,20 @@ public class LocationService extends Service implements GooglePlayServicesClient
         startBackgroundTask();
         mLocationClient = new LocationClient(getApplicationContext(), this, this);
 //        mLocationClient.connect();
+        LocalBroadcastManager.getInstance(this).registerReceiver(mStartTrackingReceiver,
+                new IntentFilter(START_TRACKING));
+        trackingETA=true;
         return Service.START_STICKY;
     }
 
     @Override
     public void onDestroy() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mStartTrackingReceiver);
         runBackgroundThread = false;
         if (backgroundThread != null) {
             backgroundThread.interrupt();
         }
-
+        super.onDestroy();
     }
 
     Thread backgroundThread = null;
@@ -169,6 +191,7 @@ public class LocationService extends Service implements GooglePlayServicesClient
 //            provider = LocationManager.GPS_PROVIDER;
             Location location = locationManager.getLastKnownLocation(provider);
             if (mLocationClient.isConnected()) {
+                if (debug) Log.d(TAG,"mLocationClient is connected");
                 location = mLocationClient.getLastLocation();
             }
             if (debug) Log.d(TAG, "location=" + location);
