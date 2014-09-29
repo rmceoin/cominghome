@@ -498,6 +498,9 @@ public class MainActivity extends FragmentActivity implements
                     FenceHandling.leftWork(getApplicationContext());
                 }
                 return true;
+            case R.id.stop_tracking:
+                LocationService.sendTrackingStop(getApplicationContext());
+                return true;
             case R.id.settings:
                 startActivity(new Intent(this,SettingsActivity.class));
                 return true;

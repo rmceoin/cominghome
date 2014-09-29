@@ -15,11 +15,14 @@
  */
 package net.mceoin.cominghome;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -28,6 +31,9 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
+import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -42,6 +48,8 @@ public class LocationService extends Service implements GooglePlayServicesClient
         GooglePlayServicesClient.OnConnectionFailedListener {
     private static final String TAG = LocationService.class.getSimpleName();
     private static final boolean debug = true;
+
+    private static final int NOTIFICATION_TRACKING = 1;
 
     private LocationManager locationManager = null;
 
@@ -64,7 +72,10 @@ public class LocationService extends Service implements GooglePlayServicesClient
     private static final int MAXSLEEP_WHILE_MOVING = 5 * 60;
 
     public static final String LOCATION_CHANGED = "net.mceoin.cominghome.LocationService.LocationChanged";
-    public static final String START_TRACKING = "net.mceoin.cominghome.LocationService.StartTracking";
+    public static final String TRACKING = "net.mceoin.cominghome.LocationService.Tracking";
+    public static final String TRACKING_TYPE = "net.mceoin.cominghome.LocationService.TrackingType";
+    public static final String TRACKING_START = "net.mceoin.cominghome.LocationService.TrackingStart";
+    public static final String TRACKING_STOP = "net.mceoin.cominghome.LocationService.TrackingStop";
 
     LocationClient mLocationClient;
 
@@ -79,17 +90,31 @@ public class LocationService extends Service implements GooglePlayServicesClient
     public LocationService() {
     }
 
-    private BroadcastReceiver mStartTrackingReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver mTrackingReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (debug) Log.d(TAG, "Need to start tracking");
-            if (backgroundThread != null) {
-                if (debug) Log.d(TAG, "interrupting background thread");
-                secondsToSleep = 30;
-                trackingETA = true;
-                backgroundThread.interrupt();
-            } else {
-                Log.e(TAG,"no background thread");
+            if (debug) Log.d(TAG, "Tracking receiver");
+            String type = intent.getStringExtra (TRACKING_TYPE);
+            if (type.equals(TRACKING_START)) {
+                if (backgroundThread != null) {
+                    if (debug) Log.d(TAG, "interrupting background thread");
+                    secondsToSleep = 30;
+                    trackingETA = true;
+                    backgroundThread.interrupt();
+                    sendTrackingNotification(context);
+                } else {
+                    Log.e(TAG, "no background thread");
+                }
+            } else if (type.equals(TRACKING_STOP)) {
+                if (backgroundThread != null) {
+                    if (debug) Log.d(TAG, "interrupting background thread");
+                    secondsToSleep = 12*60*60;
+                    trackingETA = false;
+                    backgroundThread.interrupt();
+                    clearNotification(context);
+                } else {
+                    if (debug) Log.d(TAG, "no background thread");
+                }
             }
         }
     };
@@ -133,15 +158,15 @@ public class LocationService extends Service implements GooglePlayServicesClient
         startBackgroundTask();
         mLocationClient = new LocationClient(getApplicationContext(), this, this);
 //        mLocationClient.connect();
-        LocalBroadcastManager.getInstance(this).registerReceiver(mStartTrackingReceiver,
-                new IntentFilter(START_TRACKING));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mTrackingReceiver,
+                new IntentFilter(TRACKING));
         trackingETA=true;
         return Service.START_STICKY;
     }
 
     @Override
     public void onDestroy() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mStartTrackingReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mTrackingReceiver);
         runBackgroundThread = false;
         if (backgroundThread != null) {
             backgroundThread.interrupt();
@@ -328,17 +353,6 @@ public class LocationService extends Service implements GooglePlayServicesClient
 
     }
 
-    void checkin() {
-        if (debug) Log.d(TAG, "checkin()");
-        if (backgroundThread != null) {
-            if (debug) Log.d(TAG, "interrupting background thread");
-            secondsToSleep = 30;
-            checkinRequested = true;
-            backgroundThread.interrupt();
-        }
-    }
-
-
     private boolean servicesConnected() {
         // Check that Google Play services is available
         int resultCode =
@@ -355,6 +369,73 @@ public class LocationService extends Service implements GooglePlayServicesClient
             if (debug) Log.d(TAG,
                     "Google Play services is not available.");
             return false;
+        }
+    }
+
+    /**
+     * Posts a notification in the notification bar when a transition is detected.
+     * If the user clicks the notification, control goes to the main Activity.
+     *
+     */
+    public static void sendTrackingNotification(Context context) {
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        boolean notifications = prefs.getBoolean(MainActivity.PREFS_NOTIFICATIONS, true);
+
+        if (!notifications) {
+            if (debug) Log.d(TAG,"notifications are turned off");
+            return;
+        }
+
+        // Create an explicit content Intent that starts the main Activity
+        Intent notificationIntent =
+                new Intent(context, MainActivity.class);
+
+        // Construct a task stack
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+
+        // Adds the main Activity to the task stack as the parent
+        stackBuilder.addParentStack(MainActivity.class);
+
+        // Push the content Intent onto the stack
+        stackBuilder.addNextIntent(notificationIntent);
+
+        // Get a PendingIntent containing the entire back stack
+        PendingIntent notificationPendingIntent =
+                stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        // Get a notification builder that's compatible with platform versions >= 4
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
+
+        // Set the notification contents
+        builder.setSmallIcon(R.drawable.home)
+                .setContentTitle(context.getString(R.string.tracking_notification_title))
+                .setOngoing(true)
+                .setContentText(context.getString(R.string.tracking_notification_text))
+                .setContentIntent(notificationPendingIntent);
+
+        // Get an instance of the Notification manager
+        NotificationManager mNotificationManager =
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        // Issue the notification
+        mNotificationManager.notify(NOTIFICATION_TRACKING, builder.build());
+    }
+
+    private static void clearNotification(Context context) {
+
+        // look up the notification manager service
+        NotificationManager mNotificationManager = (NotificationManager) context
+                .getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotificationManager.cancel(NOTIFICATION_TRACKING);
+    }
+
+    public static void sendTrackingStop(Context context) {
+        if (LocationService.isRunning(context)) {
+            if (debug) Log.d(TAG, "LocationService is running, ensure tracking is stopped");
+            Intent intent = new Intent(LocationService.TRACKING);
+            intent.putExtra(LocationService.TRACKING_TYPE, LocationService.TRACKING_STOP);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
         }
     }
 }

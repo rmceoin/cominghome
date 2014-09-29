@@ -1,8 +1,0 @@
-package net.mceoin.cominghome;
-
-/**
- * Copy this file to BackendConstants.java and update with your App Engine hostname.
- */
-public class BackendConstants {
-    public final static String appEngineHost="coming-home-666.appspot.com";
-}
