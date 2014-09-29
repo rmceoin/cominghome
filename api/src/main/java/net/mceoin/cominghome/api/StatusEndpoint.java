@@ -123,6 +123,21 @@ public class StatusEndpoint {
         return response;
     }
 
+    @ApiMethod(name = "trackETA")
+    public StatusBean trackETA(@Named("InstallationID") String InstallationID,
+                               @Named("access_token") String access_token,
+                               @Named("structure_id") String structure_id,
+                               @Named("latitude") double latitude,
+                               @Named("longitude") double longitude) {
+        StatusBean response = new StatusBean();
+
+        response.setSuccess(true);
+        log.info("track ETA: " + latitude + ", " + longitude);
+        logEvent(InstallationID, structure_id, "track ETA");
+
+        return response;
+    }
+
     private void logEvent(String installation_id, String structure_id, String event_msg) {
         Date date = new Date();
         Entity event = new Entity(KIND_EVENT);

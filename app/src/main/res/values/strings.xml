@@ -44,6 +44,11 @@
     </string>
     <string name="nest_transition_notification_text">Coming Home Update</string>
 
+    <string name="tracking_notification_title">Tracking ETA to home</string>
+    <string name="tracking_notification_text">Coming Home</string>
+
+    <string name="stop_tracking">Stop tracking ETA</string>
+
     <string name="history">History</string>
     <string name="delete">Delete</string>
     <string name="delete_all">Delete All</string>

@@ -11,6 +11,9 @@
         android:id="@+id/fake_left_work"
         android:title="@string/fake_left_work" />
     <item
+        android:id="@+id/stop_tracking"
+        android:title="@string/stop_tracking" />
+    <item
         android:id="@+id/settings"
         android:title="@string/settings" />
     <item

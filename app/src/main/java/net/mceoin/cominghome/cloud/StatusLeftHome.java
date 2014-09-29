@@ -47,7 +47,6 @@ public class StatusLeftHome extends AsyncTask<Void, Void, StatusBean> {
     private boolean tell_nest;
 
     public StatusLeftHome(Context context) {
-        if (debug) Log.d(TAG,"instanciated");
         this.context = context;
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);

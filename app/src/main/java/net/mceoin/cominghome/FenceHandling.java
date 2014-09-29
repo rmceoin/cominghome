@@ -88,6 +88,12 @@ public class FenceHandling {
         } else {
             Log.e(TAG, "no access_token");
         }
+        if (LocationService.isRunning(context)) {
+            if (debug) Log.d(TAG, "LocationService is running, ensure tracking is stopped");
+            Intent intent = new Intent(LocationService.TRACKING);
+            intent.putExtra(LocationService.TRACKING_TYPE, LocationService.TRACKING_STOP);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+        }
     }
 
     public static void leftHome(Context context) {
@@ -116,7 +122,8 @@ public class FenceHandling {
 
         if (LocationService.isRunning(context)) {
             if (debug) Log.d(TAG,"LocationService is running");
-            Intent intent = new Intent(LocationService.START_TRACKING);
+            Intent intent = new Intent(LocationService.TRACKING);
+            intent.putExtra(LocationService.TRACKING_TYPE,LocationService.TRACKING_START);
             LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
         } else {
             if (debug) Log.d(TAG,"Starting LocationService");
