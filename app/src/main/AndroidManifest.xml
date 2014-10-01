@@ -41,6 +41,11 @@
             android:authorities="net.mceoin.cominghome.history"
             android:exported="false" />
 
+        <provider
+            android:name=".timehome.TimeHomeProvider"
+            android:authorities="net.mceoin.cominghome.timehome"
+            android:exported="false" />
+
         <receiver
             android:name=".FenceHandlingAlarm"
             android:process=":remote" />

@@ -128,13 +128,17 @@ public class StatusEndpoint {
                                @Named("access_token") String access_token,
                                @Named("structure_id") String structure_id,
                                @Named("latitude") double latitude,
-                               @Named("longitude") double longitude) {
+                               @Named("longitude") double longitude,
+                               @Named("home_latitude") double home_latitude,
+                               @Named("home_longitude") double home_longitude) {
         StatusBean response = new StatusBean();
 
         response.setSuccess(true);
-        log.info("track ETA: " + latitude + ", " + longitude);
+        log.info("track ETA: " + latitude + ", " + longitude +" : " + home_latitude +
+            ", " + home_longitude);
         logEvent(InstallationID, structure_id, "track ETA");
 
+        response.setMessage("Success");
         return response;
     }
 
