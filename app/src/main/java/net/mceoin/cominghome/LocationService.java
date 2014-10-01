@@ -42,6 +42,8 @@ import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
 
+import net.mceoin.cominghome.cloud.trackETA;
+
 import java.util.List;
 
 public class LocationService extends Service implements GooglePlayServicesClient.ConnectionCallbacks,
@@ -68,6 +70,8 @@ public class LocationService extends Service implements GooglePlayServicesClient
     boolean runBackgroundThread;
     boolean checkinRequested = false;
     boolean trackingETA = false;
+    private long lastTimeTrackETA;
+
     private static final int MAXSLEEP_WHILE_NOT_MOVING = 30 * 60;
     private static final int MAXSLEEP_WHILE_MOVING = 5 * 60;
 
@@ -338,6 +342,15 @@ public class LocationService extends Service implements GooglePlayServicesClient
         intent.putExtra("latitude", location.getLatitude());
         intent.putExtra("longitude", location.getLongitude());
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+
+        long currentTimeMillis=System.currentTimeMillis();
+        long timeSinceLastUpdate=currentTimeMillis-lastTimeTrackETA;
+        // make sure it's been at least 2 minutes since the last update before sending up to the cloud
+        if (timeSinceLastUpdate > (2*60*1000)) {
+            new trackETA(getApplicationContext(), location.getLatitude(), location.getLongitude()).execute();
+        }
+        lastTimeTrackETA=currentTimeMillis;
+        HistoryUpdate.add(getApplicationContext(),"location changed: latitude="+location.getLatitude());
     }
 
     private void initLocationManager() {

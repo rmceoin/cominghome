@@ -82,6 +82,7 @@ public class MainActivity extends FragmentActivity implements
     public static final String PREFS_LAST_MAP_LATITUDE = "last_map_latitude";
     public static final String PREFS_LAST_MAP_LONGITUDE = "last_map_longitude";
     public static final String PREFS_NOTIFICATIONS = "notifications";
+    public static final String PREFS_TIME_LEFT_WORK = "time_left_work";
 
     /**
      * Request code for auto Google Play Services error resolution.

@@ -27,6 +27,7 @@ import com.google.android.gms.location.Geofence;
 
 import net.mceoin.cominghome.cloud.StatusArrivedHome;
 import net.mceoin.cominghome.oauth.OAuthFlowApp;
+import net.mceoin.cominghome.timehome.TimeHomeUpdate;
 
 import java.util.List;
 
@@ -77,6 +78,20 @@ public class FenceHandling {
         prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String structure_id = prefs.getString(MainActivity.PREFS_STRUCTURE_ID, "");
         String access_token = prefs.getString(OAuthFlowApp.PREF_ACCESS_TOKEN, "");
+        long time_left_work = prefs.getLong(MainActivity.PREFS_TIME_LEFT_WORK, 0);
+
+        if (time_left_work>0) {
+            long currentTimeMillis=System.currentTimeMillis();
+            long timeFromWorkToHome = (currentTimeMillis - time_left_work) / 1000;
+
+            if ((timeFromWorkToHome < (4 * 60*60)) && (timeFromWorkToHome > (5 * 60))) {
+                // only keep track if it took less than 4 hours and more than 5 minutes
+                TimeHomeUpdate.add(context, timeFromWorkToHome);
+            } else {
+                if (debug) Log.d(TAG, "too much or not enough time: "+timeFromWorkToHome);
+            }
+
+        }
 
         if (!access_token.isEmpty()) {
             if (!structure_id.isEmpty()) {
@@ -119,6 +134,11 @@ public class FenceHandling {
         if (debug) Log.d(TAG, "left work");
 
         HistoryUpdate.add(context,"Geofence left work");
+
+        prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        long currentTimeMillis=System.currentTimeMillis();
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putLong(MainActivity.PREFS_TIME_LEFT_WORK, currentTimeMillis);
 
         if (LocationService.isRunning(context)) {
             if (debug) Log.d(TAG,"LocationService is running");
