@@ -25,6 +25,7 @@ public class PrefsFragment extends PreferenceFragment {
 
     public static final String PREFERENCE_HISTORY_ENTRIES = "history_entries";
     public static final String PREFERENCE_TIMEHOME_ENTRIES = "timehome_entries";
+    public static final String PREFERENCE_TRACK_ETA = "track_eta";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

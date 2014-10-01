@@ -140,14 +140,18 @@ public class FenceHandling {
         SharedPreferences.Editor editor = prefs.edit();
         editor.putLong(MainActivity.PREFS_TIME_LEFT_WORK, currentTimeMillis);
 
-        if (LocationService.isRunning(context)) {
-            if (debug) Log.d(TAG,"LocationService is running");
-            Intent intent = new Intent(LocationService.TRACKING);
-            intent.putExtra(LocationService.TRACKING_TYPE,LocationService.TRACKING_START);
-            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-        } else {
-            if (debug) Log.d(TAG,"Starting LocationService");
-            LocationService.startService();
+        boolean trackEta = prefs.getBoolean(PrefsFragment.PREFERENCE_TRACK_ETA, false);
+
+        if (trackEta) {
+            if (LocationService.isRunning(context)) {
+                if (debug) Log.d(TAG, "LocationService is running");
+                Intent intent = new Intent(LocationService.TRACKING);
+                intent.putExtra(LocationService.TRACKING_TYPE, LocationService.TRACKING_START);
+                LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+            } else {
+                if (debug) Log.d(TAG, "Starting LocationService");
+                LocationService.startService();
+            }
         }
     }
 }
