@@ -28,8 +28,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
@@ -40,7 +38,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -66,7 +63,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public class MainActivity extends FragmentActivity implements
         GooglePlayServicesClient.ConnectionCallbacks,
@@ -109,16 +105,13 @@ public class MainActivity extends FragmentActivity implements
     Button getNestInfo;
     Button connectButton;
     TextView structureNameText;
-//    Button sendETAButton;
     TextView awayStatusText;
-//    EditText ETAminutes;
     Button atHomeButton;
     Button atWorkButton;
 
     public static String access_token = "";
     public static String structure_id = "";
     String structure_name = "";
-    String trip_id = "";
     String away_status = "";
 
     LocationClient mLocationClient;
@@ -127,10 +120,6 @@ public class MainActivity extends FragmentActivity implements
     GoogleMap map;
     Map<String, Marker> mapMarkers = new HashMap<String, Marker>();
     Map<String, Circle> mapCircles = new HashMap<String, Circle>();
-
-//    private static final long GEOFENCE_EXPIRATION_IN_HOURS = 12;
-//    private static final long GEOFENCE_EXPIRATION_IN_MILLISECONDS =
-//            GEOFENCE_EXPIRATION_IN_HOURS * DateUtils.HOUR_IN_MILLIS;
 
     public static final String FENCE_HOME = "home";
     public static final String FENCE_WORK = "work";
@@ -147,52 +136,6 @@ public class MainActivity extends FragmentActivity implements
 
     // Add geofences handler
     private GeofenceRequester mGeofenceRequester;
-
-    // Store the current request
-//    private GeofenceUtils.REQUEST_TYPE mRequestType;
-
-
-    Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            if (debug) {
-                Log.d(TAG, "handling stuff");
-            }
-            Bundle b = msg.getData();
-            String msgType = b.getString("type");
-
-            if (msgType.equals(NestUtils.MSG_STRUCTURES)) {
-                structure_id = b.getString("structure_id");
-                structure_name = b.getString("structure_name");
-                away_status = b.getString("away_status");
-                if (debug) {
-                    Log.d(TAG, "structure_id=" + structure_id);
-                    Log.d(TAG, "structure_name=" + structure_name);
-                    Log.d(TAG, "away_status=" + away_status);
-                }
-                SharedPreferences.Editor editor = prefs.edit();
-                editor.putString(PREFS_STRUCTURE_ID, structure_id);
-                editor.putString(PREFS_STRUCTURE_NAME, structure_name);
-                editor.apply();
-                structureNameText.setText(structure_name);
-                awayStatusText.setText(away_status);
-//                sendETAButton.setEnabled(true);
-            } else if (msgType.equals(NestUtils.MSG_GET_OTHERS)) {
-                if (debug) Log.d(TAG,"message get others");
-                String result = b.getString("result");
-                if (debug) Log.d(TAG,"result="+result);
-            } else {
-                Log.e(TAG,"unknown handle message: "+msgType);
-            }
-        }
-    };
-
-    /*
- * Define a request code to send to Google Play services
- * This code is returned in Activity.onActivityResult
- */
-//    private final static int
-//            CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 
     public static class ErrorDialogFragment extends DialogFragment {
         // Global field to contain the error dialog
@@ -279,12 +222,12 @@ public class MainActivity extends FragmentActivity implements
         map = ((MapFragment) getFragmentManager()
                 .findFragmentById(R.id.map)).getMap();
 
-        if (map!=null) {
+        if (map != null) {
             map.setMyLocationEnabled(true);
 
-            float lastLatitude=prefs.getFloat(PREFS_LAST_MAP_LATITUDE,0);
-            float lastLongitude=prefs.getFloat(PREFS_LAST_MAP_LONGITUDE,0);
-            if ((lastLatitude!=0) && (lastLongitude!=0)) {
+            float lastLatitude = prefs.getFloat(PREFS_LAST_MAP_LATITUDE, 0);
+            float lastLongitude = prefs.getFloat(PREFS_LAST_MAP_LONGITUDE, 0);
+            if ((lastLatitude != 0) && (lastLongitude != 0)) {
                 LatLng current = new LatLng(lastLatitude, lastLongitude);
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(current, 13));
             }
@@ -299,7 +242,7 @@ public class MainActivity extends FragmentActivity implements
         atHomeButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
                 homeGeofence = updateGeofenceLocation(FENCE_HOME);
-                if (homeGeofence!=null) updateGeofences();
+                if (homeGeofence != null) updateGeofences();
             }
         });
 
@@ -307,7 +250,7 @@ public class MainActivity extends FragmentActivity implements
         atWorkButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
                 workGeofence = updateGeofenceLocation(FENCE_WORK);
-                if (workGeofence!=null) updateGeofences();
+                if (workGeofence != null) updateGeofences();
             }
         });
         // Instantiate a Geofence requester
@@ -337,13 +280,13 @@ public class MainActivity extends FragmentActivity implements
     private void loadFences() {
 
         homeGeofence = mGeofenceStorage.getGeofence(FENCE_HOME);
-        if (homeGeofence!=null) {
-            updateMarker(homeGeofence.getLatitude(),homeGeofence.getLongitude(),FENCE_HOME,false);
+        if (homeGeofence != null) {
+            updateMarker(homeGeofence.getLatitude(), homeGeofence.getLongitude(), FENCE_HOME, false);
             mCurrentGeofences.add(homeGeofence.toGeofence());
         }
         workGeofence = mGeofenceStorage.getGeofence(FENCE_WORK);
-        if (workGeofence!=null) {
-            updateMarker(workGeofence.getLatitude(),workGeofence.getLongitude(),FENCE_WORK,false);
+        if (workGeofence != null) {
+            updateMarker(workGeofence.getLatitude(), workGeofence.getLongitude(), FENCE_WORK, false);
             mCurrentGeofences.add(workGeofence.toGeofence());
         }
 
@@ -401,10 +344,10 @@ public class MainActivity extends FragmentActivity implements
             marker.setPosition(current);
 
             circle = mapCircles.get(geofenceId);
-            if (circle!=null) {
+            if (circle != null) {
                 circle.setCenter(current);
             } else {
-                Log.e(TAG,"missing circle for "+geofenceId);
+                Log.e(TAG, "missing circle for " + geofenceId);
             }
         } else {
             int iconId;
@@ -413,7 +356,7 @@ public class MainActivity extends FragmentActivity implements
             } else {
                 iconId = R.drawable.my_briefcase;
             }
-            if (map!=null) {
+            if (map != null) {
 
                 CircleOptions circleOptions = new CircleOptions()
                         .center(current)
@@ -429,7 +372,7 @@ public class MainActivity extends FragmentActivity implements
                 mapMarkers.put(geofenceId, marker);
             }
         }
-        if ((move)&&(map!=null)) map.moveCamera(CameraUpdateFactory.newLatLngZoom(current, 13));
+        if ((move) && (map != null)) map.moveCamera(CameraUpdateFactory.newLatLngZoom(current, 13));
     }
 
     private void updateGeofences() {
@@ -471,17 +414,17 @@ public class MainActivity extends FragmentActivity implements
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.fake_arrived:
-                if ((structure_id!=null) && (!structure_id.isEmpty())) {
+                if ((structure_id != null) && (!structure_id.isEmpty())) {
                     FenceHandling.arrivedHome(getApplicationContext());
                 }
                 return true;
             case R.id.fake_left:
-                if ((structure_id!=null) && (!structure_id.isEmpty())) {
+                if ((structure_id != null) && (!structure_id.isEmpty())) {
                     FenceHandling.leftHome(getApplicationContext());
                 }
                 return true;
             case R.id.fake_left_work:
-                if ((structure_id!=null) && (!structure_id.isEmpty())) {
+                if ((structure_id != null) && (!structure_id.isEmpty())) {
                     FenceHandling.leftWork(getApplicationContext());
                 }
                 return true;
@@ -489,15 +432,16 @@ public class MainActivity extends FragmentActivity implements
                 LocationService.sendTrackingStop(getApplicationContext());
                 return true;
             case R.id.settings:
-                startActivity(new Intent(this,SettingsActivity.class));
+                startActivity(new Intent(this, SettingsActivity.class));
                 return true;
             case R.id.history:
-                startActivity(new Intent(this,HistoryList.class));
+                startActivity(new Intent(this, HistoryList.class));
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
+
     /**
      * Called when the Activity is made visible.
      * A connection to Play Services need to be initiated as
@@ -551,15 +495,16 @@ public class MainActivity extends FragmentActivity implements
     protected void onPause() {
         super.onPause();
 
-        if (map!=null) {
+        if (map != null) {
             SharedPreferences.Editor editor = prefs.edit();
 
-            CameraPosition cameraPosition=map.getCameraPosition();
-            editor.putFloat(PREFS_LAST_MAP_LATITUDE,(float)cameraPosition.target.latitude);
+            CameraPosition cameraPosition = map.getCameraPosition();
+            editor.putFloat(PREFS_LAST_MAP_LATITUDE, (float) cameraPosition.target.latitude);
             editor.putFloat(PREFS_LAST_MAP_LONGITUDE, (float) cameraPosition.target.longitude);
             editor.apply();
         }
     }
+
     /**
      * Called when activity gets invisible. Connection to Play Services needs to
      * be disconnected as soon as an activity is invisible.
@@ -678,14 +623,14 @@ public class MainActivity extends FragmentActivity implements
         // If Google Play services is available
         if (ConnectionResult.SUCCESS == resultCode) {
 
-            int v=0;
+            int v = 0;
             try {
                 v = getPackageManager().getPackageInfo("com.google.android.gms", 0).versionCode;
             } catch (PackageManager.NameNotFoundException e) {
                 e.printStackTrace();
             }
-            if (debug) Log.d(TAG, "Google Play services available: client "+
-                    GooglePlayServicesUtil.GOOGLE_PLAY_SERVICES_VERSION_CODE + " package "+v);
+            if (debug) Log.d(TAG, "Google Play services available: client " +
+                    GooglePlayServicesUtil.GOOGLE_PLAY_SERVICES_VERSION_CODE + " package " + v);
             return true;
 
             // Google Play services was not available for some reason
