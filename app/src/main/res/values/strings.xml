@@ -1,7 +1,8 @@
 <resources>
     <string name="app_name">Coming Home</string>
     <string name="pincode">Pincode</string>
-    <string name="fillin">Login to the Nest site below and then click the accept button.  Then fill in the Pincode here.  You may have to scroll right to see the whole 8 character code.</string>
+    <string name="use_pincode">Use Pincode</string>
+    <string name="fillin">Login to the Nest site below and click the accept button.  Then fill in the Pincode here.  You may have to scroll right to see the whole 8 character code.</string>
 
     <string name="geofence_transition_entered">Entered</string>
     <string name="geofence_transition_error_detail">
