@@ -16,7 +16,18 @@
 package net.mceoin.cominghome;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.widget.Toast;
+
+import net.mceoin.cominghome.oauth.OAuthFlowApp;
 
 public class SettingsActivity extends Activity {
 
@@ -28,4 +39,44 @@ public class SettingsActivity extends Activity {
                 new PrefsFragment()).commit();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.settings, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.forget_nest:
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage(R.string.forget_nest_confirmation_msg)
+                        .setTitle(R.string.forget_nest);
+                AlertDialog dialog = builder.create();
+                dialog.setButton(DialogInterface.BUTTON_POSITIVE, getString(android.R.string.yes), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        forgetNest(getApplicationContext());
+                        Toast.makeText(getApplicationContext(), getString(R.string.forgotten), Toast.LENGTH_SHORT).show();
+                    }
+                });
+                dialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(android.R.string.no), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+                dialog.show();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    public static void forgetNest(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(OAuthFlowApp.PREF_ACCESS_TOKEN, "");
+        editor.apply();
+    }
 }
