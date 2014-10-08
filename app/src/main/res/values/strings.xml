@@ -38,6 +38,9 @@
     <string name="fake_arrived">Fake Arrived</string>
     <string name="settings">Settings</string>
     <string name="about">About</string>
+    <string name="forget_nest">Forget Nest</string>
+    <string name="forget_nest_confirmation_msg">Are you sure you want to forget access to Nest?</string>
+    <string name="forgotten">Forgotten</string>
 
     <string name="nest_transition_notification_title">
         Nest set to %1$s

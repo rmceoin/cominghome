@@ -108,11 +108,10 @@ public class MainActivity extends FragmentActivity implements
     public static SharedPreferences prefs;
     Button getNestInfo;
     Button connectButton;
-    Button forgetButton;
     TextView structureNameText;
-    Button sendETAButton;
+//    Button sendETAButton;
     TextView awayStatusText;
-    EditText ETAminutes;
+//    EditText ETAminutes;
     Button atHomeButton;
     Button atWorkButton;
 
@@ -177,7 +176,7 @@ public class MainActivity extends FragmentActivity implements
                 editor.apply();
                 structureNameText.setText(structure_name);
                 awayStatusText.setText(away_status);
-                sendETAButton.setEnabled(true);
+//                sendETAButton.setEnabled(true);
             } else if (msgType.equals(NestUtils.MSG_GET_OTHERS)) {
                 if (debug) Log.d(TAG,"message get others");
                 String result = b.getString("result");
@@ -242,20 +241,6 @@ public class MainActivity extends FragmentActivity implements
                 startActivity(new Intent().setClass(arg0.getContext(), OAuthFlowApp.class));
             }
         });
-        forgetButton = (Button) findViewById(R.id.buttonForget);
-        forgetButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View arg0) {
-                SharedPreferences.Editor editor = prefs.edit();
-                editor.putString(OAuthFlowApp.PREF_ACCESS_TOKEN, "");
-                editor.apply();
-                access_token = "";
-                connectButton.setEnabled(true);
-                connectButton.setVisibility(View.VISIBLE);
-                forgetButton.setEnabled(false);
-                getNestInfo.setEnabled(false);
-            }
-        });
-
 
         getNestInfo = (Button) findViewById(R.id.buttonGetNestInfo);
         getNestInfo.setOnClickListener(new View.OnClickListener() {
@@ -268,6 +253,7 @@ public class MainActivity extends FragmentActivity implements
         structureNameText = (TextView) findViewById(R.id.structure_name);
         structureNameText.setText(structure_name);
 
+/*
         sendETAButton = (Button) findViewById(R.id.buttonSendETA);
         sendETAButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
@@ -279,6 +265,7 @@ public class MainActivity extends FragmentActivity implements
                 NestUtils.sendETA(access_token, handler, structure_id, trip_id, minutes);
             }
         });
+*/
         awayStatusText = (TextView) findViewById(R.id.away_status);
 
         if (away_status.isEmpty()) {
@@ -286,7 +273,6 @@ public class MainActivity extends FragmentActivity implements
         } else {
             awayStatusText.setText(away_status);
         }
-        ETAminutes = (EditText) findViewById(R.id.ETAminutes);
 
         playServicesConnected();
 
@@ -543,23 +529,22 @@ public class MainActivity extends FragmentActivity implements
         if (access_token.isEmpty()) {
             connectButton.setEnabled(true);
             connectButton.setVisibility(View.VISIBLE);
-            forgetButton.setEnabled(false);
             getNestInfo.setEnabled(false);
             structureNameText.setText("");
         } else {
             connectButton.setEnabled(false);
             connectButton.setVisibility(View.GONE);
-            forgetButton.setEnabled(true);
             getNestInfo.setEnabled(true);
         }
         structure_id = prefs.getString(PREFS_STRUCTURE_ID, "");
         structure_name = prefs.getString(PREFS_STRUCTURE_NAME, "");
+/*
         if (structure_id.isEmpty()) {
             sendETAButton.setEnabled(false);
         } else {
             sendETAButton.setEnabled(true);
         }
-//        BackendUtils.updateStatus(getApplicationContext(), structure_id, away_status,false);
+*/
     }
 
     @Override
