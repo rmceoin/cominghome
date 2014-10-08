@@ -34,6 +34,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONObject;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -57,6 +58,7 @@ public class OAuthFlowApp extends Activity {
     public static final String PREF_ACCESS_TOKEN="access_token";
     public static final String PREF_EXPIRES_IN="expires_in";
 
+    @SuppressLint("SetJavaScriptEnabled")
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,7 +79,13 @@ public class OAuthFlowApp extends Activity {
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setLoadWithOverviewMode(true);
         webView.getSettings().setUseWideViewPort(false);
-        webView.loadUrl(Constants.AUTHORIZE_URL);
+
+        try {
+            webView.loadUrl(Constants.AUTHORIZE_URL);
+        } catch (Exception e){
+            e.printStackTrace();
+            Toast.makeText(this, "Failed", Toast.LENGTH_LONG).show();
+        }
 
     }
 

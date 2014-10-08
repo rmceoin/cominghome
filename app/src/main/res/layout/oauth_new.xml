@@ -9,14 +9,6 @@
     android:useDefaultMargins="true"
     tools:context=".oauth.OAuthFlowApp">
 
-
-    <Button
-        android:visibility="gone"
-        android:id="@+id/btn_launch_oauth"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Launch Nest Auth" />
-
     <TextView
         android:id="@+id/response_code"
         android:layout_width="wrap_content"
@@ -41,13 +33,15 @@
             android:id="@+id/btn_use_pincode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:text="Use Pincode" />
+            android:layout_gravity="end"
+            android:text="@string/use_pincode" />
     </LinearLayout>
 
     <WebView
         android:id="@+id/webView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-/>
+>
+        <requestFocus />
+        </WebView>
 </LinearLayout>
