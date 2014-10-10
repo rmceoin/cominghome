@@ -6,7 +6,8 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.google.appengine:gradle-appengine-plugin:1.9.10'
+        classpath 'com.google.appengine:gradle-appengine-plugin:1.9.12'
+        classpath 'org.codehaus.groovy:groovy-all:2.3.7'
     }
 }
 
@@ -18,15 +19,15 @@ apply plugin: 'java'
 apply plugin: 'war'
 apply plugin: 'appengine'
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
+//sourceCompatibility = 1.7
+//targetCompatibility = 1.7
 
 dependencies {
-  appengineSdk 'com.google.appengine:appengine-java-sdk:1.9.10'
-  compile 'com.google.appengine:appengine-endpoints:1.9.10'
-  compile 'com.google.appengine:appengine-endpoints-deps:1.9.10'
+  appengineSdk 'com.google.appengine:appengine-java-sdk:1.9.13'
+  compile 'com.google.appengine:appengine-endpoints:1.9.13'
+  compile 'com.google.appengine:appengine-endpoints-deps:1.9.13'
   compile 'javax.servlet:servlet-api:2.5'
-  compile 'org.json:json:+'
+  compile 'org.json:json:20140107'
 }
 
 appengine {
