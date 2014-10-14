@@ -25,6 +25,7 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Iterator;
+import java.util.Random;
 import java.util.logging.Logger;
 
 /**
@@ -160,6 +161,24 @@ public class NestUtil {
     }
 
     public static String getNestAwayStatus(String access_token) {
+        String result = getNestAwayStatusCall(access_token);
+
+        if (result.contains("Error: Timeout")) {
+            try {
+                Random randomGenerator = new Random();
+                int seconds = 5 + randomGenerator.nextInt(10);
+                log.info("retry in "+seconds+" seconds");
+                Thread.sleep(seconds*1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            result = getNestAwayStatusCall(access_token);
+        }
+
+        return result;
+    }
+
+    private static String getNestAwayStatusCall(String access_token) {
 
         String away_status = "";
 
