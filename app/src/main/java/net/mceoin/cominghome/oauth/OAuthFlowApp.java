@@ -41,6 +41,8 @@ import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.webkit.WebView;
@@ -64,6 +66,20 @@ public class OAuthFlowApp extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.oauth_new);
         this.prefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+        EditText editPincode = (EditText) findViewById(R.id.editPincode);
+        editPincode.addTextChangedListener(new TextWatcher(){
+            public void afterTextChanged(Editable s) {
+                Button usePincode = (Button) findViewById(R.id.btn_use_pincode);
+                if (s.length()==8) {
+                    usePincode.setEnabled(true);
+                } else {
+                    usePincode.setEnabled(false);
+                }
+            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after){}
+            public void onTextChanged(CharSequence s, int start, int before, int count){}
+        });
 
         Button usePincode = (Button) findViewById(R.id.btn_use_pincode);
         usePincode.setOnClickListener(new View.OnClickListener() {

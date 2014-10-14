@@ -3,8 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:columnCount="5"
-    android:columnOrderPreserved="false"
     android:orientation="vertical"
     android:useDefaultMargins="true"
     tools:context=".oauth.OAuthFlowApp">
@@ -27,21 +25,23 @@
             android:layout_height="wrap_content"
             android:ems="8"
             android:hint="@string/pincode"
-            android:inputType="textShortMessage|textCapCharacters|textNoSuggestions" />
+            android:inputType="textShortMessage|textCapCharacters|textNoSuggestions"
+            android:maxLength="8" />
 
         <Button
             android:id="@+id/btn_use_pincode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
+            android:enabled="false"
             android:text="@string/use_pincode" />
     </LinearLayout>
 
     <WebView
         android:id="@+id/webView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
->
+        android:layout_height="match_parent">
+
         <requestFocus />
-        </WebView>
+    </WebView>
 </LinearLayout>
