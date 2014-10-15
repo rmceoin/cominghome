@@ -16,6 +16,7 @@
 package net.mceoin.cominghome;
 
 import android.app.ActivityManager;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -437,9 +438,30 @@ public class MainActivity extends FragmentActivity implements
             case R.id.history:
                 startActivity(new Intent(this, HistoryList.class));
                 return true;
+            case R.id.about_menu:
+                showAbout();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    protected void showAbout() {
+        // Inflate the about message contents
+        View messageView = getLayoutInflater().inflate(R.layout.about, null, false);
+
+        // When linking text, force to always use default color. This works
+        // around a pressed color state bug.
+        TextView textView = (TextView) messageView.findViewById(R.id.about_credits);
+        int defaultColor = textView.getTextColors().getDefaultColor();
+        textView.setTextColor(defaultColor);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setIcon(R.drawable.home);
+        builder.setTitle(R.string.app_name);
+        builder.setView(messageView);
+        builder.create();
+        builder.show();
     }
 
     /**

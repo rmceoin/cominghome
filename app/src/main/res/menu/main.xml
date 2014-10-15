@@ -20,6 +20,6 @@
         android:id="@+id/history"
         android:title="@string/history" />
     <item
-        android:id="@+id/help"
+        android:id="@+id/about_menu"
         android:title="@string/about" />
 </menu>
