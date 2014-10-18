@@ -5,3 +5,8 @@ drawable-hdpi: ic_launcher.png 72x72
 drawable-xhdpi: ic_launcher.png 96x96
 drawable-xxhdpi: ic_launcher.png 144x144
 
+To change debugging information for Volley:
+
+adb shell setprop log.tag.Volley INFO
+adb shell setprop persist.log.tag.Volley INFO
+

@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 20
-    buildToolsVersion "20.0.0"
+    compileSdkVersion 21
+    buildToolsVersion "21.0.1"
 
     defaultConfig {
         applicationId "net.mceoin.cominghome"
         minSdkVersion 15
-        targetSdkVersion 20
+        targetSdkVersion 21
         versionCode 1
         versionName "1.0"
     }
@@ -25,7 +25,7 @@ dependencies {
 
     // Handy mirror of Volley
     // https://github.com/mcxiaoke/android-volley
-    compile 'com.google.android.gms:play-services:5.0.89'
+    compile 'com.google.android.gms:play-services:6.1.11'
     compile 'com.mcxiaoke.volley:library:1.0.6'
     compile project(path: ':api', configuration: 'android-endpoints')
 }
