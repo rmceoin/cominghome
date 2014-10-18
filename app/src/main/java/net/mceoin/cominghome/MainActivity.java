@@ -15,6 +15,7 @@
  */
 package net.mceoin.cominghome;
 
+import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -70,7 +71,7 @@ public class MainActivity extends FragmentActivity implements
         GooglePlayServicesClient.OnConnectionFailedListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
-    private static final boolean debug = true;
+    private static final boolean debug = false;
 
     private static final String KEY_IN_RESOLUTION = "is_in_resolution";
     public static final String PREFS_STRUCTURE_ID = "structure_id";
@@ -410,6 +411,18 @@ public class MainActivity extends FragmentActivity implements
         return true;
     }
 
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem fake_arrived = menu.findItem(R.id.fake_arrived);
+        fake_arrived.setVisible(debug);
+        MenuItem fake_left = menu.findItem(R.id.fake_left);
+        fake_left.setVisible(debug);
+        MenuItem fake_left_work = menu.findItem(R.id.fake_left_work);
+        fake_left_work.setVisible(debug);
+        MenuItem stop_tracking = menu.findItem(R.id.stop_tracking);
+        stop_tracking.setVisible(false);
+        return true;
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
@@ -448,7 +461,7 @@ public class MainActivity extends FragmentActivity implements
 
     protected void showAbout() {
         // Inflate the about message contents
-        View messageView = getLayoutInflater().inflate(R.layout.about, null, false);
+        @SuppressLint("InflateParams") View messageView = getLayoutInflater().inflate(R.layout.about, null, false);
 
         // When linking text, force to always use default color. This works
         // around a pressed color state bug.
