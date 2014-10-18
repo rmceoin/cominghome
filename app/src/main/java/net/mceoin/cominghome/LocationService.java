@@ -49,7 +49,7 @@ import java.util.List;
 public class LocationService extends Service implements GooglePlayServicesClient.ConnectionCallbacks,
         GooglePlayServicesClient.OnConnectionFailedListener {
     private static final String TAG = LocationService.class.getSimpleName();
-    private static final boolean debug = true;
+    private static final boolean debug = false;
 
     private static final int NOTIFICATION_TRACKING = 1;
 

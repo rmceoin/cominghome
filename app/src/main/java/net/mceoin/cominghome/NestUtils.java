@@ -15,7 +15,6 @@
  */
 package net.mceoin.cominghome;
 
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -36,15 +35,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 
-import net.mceoin.cominghome.oauth.OAuthFlowApp;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -57,9 +48,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.TimeZone;
 
 /**
@@ -71,28 +60,10 @@ import java.util.TimeZone;
  */
 public class NestUtils {
     public static final String TAG = NestUtils.class.getSimpleName();
-    public static final boolean debug = true;
+    public static final boolean debug = false;
 
-    public static final String MSG_STRUCTURES = "structures";
     public static final String MSG_ETA = "eta";
-    public static final String MSG_GET_OTHERS = "get_others";
     public static final String MSG_AWAY = "away";
-
-    public static final String POST_ACTION_IF_AWAY_SET_HOME = "if-away-set-home";
-
-    public static void getInfoOld(Context context, String access_token, Handler handler, String post_action) {
-        if (context == null) {
-            Log.e(TAG, "missing context");
-            return;
-        }
-
-        RequestStructures requestStructures = new RequestStructures();
-        requestStructures.setContext(context);
-        requestStructures.setHandler(handler);
-        requestStructures.setPostAction(post_action);
-        requestStructures.setAccessToken(access_token);
-        requestStructures.execute(access_token);
-    }
 
     public static void getInfo(Context context, String access_token) {
         if (debug) Log.d(TAG, "getInfo()");
@@ -123,9 +94,9 @@ public class NestUtils {
                         // "name":"Home"
                         // }
 
-                        String structure_id="";
-                        String structure_name="";
-                        String away_status="";
+                        String structure_id = "";
+                        String structure_name = "";
+                        String away_status = "";
 
                         JSONObject structures;
                         try {
@@ -134,7 +105,7 @@ public class NestUtils {
                             while (keys.hasNext()) {
                                 String structure = keys.next();
                                 JSONObject value = structures.getJSONObject(structure);
-                                if (debug) Log.d(TAG,"value="+value);
+                                if (debug) Log.d(TAG, "value=" + value);
                                 structure_id = value.getString("structure_id");
                                 structure_name = value.getString("name");
                                 away_status = value.getString("away");
@@ -204,138 +175,6 @@ public class NestUtils {
         sendAwayStatus.setAwayStatus(away_status);
         sendAwayStatus.setContext(context);
         sendAwayStatus.execute(access_token);
-    }
-
-    private static class RequestStructures extends AsyncTask<String, Integer, Double> {
-
-        String structure_id;
-        String structure_name;
-        String away_status = "";
-        private String post_action;
-        private Context context;
-        private String access_token;
-
-        private Handler handler;
-
-        public void setAccessToken(String access_token) {
-            this.access_token = access_token;
-        }
-
-        public void setContext(Context context) {
-            this.context = context;
-        }
-
-        public void setPostAction(String post_action) {
-            this.post_action = post_action;
-        }
-
-        public void setHandler(Handler handler) {
-            this.handler = handler;
-        }
-
-        @Override
-        protected Double doInBackground(String... params) {
-            postData(params[0]);
-            return null;
-        }
-
-        protected void onPostExecute(Double result) {
-            if (debug) {
-                Log.d(TAG, "onPostExecute");
-            }
-            if (handler != null) {
-                Message msg = Message.obtain();
-                Bundle b = new Bundle();
-                b.putString("type", MSG_STRUCTURES);
-                b.putString("structure_id", structure_id);
-                b.putString("structure_name", structure_name);
-                b.putString("away_status", away_status);
-                msg.setData(b);
-                handler.sendMessage(msg);
-            }
-            if (post_action.equals(POST_ACTION_IF_AWAY_SET_HOME)) {
-                if ((away_status.equals("away")) || (away_status.equals("auto-away"))) {
-                    sendAwayStatus(context, access_token, null, structure_id, "home");
-                }
-            }
-        }
-
-        protected void onProgressUpdate(Integer... progress) {
-//            pb.setProgress(progress[0]);
-        }
-
-        public void postData(String access_token) {
-            StringBuilder builder = new StringBuilder();
-
-            // Create a new HttpClient and Post Header
-            HttpClient httpclient = new DefaultHttpClient();
-
-            // curl -X PUT -d ' {"trip_id":"sample-trip-id","estimated_arrival_window_begin":"2014-07-04T10:48:11+00:00","estimated_arrival_window_end":"2014-07-04T18:48:11+00:00"}'
-            //"http://developer-api.nest.com/structures/5af48890-b516-11e3-9eff-123139166438/eta.json?auth=c.VG6bfzyOxAltaih6P4v..."
-
-            // curl -L https://developer-api.nest.com/structures?auth=c.pP7r4ByOx...
-
-            String url = "https://developer-api.nest.com/structures?auth=" + access_token;
-            HttpGet httpGet = new HttpGet(url);
-
-            if (debug) Log.d(TAG, "url=" + url);
-
-            try {
-                // Execute HTTP Get Request
-                HttpResponse response = httpclient.execute(httpGet);
-                StatusLine statusLine = response.getStatusLine();
-                int statusCode = statusLine.getStatusCode();
-                if (debug) {
-                    Log.d(TAG, "statusCode=" + statusCode);
-                }
-                if (statusCode == 200) {
-                    HttpEntity entity = response.getEntity();
-                    InputStream content = entity.getContent();
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(content));
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        builder.append(line);
-                    }
-                    JSONObject object = new JSONObject(builder.toString());
-                    Iterator<String> keys = object.keys();
-                    while (keys.hasNext()) {
-                        String key = keys.next();
-                        JSONObject structure = object.getJSONObject(key);
-                        // {
-                        // "structure_id":"njBTS-gAhF1mJ8_oF23ne7JNDyx1m1hULWixOD6IQWEe-SFA",
-                        // "thermostats":["n232323jy8Xr1HVc2OGqICVP45i-Mc"],
-                        // "smoke_co_alarms":["pt00ag34grggZchI7ICVPddi-Mc"],
-                        // "country_code":"US",
-                        // "away":"home"
-                        // "name":"Home"
-                        // }
-                        if (debug) {
-                            Log.d(TAG, structure.toString());
-                        }
-                        structure_id = structure.getString("structure_id");
-                        structure_name = structure.getString("name");
-                        if (structure.has("away")) {
-                            away_status = structure.getString("away");
-                        } else {
-                            if (debug) Log.d(TAG, "missing away");
-                        }
-
-                        SharedPreferences.Editor pref = MainActivity.prefs.edit();
-                        pref.putString(MainActivity.PREFS_STRUCTURE_ID, structure_id);
-                        pref.putString(MainActivity.PREFS_STRUCTURE_NAME, structure_name);
-                        pref.apply();
-                    }
-                }
-
-            } catch (ClientProtocolException e) {
-                logException(e, "RequestStructures: ClientProtocol");
-            } catch (IOException e) {
-                logException(e, "RequestStructures: IOException");
-            } catch (Exception e) {
-                logException(e, "RequestStructures");
-            }
-        }
-
     }
 
     private static void logException(Exception e, String extra) {
@@ -624,7 +463,7 @@ public class NestUtils {
             try {
                 URL url = new URL(urlString);
                 urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestProperty("User-Agent","ComingHome/1.0");
+                urlConnection.setRequestProperty("User-Agent", "ComingHome/1.0");
                 urlConnection.setRequestMethod("PUT");
                 urlConnection.setDoOutput(true);
                 urlConnection.setDoInput(true);
@@ -702,7 +541,7 @@ public class NestUtils {
                         Iterator<String> keys = object.keys();
                         while (keys.hasNext()) {
                             String key = keys.next();
-                            if ((statusCode == 400) && (key.equals("error"))) {
+                            if (key.equals("error")) {
                                 errorResult = object.getString("error");
                                 if (debug) {
                                     Log.d(TAG, "errorResult=" + errorResult);
@@ -742,7 +581,7 @@ public class NestUtils {
         boolean notifications = prefs.getBoolean(MainActivity.PREFS_NOTIFICATIONS, true);
 
         if (!notifications) {
-            if (debug) Log.d(TAG,"notifications are turned off");
+            if (debug) Log.d(TAG, "notifications are turned off");
             return;
         }
 

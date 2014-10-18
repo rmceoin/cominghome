@@ -21,7 +21,6 @@ package net.mceoin.cominghome;
  *
  */
 import android.content.Context;
-import android.util.Log;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -36,7 +35,7 @@ import java.util.UUID;
  */
 public class Installation {
     public static final String TAG = "Installation";
-    public static final boolean debug = true;
+    public static final boolean debug = false;
 
     private static String sID = null;
     private static final String INSTALLATION = "INSTALLATION";
@@ -44,7 +43,7 @@ public class Installation {
     /**
      * Retrieve a unique identifier.
      *
-     * @param context
+     * @param context Context of app
      * @return String unique identifier
      */
     public synchronized static String id(Context context) {

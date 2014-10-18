@@ -28,7 +28,7 @@ import android.util.Log;
 public class HistoryUpdate {
 
     public static final String TAG = HistoryUpdate.class.getSimpleName();
-    public static final boolean debug = true;
+    public static final boolean debug = false;
 
     public static void add(Context context, String entry)
     {
