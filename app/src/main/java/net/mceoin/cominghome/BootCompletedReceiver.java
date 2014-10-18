@@ -32,7 +32,7 @@ import java.util.List;
 public class BootCompletedReceiver extends BroadcastReceiver {
 
     private final static String TAG = BootCompletedReceiver.class.getSimpleName();
-    private final static boolean debug = true;
+    private final static boolean debug = false;
 
     private GeofenceRequester mGeofenceRequester;
     List<Geofence> mCurrentGeofences;

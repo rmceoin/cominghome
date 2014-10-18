@@ -39,7 +39,7 @@ import java.io.IOException;
 
 public class trackETA extends AsyncTask<Void, Void, StatusBean> {
     private static final String TAG = trackETA.class.getSimpleName();
-    private static final boolean debug = true;
+    private static final boolean debug = false;
 
     private static MyApi myApiService = null;
     private Context context;

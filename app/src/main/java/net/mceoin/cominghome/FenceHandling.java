@@ -37,7 +37,7 @@ import java.util.List;
 public class FenceHandling {
 
     public final static String TAG = FenceHandling.class.getSimpleName();
-    public final static boolean debug = true;
+    public final static boolean debug = false;
 
     private static SharedPreferences prefs;
     private static FenceHandlingAlarm alarm= new FenceHandlingAlarm();
@@ -139,6 +139,7 @@ public class FenceHandling {
         long currentTimeMillis=System.currentTimeMillis();
         SharedPreferences.Editor editor = prefs.edit();
         editor.putLong(MainActivity.PREFS_TIME_LEFT_WORK, currentTimeMillis);
+        editor.commit();
 
         boolean trackEta = prefs.getBoolean(PrefsFragment.PREFERENCE_TRACK_ETA, false);
 

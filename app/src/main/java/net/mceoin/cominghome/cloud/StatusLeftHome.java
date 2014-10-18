@@ -37,7 +37,7 @@ import java.io.IOException;
 
 public class StatusLeftHome extends AsyncTask<Void, Void, StatusBean> {
     private static final String TAG = StatusLeftHome.class.getSimpleName();
-    private static final boolean debug = true;
+    private static final boolean debug = false;
 
     private static MyApi myApiService = null;
     private Context context;

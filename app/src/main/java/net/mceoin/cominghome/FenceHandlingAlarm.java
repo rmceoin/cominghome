@@ -33,7 +33,7 @@ import net.mceoin.cominghome.cloud.StatusLeftHome;
 public class FenceHandlingAlarm extends BroadcastReceiver {
 
     public final static String TAG = FenceHandlingAlarm.class.getSimpleName();
-    public final static boolean debug = true;
+    public final static boolean debug = false;
 
 
     @Override
