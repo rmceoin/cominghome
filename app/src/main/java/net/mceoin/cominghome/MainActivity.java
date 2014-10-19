@@ -498,6 +498,7 @@ public class MainActivity extends FragmentActivity implements
             connectButton.setVisibility(View.VISIBLE);
             getNestInfo.setEnabled(false);
             structureNameText.setText("");
+            awayStatusText.setText("");
         } else {
             connectButton.setEnabled(false);
             connectButton.setVisibility(View.GONE);
