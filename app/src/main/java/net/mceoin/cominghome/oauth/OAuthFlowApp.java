@@ -15,25 +15,6 @@
  */
 package net.mceoin.cominghome.oauth;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.StatusLine;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONObject;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.SharedPreferences;
@@ -52,13 +33,32 @@ import android.widget.Toast;
 
 import net.mceoin.cominghome.R;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.StatusLine;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+
 public class OAuthFlowApp extends Activity {
     public final String TAG = getClass().getName();
     public static final boolean debug = false;
 
     private SharedPreferences prefs;
-    public static final String PREF_ACCESS_TOKEN="access_token";
-    public static final String PREF_EXPIRES_IN="expires_in";
+    public static final String PREF_ACCESS_TOKEN = "access_token";
+    public static final String PREF_EXPIRES_IN = "expires_in";
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -68,17 +68,21 @@ public class OAuthFlowApp extends Activity {
         this.prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         EditText editPincode = (EditText) findViewById(R.id.editPincode);
-        editPincode.addTextChangedListener(new TextWatcher(){
+        editPincode.addTextChangedListener(new TextWatcher() {
             public void afterTextChanged(Editable s) {
                 Button usePincode = (Button) findViewById(R.id.btn_use_pincode);
-                if (s.length()==8) {
+                if (s.length() == 8) {
                     usePincode.setEnabled(true);
                 } else {
                     usePincode.setEnabled(false);
                 }
             }
-            public void beforeTextChanged(CharSequence s, int start, int count, int after){}
-            public void onTextChanged(CharSequence s, int start, int before, int count){}
+
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
         });
 
         Button usePincode = (Button) findViewById(R.id.btn_use_pincode);
@@ -98,7 +102,7 @@ public class OAuthFlowApp extends Activity {
 
         try {
             webView.loadUrl(Constants.AUTHORIZE_URL);
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(this, "Failed", Toast.LENGTH_LONG).show();
         }
@@ -107,7 +111,7 @@ public class OAuthFlowApp extends Activity {
 
     private class RequestAccessToken extends AsyncTask<String, Integer, Double> {
 
-        String access_token="";
+        String access_token = "";
 
         @Override
         protected Double doInBackground(String... params) {
@@ -149,7 +153,7 @@ public class OAuthFlowApp extends Activity {
                 HttpResponse response = httpclient.execute(httppost);
                 StatusLine statusLine = response.getStatusLine();
                 int statusCode = statusLine.getStatusCode();
-                Log.d(TAG, "statusCode=" + statusCode);
+                if (debug) Log.d(TAG, "statusCode=" + statusCode);
                 if (statusCode == 200) {
                     HttpEntity entity = response.getEntity();
                     InputStream content = entity.getContent();
@@ -163,10 +167,10 @@ public class OAuthFlowApp extends Activity {
                     // expires_in = token expires in this number of seconds
                     // The values I've seen have been 10 years out
                     long expires_in = object.getLong("expires_in");
-                    long expires_in_hours = expires_in / (60*60);
+                    long expires_in_hours = expires_in / (60 * 60);
 
-                    Log.d(TAG,"access_token="+access_token);
-                    Log.d(TAG,"expires_in_hours="+expires_in_hours);
+                    if (debug) Log.d(TAG, "access_token=" + access_token);
+                    if (debug) Log.d(TAG, "expires_in_hours=" + expires_in_hours);
 
                     Editor pref = prefs.edit();
                     pref.putString(PREF_ACCESS_TOKEN, access_token);
