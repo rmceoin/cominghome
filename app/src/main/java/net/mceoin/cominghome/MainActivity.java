@@ -31,6 +31,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
@@ -155,7 +156,7 @@ public class MainActivity extends FragmentActivity implements
         }
 
         // Return a Dialog to the DialogFragment.
-        @Override
+        @Override @NonNull
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             return mDialog;
         }
@@ -198,19 +199,6 @@ public class MainActivity extends FragmentActivity implements
         structureNameText = (TextView) findViewById(R.id.structure_name);
         structureNameText.setText(structure_name);
 
-/*
-        sendETAButton = (Button) findViewById(R.id.buttonSendETA);
-        sendETAButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View arg0) {
-                if (trip_id.isEmpty()) {
-                    trip_id = UUID.randomUUID().toString();
-                }
-                int minutes = Integer.parseInt(ETAminutes.getText().toString());
-
-                NestUtils.sendETA(access_token, handler, structure_id, trip_id, minutes);
-            }
-        });
-*/
         awayStatusText = (TextView) findViewById(R.id.away_status);
 
         if (away_status.isEmpty()) {
@@ -588,7 +576,6 @@ public class MainActivity extends FragmentActivity implements
     @Override
     public void onConnected(Bundle connectionHint) {
         Log.i(TAG, "GoogleApiClient connected");
-        // TODO: Start making API requests.
     }
 
     /**
@@ -658,14 +645,16 @@ public class MainActivity extends FragmentActivity implements
         // If Google Play services is available
         if (ConnectionResult.SUCCESS == resultCode) {
 
-            int v = 0;
-            try {
-                v = getPackageManager().getPackageInfo("com.google.android.gms", 0).versionCode;
-            } catch (PackageManager.NameNotFoundException e) {
-                e.printStackTrace();
+            if (debug) {
+                int v = 0;
+                try {
+                    v = getPackageManager().getPackageInfo("com.google.android.gms", 0).versionCode;
+                } catch (PackageManager.NameNotFoundException e) {
+                    e.printStackTrace();
+                }
+                Log.d(TAG, "Google Play services available: client " +
+                        GooglePlayServicesUtil.GOOGLE_PLAY_SERVICES_VERSION_CODE + " package " + v);
             }
-            if (debug) Log.d(TAG, "Google Play services available: client " +
-                    GooglePlayServicesUtil.GOOGLE_PLAY_SERVICES_VERSION_CODE + " package " + v);
             return true;
 
             // Google Play services was not available for some reason
