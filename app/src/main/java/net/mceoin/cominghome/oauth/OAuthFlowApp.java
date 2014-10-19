@@ -64,7 +64,7 @@ public class OAuthFlowApp extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.oauth_new);
+        setContentView(R.layout.oauth);
         this.prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         EditText editPincode = (EditText) findViewById(R.id.editPincode);
