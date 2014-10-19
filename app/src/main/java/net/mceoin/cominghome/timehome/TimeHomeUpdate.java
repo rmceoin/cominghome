@@ -31,25 +31,29 @@ public class TimeHomeUpdate {
     public static final String TAG = TimeHomeUpdate.class.getSimpleName();
     public static final boolean debug = true;
 
-    public static void add(Context context, long timeseconds)
-    {
+    public static void add(Context context, long timeseconds) {
         Uri mUri;
 
-        if (debug) Log.d(TAG,"updateTimeHome("+timeseconds+")");
+        if (debug) Log.d(TAG, "updateTimeHome(" + timeseconds + ")");
         ContentValues values = new ContentValues();
 
         long hours = timeseconds % 60;
         long seconds = timeseconds - (hours * 60);
-        String timehome = String.format("%f:%02f", hours,seconds);
+        String timehome;
+        try {
+            timehome = String.format("%d:%02d", hours, seconds);
+            values.put(TimeHome.TIMEHOME, timehome);
+            values.put(TimeHome.TIMESECONDS, timeseconds);
+            values.put(TimeHome.CREATED_DATE, System.currentTimeMillis());
 
-        values.put(TimeHome.TIMEHOME, timehome);
-        values.put(TimeHome.TIMESECONDS, timeseconds);
-        values.put(TimeHome.CREATED_DATE, System.currentTimeMillis());
+            mUri = TimeHome.CONTENT_URI;
+            Uri uri = context.getContentResolver().insert(mUri, values);
 
-        mUri = TimeHome.CONTENT_URI;
-        Uri uri=context.getContentResolver().insert(mUri, values);
+            if (debug) Log.d(TAG, "updateTimeHome: inserted uri=" + uri);
+        } catch (Exception e) {
+            Log.w(TAG, e.getLocalizedMessage());
+        }
 
-        if (debug) Log.d(TAG,"updateTimeHome: inserted uri="+uri);
     }
 
 }

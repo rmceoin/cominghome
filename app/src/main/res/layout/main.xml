@@ -17,13 +17,13 @@
             android:id="@+id/buttonConnectNest"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Connect to Nest" />
+            android:text="@string/connect_nest" />
 
         <Button
             android:id="@+id/buttonGetNestInfo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Get Nest Info" />
+            android:text="@string/get_nest" />
 
     </LinearLayout>
 
@@ -32,7 +32,7 @@
         android:id="@+id/structure_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Name"
+        android:text="@string/name"
 
         />
 
@@ -40,7 +40,7 @@
         android:id="@+id/away_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Away Status" />
+        android:text="@string/away_status" />
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -50,18 +50,20 @@
             android:id="@+id/buttonSetAtHome"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="At Home" />
+            android:text="@string/at_home" />
         <Button
             android:id="@+id/buttonSetAtWork"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="At Work" />
+            android:visibility="gone"
+            android:text="@string/at_work" />
     </LinearLayout>
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.MapFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        tools:layout="@android:layout/simple_gallery_item" />
 
 </LinearLayout>
