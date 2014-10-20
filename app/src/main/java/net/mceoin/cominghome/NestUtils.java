@@ -27,6 +27,7 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.android.volley.Request;
@@ -64,6 +65,8 @@ public class NestUtils {
 
     public static final String MSG_ETA = "eta";
     public static final String MSG_AWAY = "away";
+
+    public static final String GOT_INFO = "net.mceoin.cominghome.NetUtils.GotInfo";
 
     public static void getInfo(Context context, String access_token) {
         if (debug) Log.d(TAG, "getInfo()");
@@ -121,6 +124,11 @@ public class NestUtils {
                         pref.putString(MainActivity.PREFS_STRUCTURE_NAME, structure_name);
                         pref.putString(MainActivity.PREFS_LAST_AWAY_STATUS, away_status);
                         pref.apply();
+
+                        Intent intent = new Intent(GOT_INFO);
+                        intent.putExtra("structure_name", structure_name);
+                        intent.putExtra("away_status", away_status);
+                        LocalBroadcastManager.getInstance(AppController.getInstance().getApplicationContext()).sendBroadcast(intent);
 
 //                        if (handler != null) {
 //                            Message msg = Message.obtain();

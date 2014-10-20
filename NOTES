@@ -10,3 +10,6 @@ To change debugging information for Volley:
 adb shell setprop log.tag.Volley INFO
 adb shell setprop persist.log.tag.Volley INFO
 
+adb shell setprop log.tag.Volley ERROR
+adb shell setprop persist.log.tag.Volley ERROR
+

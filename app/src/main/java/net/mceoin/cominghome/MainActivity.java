@@ -105,7 +105,6 @@ public class MainActivity extends FragmentActivity implements
     private boolean mIsInResolution;
 
     public static SharedPreferences prefs;
-    Button getNestInfo;
     Button connectButton;
     TextView structureNameText;
     TextView awayStatusText;
@@ -116,6 +115,8 @@ public class MainActivity extends FragmentActivity implements
     public static String structure_id = "";
     String structure_name = "";
     String away_status = "";
+
+    long last_info_check = 0;
 
     LocationClient mLocationClient;
     Location mCurrentLocation;
@@ -173,9 +174,7 @@ public class MainActivity extends FragmentActivity implements
         }
         prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         access_token = prefs.getString(OAuthFlowApp.PREF_ACCESS_TOKEN, "");
-        structure_name = prefs.getString(PREFS_STRUCTURE_NAME, "");
         structure_id = prefs.getString(PREFS_STRUCTURE_ID, "");
-        away_status = prefs.getString(PREFS_LAST_AWAY_STATUS, "");
 
         Installation.id(this);
 
@@ -188,24 +187,8 @@ public class MainActivity extends FragmentActivity implements
             }
         });
 
-        getNestInfo = (Button) findViewById(R.id.buttonGetNestInfo);
-        getNestInfo.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View arg0) {
-                if (!access_token.isEmpty()) {
-                    NestUtils.getInfo(getApplicationContext(), access_token);
-                }
-            }
-        });
         structureNameText = (TextView) findViewById(R.id.structure_name);
-        structureNameText.setText(structure_name);
-
         awayStatusText = (TextView) findViewById(R.id.away_status);
-
-        if (away_status.isEmpty()) {
-            awayStatusText.setText("Checking status");
-        } else {
-            awayStatusText.setText(away_status);
-        }
 
         playServicesConnected();
 
@@ -227,6 +210,9 @@ public class MainActivity extends FragmentActivity implements
 
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                 new IntentFilter(LocationService.LOCATION_CHANGED));
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
+                new IntentFilter(NestUtils.GOT_INFO));
 
         atHomeButton = (Button) findViewById(R.id.buttonSetAtHome);
         atHomeButton.setOnClickListener(new View.OnClickListener() {
@@ -381,13 +367,26 @@ public class MainActivity extends FragmentActivity implements
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            double latitude = intent.getDoubleExtra("latitude", 0);
-            double longitude = intent.getDoubleExtra("longitude", 0);
-            LatLng current = new LatLng(latitude, longitude);
-            if (debug)
-                Log.d(TAG, "Got location update: " + latitude + ", " + longitude);
-            if (map != null) {
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(current, 13));
+            if (intent.getAction().equals(NestUtils.GOT_INFO)) {
+                String got_structure_name = intent.getStringExtra("structure_name");
+                String got_away_status = intent.getStringExtra("away_status");
+
+                if (structureNameText!=null) {
+                    structureNameText.setText(got_structure_name);
+                }
+                if (awayStatusText!=null) {
+                    awayStatusText.setText(got_away_status);
+                }
+
+            } else {
+                double latitude = intent.getDoubleExtra("latitude", 0);
+                double longitude = intent.getDoubleExtra("longitude", 0);
+                LatLng current = new LatLng(latitude, longitude);
+                if (debug)
+                    Log.d(TAG, "Got location update: " + latitude + ", " + longitude);
+                if (map != null) {
+                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(current, 13));
+                }
             }
         }
     };
@@ -492,20 +491,27 @@ public class MainActivity extends FragmentActivity implements
     protected void onResume() {
         super.onResume();
 
+        structure_id = prefs.getString(PREFS_STRUCTURE_ID, "");
+        structure_name = prefs.getString(PREFS_STRUCTURE_NAME, "");
+        away_status = prefs.getString(PREFS_LAST_AWAY_STATUS, "");
+
+        structureNameText.setText(structure_name);
+        awayStatusText.setText(away_status);
+
         access_token = prefs.getString(OAuthFlowApp.PREF_ACCESS_TOKEN, "");
         if (access_token.isEmpty()) {
             connectButton.setEnabled(true);
             connectButton.setVisibility(View.VISIBLE);
-            getNestInfo.setEnabled(false);
-            structureNameText.setText("");
-            awayStatusText.setText("");
         } else {
             connectButton.setEnabled(false);
             connectButton.setVisibility(View.GONE);
-            getNestInfo.setEnabled(true);
+            long currentTime = System.currentTimeMillis();
+            // make sure it's been at least 60 seconds since last time we got info
+            if (currentTime > (last_info_check + 60*1000)) {
+                NestUtils.getInfo(getApplicationContext(), access_token);
+                last_info_check = System.currentTimeMillis();
+            }
         }
-        structure_id = prefs.getString(PREFS_STRUCTURE_ID, "");
-        structure_name = prefs.getString(PREFS_STRUCTURE_NAME, "");
 /*
         if (structure_id.isEmpty()) {
             sendETAButton.setEnabled(false);
