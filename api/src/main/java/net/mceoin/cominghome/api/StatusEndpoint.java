@@ -21,6 +21,11 @@ import com.google.api.server.spi.config.ApiNamespace;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
 
 import java.util.Date;
 import java.util.logging.Logger;
@@ -34,6 +39,7 @@ import javax.inject.Named;
 public class StatusEndpoint {
 
     public static final String KIND_EVENT = "Event";
+    public static final String KIND_STATUS = "Status";
 
     private static final Logger log = Logger.getLogger(StatusEndpoint.class.getName());
 
@@ -56,6 +62,26 @@ public class StatusEndpoint {
         response.setSuccess(true);
         log.info("arrived home: tell_nest="+tell_nest);
         logEvent(InstallationID, structure_id, "arrived home");
+
+        if (InstallationID.isEmpty()) {
+            response.setSuccess(false);
+            response.setMessage("InstallationID is empty");
+            return response;
+        }
+
+        if (access_token.isEmpty()) {
+            response.setSuccess(false);
+            response.setMessage("access_token is empty");
+            return response;
+        }
+
+        if (structure_id.isEmpty()) {
+            response.setSuccess(false);
+            response.setMessage("structure_id is empty");
+            return response;
+        }
+
+        saveStatus(InstallationID, structure_id, "home");
 
         if (tell_nest) {
             String nest_away = NestUtil.getNestAwayStatus(access_token);
@@ -96,8 +122,34 @@ public class StatusEndpoint {
         log.info("left home: tell_nest="+tell_nest);
         logEvent(InstallationID, structure_id, "left home");
 
-        if (tell_nest) {
+        if (InstallationID.isEmpty()) {
+            response.setSuccess(false);
+            response.setMessage("InstallationID is empty");
+            return response;
+        }
+
+        if (access_token.isEmpty()) {
+            response.setSuccess(false);
+            response.setMessage("access_token is empty");
+            return response;
+        }
+
+        if (structure_id.isEmpty()) {
+            response.setSuccess(false);
+            response.setMessage("structure_id is empty");
+            return response;
+        }
+
+        saveStatus(InstallationID, structure_id, "away");
+
+        boolean others = checkOthersAtHome(InstallationID, structure_id);
+
+        if (others) {
+            response.setNestUpdated(false);
+            response.setMessage("Others still at home");
+        } else if (tell_nest) {
             String nest_away = NestUtil.getNestAwayStatus(access_token);
+
             if (nest_away.equals("home")) {
                 String result = NestUtil.tellNestAwayStatus(access_token, structure_id, "away");
                 response.setMessage("Nest updated");
@@ -153,5 +205,58 @@ public class StatusEndpoint {
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
         datastore.put(event);
 
+    }
+
+    private void saveStatus(String installation_id, String structure_id, String away_status) {
+        Key statusKey = KeyFactory.createKey(KIND_STATUS, installation_id);
+        Date date = new Date();
+        Entity status = new Entity(statusKey);
+        status.setProperty("installation_id", installation_id);
+        status.setProperty("date", date);
+        status.setProperty("structure_id", structure_id);
+        status.setProperty("away_status", away_status);
+
+        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+        datastore.put(status);
+    }
+
+    /**
+     * Check for anybody else still at home
+     *
+     * @param installation_id Nest installation_id of user
+     * @param structure_id    Nest structure_id of user
+     * @return true if somebody else is still home
+     */
+    private boolean checkOthersAtHome(String installation_id, String structure_id) {
+        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+
+        Query findStructureQuery = new Query(KIND_STATUS);
+
+        Query.Filter structureFilter =
+                new Query.FilterPredicate("structure_id",
+                        Query.FilterOperator.EQUAL,
+                        structure_id);
+        findStructureQuery.setFilter(structureFilter);
+        findStructureQuery.addSort("date", Query.SortDirection.DESCENDING);
+
+        try {
+            PreparedQuery pq = datastore.prepare(findStructureQuery);
+            for (Entity result : pq.asIterable(FetchOptions.Builder.withLimit(10))) {
+                String installation_ID = (String) result.getProperty("installation_id");
+                String away_status = (String) result.getProperty("away_status");
+//            Date date = (Date) result.getProperty("date");
+
+                if ((!installation_ID.equals(installation_id)) && (away_status != null)) {
+                    if (away_status.equals("home")) {
+                        log.info("found somebody else at home");
+                        return true;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.warning("Error: "+e.getLocalizedMessage());
+        }
+        log.info("nobody else home");
+        return false;
     }
 }
