@@ -86,4 +86,10 @@
     <string name="title_notifications_preference">Notifications</string>
     <string name="summary_notifications_preference">After updating Nest, show notification</string>
 
+    <!-- Initial Wizard -->
+    <string name="step1_description">Coming Home works with your Nest Thermostat to automatically set the status to home or away.\n
+    \n
+    Your first step will be to use the \'Connect to Nest\' button to grant Coming Home permission to
+    check and set status on Nest.</string>
+    <string name="step2_description">After you have connected to Nest, use the \'At Home\' button to set the geo location of your home.</string>
 </resources>

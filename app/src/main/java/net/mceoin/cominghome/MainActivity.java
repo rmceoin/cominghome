@@ -61,6 +61,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import net.mceoin.cominghome.oauth.OAuthFlowApp;
+import net.mceoin.cominghome.wizard.InitialWizardActivity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -75,6 +76,7 @@ public class MainActivity extends FragmentActivity implements
     private static final boolean debug = false;
 
     private static final String KEY_IN_RESOLUTION = "is_in_resolution";
+    public static final String PREFS_INITIAL_WIZARD = "initial_wizard";
     public static final String PREFS_STRUCTURE_ID = "structure_id";
     public static final String PREFS_STRUCTURE_NAME = "structure_name";
     public static final String PREFS_LAST_AWAY_STATUS = "last_away_status";
@@ -490,6 +492,12 @@ public class MainActivity extends FragmentActivity implements
     @Override
     protected void onResume() {
         super.onResume();
+
+        boolean initialWizardRan = prefs.getBoolean(PREFS_INITIAL_WIZARD, false);
+        if (!initialWizardRan) {
+            startActivity(new Intent().setClass(getApplicationContext(), InitialWizardActivity.class));
+            finish();
+        }
 
         structure_id = prefs.getString(PREFS_STRUCTURE_ID, "");
         structure_name = prefs.getString(PREFS_STRUCTURE_NAME, "");
