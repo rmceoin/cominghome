@@ -88,8 +88,9 @@
 
     <!-- Initial Wizard -->
     <string name="step1_description">Coming Home works with your Nest Thermostat to automatically set the status to home or away.\n
-    \n
-    Your first step will be to use the \'Connect to Nest\' button to grant Coming Home permission to
+    \nYour first step will be to use the \'Connect to Nest\' button to grant Coming Home permission to
     check and set status on Nest.</string>
-    <string name="step2_description">After you have connected to Nest, use the \'At Home\' button to set the geo location of your home.</string>
+    <string name="step2_description">After you have connected to Nest, use the \'At Home\' button to set the geo location of your home.\n
+    \nComing Home will set a geofence that will trigger when you leave or arrive and will automatically
+    set the away or home status for Nest.</string>
 </resources>
