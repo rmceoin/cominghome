@@ -22,43 +22,51 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <Button
-        android:id="@+id/buttonConnectNest"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/connect_nest" />
-
-
-    <TextView
-        android:id="@+id/structure_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/name"
-
-        />
-
-    <TextView
-        android:id="@+id/away_status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/away_status" />
-
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/rect"
+        android:elevation="5dp"
+        android:orientation="vertical">
 
         <Button
-            android:id="@+id/buttonSetAtHome"
+            android:id="@+id/buttonConnectNest"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/at_home" />
+            android:text="@string/connect_nest" />
 
-        <Button
-            android:id="@+id/buttonSetAtWork"
+        <TextView
+            android:id="@+id/structure_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/at_work"
-            android:visibility="gone" />
+            tools:text="@string/name" />
+
+        <TextView
+            android:id="@+id/away_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="@string/away_status" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/buttonSetAtHome"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/at_home"
+                tools:ignore="ButtonStyle" />
+
+            <Button
+                android:id="@+id/buttonSetAtWork"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/at_work"
+                android:visibility="gone"
+                tools:ignore="ButtonStyle" />
+        </LinearLayout>
+
     </LinearLayout>
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
