@@ -73,7 +73,7 @@ public class MainActivity extends FragmentActivity implements
         GooglePlayServicesClient.OnConnectionFailedListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
-    private static final boolean debug = false;
+    private static final boolean debug = true;
 
     private static final String KEY_IN_RESOLUTION = "is_in_resolution";
     public static final String PREFS_INITIAL_WIZARD = "initial_wizard";
@@ -590,7 +590,33 @@ public class MainActivity extends FragmentActivity implements
      */
     @Override
     public void onConnected(Bundle connectionHint) {
-        Log.i(TAG, "GoogleApiClient connected");
+        if (debug) Log.d(TAG, "GoogleApiClient connected");
+        if (map!=null) {
+            //
+            // The very first time we run, the map will be at 0,0
+            // Check that we have a map and a location, if so, zoom to it
+            //
+            CameraPosition cameraPosition = map.getCameraPosition();
+            if (debug) Log.d(TAG,"cameraPosition lat="+cameraPosition.target.latitude+
+                " long="+cameraPosition.target.longitude);
+            if ((cameraPosition.target.latitude==0) && (cameraPosition.target.longitude==0)) {
+                if (mLocationClient == null) {
+                    return;
+                }
+                mCurrentLocation = mLocationClient.getLastLocation();
+                if (debug) Log.d(TAG, mCurrentLocation.toString());
+                if (mCurrentLocation == null) {
+                    return;
+                }
+                double latitude = mCurrentLocation.getLatitude();
+                double longitude = mCurrentLocation.getLongitude();
+
+                LatLng current = new LatLng(latitude, longitude);
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(current,
+                        13));
+            }
+        }
+
     }
 
     /**
