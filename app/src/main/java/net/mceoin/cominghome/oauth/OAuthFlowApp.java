@@ -25,10 +25,13 @@ import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import net.mceoin.cominghome.R;
@@ -84,14 +87,22 @@ public class OAuthFlowApp extends Activity {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
             }
         });
+        editPincode.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    if (v.length() == 8) {
+                        usePincode();
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
 
         Button usePincode = (Button) findViewById(R.id.btn_use_pincode);
         usePincode.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                EditText editPincode = (EditText) findViewById(R.id.editPincode);
-                String pincode = editPincode.getText().toString();
-                if (debug) Log.d(TAG, "pincode=" + pincode);
-                new RequestAccessToken().execute(pincode);
+                usePincode();
             }
         });
 
@@ -107,6 +118,13 @@ public class OAuthFlowApp extends Activity {
             Toast.makeText(this, "Failed", Toast.LENGTH_LONG).show();
         }
 
+    }
+
+    private  void usePincode() {
+        EditText editPincode = (EditText) findViewById(R.id.editPincode);
+        String pincode = editPincode.getText().toString();
+        if (debug) Log.d(TAG, "pincode=" + pincode);
+        new RequestAccessToken().execute(pincode);
     }
 
     private class RequestAccessToken extends AsyncTask<String, Integer, Double> {

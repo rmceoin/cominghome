@@ -11,6 +11,8 @@
     <string name="at_home">At Home</string>
     <string name="at_work">At Work</string>
 
+    <string name="lost_auth">Lost our Nest authorization</string>
+
     <string name="pincode">Pincode</string>
     <string name="use_pincode">Use Pincode</string>
     <string name="fillin">Login to the Nest site below and click the accept button.  Then fill in the Pincode here.  You may have to scroll right to see the whole 8 character code.</string>

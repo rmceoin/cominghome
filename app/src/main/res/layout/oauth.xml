@@ -11,6 +11,8 @@
         android:id="@+id/response_code"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_margin="4dp"
+        android:textSize="16sp"
         android:text="@string/fillin"
         android:typeface="normal" />
 
@@ -25,6 +27,7 @@
             android:layout_height="wrap_content"
             android:ems="8"
             android:hint="@string/pincode"
+            android:imeOptions="actionDone"
             android:inputType="textShortMessage|textCapCharacters|textNoSuggestions"
             android:maxLength="8" />
 
