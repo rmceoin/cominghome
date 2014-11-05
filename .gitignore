@@ -10,5 +10,6 @@
 
 backend/build/
 
+*.apk
 
 .DS_Store

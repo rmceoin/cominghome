@@ -159,7 +159,8 @@ public class MainActivity extends FragmentActivity implements
         }
 
         // Return a Dialog to the DialogFragment.
-        @Override @NonNull
+        @Override
+        @NonNull
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             return mDialog;
         }
@@ -215,6 +216,9 @@ public class MainActivity extends FragmentActivity implements
 
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                 new IntentFilter(NestUtils.GOT_INFO));
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
+                new IntentFilter(NestUtils.LOST_AUTH));
 
         atHomeButton = (Button) findViewById(R.id.buttonSetAtHome);
         atHomeButton.setOnClickListener(new View.OnClickListener() {
@@ -373,12 +377,22 @@ public class MainActivity extends FragmentActivity implements
                 String got_structure_name = intent.getStringExtra("structure_name");
                 String got_away_status = intent.getStringExtra("away_status");
 
-                if (structureNameText!=null) {
+                if (structureNameText != null) {
                     structureNameText.setText(got_structure_name);
                 }
-                if (awayStatusText!=null) {
+                if (awayStatusText != null) {
                     awayStatusText.setText(got_away_status);
                 }
+            } else if (intent.getAction().equals(NestUtils.LOST_AUTH)) {
+                if (structureNameText != null) {
+                    structureNameText.setText("");
+                }
+                if (awayStatusText != null) {
+                    awayStatusText.setText("");
+                }
+                connectButton.setEnabled(true);
+                connectButton.setVisibility(View.VISIBLE);
+                Toast.makeText(context, R.string.lost_auth, Toast.LENGTH_LONG).show();
 
             } else {
                 double latitude = intent.getDoubleExtra("latitude", 0);
@@ -515,7 +529,7 @@ public class MainActivity extends FragmentActivity implements
             connectButton.setVisibility(View.GONE);
             long currentTime = System.currentTimeMillis();
             // make sure it's been at least 60 seconds since last time we got info
-            if (currentTime > (last_info_check + 60*1000)) {
+            if (currentTime > (last_info_check + 60 * 1000)) {
                 NestUtils.getInfo(getApplicationContext(), access_token);
                 last_info_check = System.currentTimeMillis();
             }
@@ -591,15 +605,15 @@ public class MainActivity extends FragmentActivity implements
     @Override
     public void onConnected(Bundle connectionHint) {
         if (debug) Log.d(TAG, "GoogleApiClient connected");
-        if (map!=null) {
+        if (map != null) {
             //
             // The very first time we run, the map will be at 0,0
             // Check that we have a map and a location, if so, zoom to it
             //
             CameraPosition cameraPosition = map.getCameraPosition();
-            if (debug) Log.d(TAG,"cameraPosition lat="+cameraPosition.target.latitude+
-                " long="+cameraPosition.target.longitude);
-            if ((cameraPosition.target.latitude==0) && (cameraPosition.target.longitude==0)) {
+            if (debug) Log.d(TAG, "cameraPosition lat=" + cameraPosition.target.latitude +
+                    " long=" + cameraPosition.target.longitude);
+            if ((cameraPosition.target.latitude == 0) && (cameraPosition.target.longitude == 0)) {
                 if (mLocationClient == null) {
                     return;
                 }

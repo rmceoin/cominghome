@@ -36,6 +36,9 @@ import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 
+import net.mceoin.cominghome.oauth.OAuthFlowApp;
+
+import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -61,12 +64,13 @@ import java.util.TimeZone;
  */
 public class NestUtils {
     public static final String TAG = NestUtils.class.getSimpleName();
-    public static final boolean debug = false;
+    public static final boolean debug = true;
 
     public static final String MSG_ETA = "eta";
     public static final String MSG_AWAY = "away";
 
     public static final String GOT_INFO = "net.mceoin.cominghome.NetUtils.GotInfo";
+    public static final String LOST_AUTH = "net.mceoin.cominghome.NetUtils.LostAuth";
 
     public static void getInfo(Context context, String access_token) {
         if (debug) Log.d(TAG, "getInfo()");
@@ -130,25 +134,37 @@ public class NestUtils {
                         intent.putExtra("away_status", away_status);
                         LocalBroadcastManager.getInstance(AppController.getInstance().getApplicationContext()).sendBroadcast(intent);
 
-//                        if (handler != null) {
-//                            Message msg = Message.obtain();
-//                            Bundle b = new Bundle();
-//                            b.putString("type", MSG_STRUCTURES);
-//                            b.putString("structure_id", structure_id);
-//                            b.putString("structure_name", structure_name);
-//                            b.putString("away_status", away_status);
-//                            msg.setData(b);
-//                            handler.sendMessage(msg);
-//                        }
                     }
                 }, new Response.ErrorListener() {
 
             @Override
             public void onErrorResponse(VolleyError error) {
-                if (debug) Log.d(TAG, "getInfo volley error=" + error.getLocalizedMessage());
-                Context context = AppController.getInstance().getApplicationContext();
-                HistoryUpdate.add(context, error.getLocalizedMessage());
-                VolleyLog.d(TAG, "getInfo Error: " + error.getMessage());
+                if (error.networkResponse!=null) {
+                    if (debug)
+                        Log.d(TAG, "getInfo volley statusCode=" + error.networkResponse.statusCode);
+
+                    Context context = AppController.getInstance().getApplicationContext();
+
+                    if (error.networkResponse.statusCode == HttpStatus.SC_UNAUTHORIZED) {
+                        // We must have been de-authorized at the Nest web site
+                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+                        SharedPreferences.Editor pref = prefs.edit();
+                        pref.putString(OAuthFlowApp.PREF_ACCESS_TOKEN, "");
+                        pref.putString(MainActivity.PREFS_STRUCTURE_ID, "");
+                        pref.putString(MainActivity.PREFS_STRUCTURE_NAME, "");
+                        pref.putString(MainActivity.PREFS_LAST_AWAY_STATUS, "");
+                        pref.apply();
+
+                        HistoryUpdate.add(context, "Lost our Nest authorization");
+
+                        Intent intent = new Intent(LOST_AUTH);
+                        LocalBroadcastManager.getInstance(AppController.getInstance().getApplicationContext()).sendBroadcast(intent);
+
+                    } else {
+                        HistoryUpdate.add(context, error.getLocalizedMessage());
+                        VolleyLog.d(TAG, "getInfo Error: " + error.getMessage());
+                    }
+                }
             }
         });
         AppController.getInstance().addToRequestQueue(updateStatusReq, tag_update_status);
