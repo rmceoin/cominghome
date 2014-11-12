@@ -163,7 +163,8 @@ public class NestUtil {
     public static String getNestAwayStatus(String access_token) {
         String result = getNestAwayStatusCall(access_token);
 
-        if (result.contains("Error: Timeout")) {
+        if ((result.contains("Error:")) && (!result.contains("Unauthorized"))) {
+            // Try again if it was an Error but not an Unauthorized
             try {
                 Random randomGenerator = new Random();
                 int seconds = 5 + randomGenerator.nextInt(10);
@@ -197,6 +198,8 @@ public class NestUtil {
             urlConnection.setRequestMethod("GET");
             urlConnection.setDoOutput(true);
             urlConnection.setDoInput(true);
+            urlConnection.setConnectTimeout(15000);
+            urlConnection.setReadTimeout(15000);
 //            urlConnection.setChunkedStreamingMode(0);
 
 //            urlConnection.setRequestProperty("Content-Type", "application/json; charset=utf8");
