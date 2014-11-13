@@ -77,6 +77,7 @@ public class StatusArrivedHome extends AsyncTask<Void, Void, StatusBean> {
             return myApiService.arrivedHome(InstallationId, access_token, structure_id, tell_nest).execute();
         } catch (IOException e) {
             Log.w(TAG, "IOException: " + e.getLocalizedMessage());
+            HistoryUpdate.add(context, "Backend error: " + e.getLocalizedMessage());
             return null;
         }
     }
