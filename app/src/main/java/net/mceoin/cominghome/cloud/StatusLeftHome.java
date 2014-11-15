@@ -34,6 +34,7 @@ import net.mceoin.cominghome.api.myApi.model.StatusBean;
 import net.mceoin.cominghome.oauth.OAuthFlowApp;
 
 import java.io.IOException;
+import java.util.Random;
 
 public class StatusLeftHome extends AsyncTask<Void, Void, StatusBean> {
     private static final String TAG = StatusLeftHome.class.getSimpleName();
@@ -73,13 +74,27 @@ public class StatusLeftHome extends AsyncTask<Void, Void, StatusBean> {
             Log.w(TAG, "missing structure_id");
             return null;
         }
-        try {
-            return myApiService.leftHome(InstallationId, access_token, structure_id, tell_nest).execute();
-        } catch (IOException e) {
-            Log.w(TAG, "IOException: " + e.getLocalizedMessage());
-            HistoryUpdate.add(context, "Backend error: " + e.getLocalizedMessage());
-            return null;
+        int retry=0;
+        while (retry<3) {
+            try {
+                return myApiService.leftHome(InstallationId, access_token, structure_id, tell_nest).execute();
+            } catch (IOException e) {
+                Log.w(TAG, "IOException: " + e.getLocalizedMessage());
+                HistoryUpdate.add(context, "Endpoint error: " + e.getLocalizedMessage());
+            }
+            try {
+                Random randomGenerator = new Random();
+                int seconds = (retry*15) + randomGenerator.nextInt(15);
+                if (debug) Log.d(TAG,
+                        "retry in "+seconds+" seconds");
+                Thread.sleep(seconds*1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            retry++;
         }
+        HistoryUpdate.add(context, "Unable to connect to Backend");
+        return null;
     }
 
     @Override
