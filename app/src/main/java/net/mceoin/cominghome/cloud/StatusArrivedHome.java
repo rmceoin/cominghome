@@ -24,7 +24,7 @@ import android.util.Log;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 
-import net.mceoin.cominghome.HistoryUpdate;
+import net.mceoin.cominghome.history.HistoryUpdate;
 import net.mceoin.cominghome.Installation;
 import net.mceoin.cominghome.MainActivity;
 import net.mceoin.cominghome.NestUtils;

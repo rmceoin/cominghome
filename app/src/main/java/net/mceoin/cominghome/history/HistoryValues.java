@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package net.mceoin.cominghome;
+package net.mceoin.cominghome.history;
 
 import android.net.Uri;
 import android.provider.BaseColumns;

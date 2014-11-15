@@ -43,6 +43,7 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
 
 import net.mceoin.cominghome.cloud.trackETA;
+import net.mceoin.cominghome.history.HistoryUpdate;
 
 import java.util.List;
 
@@ -350,7 +351,7 @@ public class LocationService extends Service implements GooglePlayServicesClient
             new trackETA(getApplicationContext(), location.getLatitude(), location.getLongitude()).execute();
         }
         lastTimeTrackETA=currentTimeMillis;
-        HistoryUpdate.add(getApplicationContext(),"location changed: latitude="+location.getLatitude());
+        HistoryUpdate.add(getApplicationContext(), "location changed: latitude=" + location.getLatitude());
     }
 
     private void initLocationManager() {

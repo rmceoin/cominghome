@@ -24,13 +24,10 @@ import android.util.Log;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 
-import net.mceoin.cominghome.HistoryUpdate;
 import net.mceoin.cominghome.Installation;
 import net.mceoin.cominghome.MainActivity;
-import net.mceoin.cominghome.NestUtils;
-import net.mceoin.cominghome.PrefsFragment;
-import net.mceoin.cominghome.SimpleGeofence;
-import net.mceoin.cominghome.SimpleGeofenceStore;
+import net.mceoin.cominghome.geofence.SimpleGeofence;
+import net.mceoin.cominghome.geofence.SimpleGeofenceStore;
 import net.mceoin.cominghome.api.myApi.MyApi;
 import net.mceoin.cominghome.api.myApi.model.StatusBean;
 import net.mceoin.cominghome.oauth.OAuthFlowApp;

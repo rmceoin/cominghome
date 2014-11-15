@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.mceoin.cominghome;
+package net.mceoin.cominghome.geofence;
 
 import android.content.Context;
 import android.content.Intent;
@@ -25,7 +25,11 @@ import android.util.Log;
 
 import com.google.android.gms.location.Geofence;
 
+import net.mceoin.cominghome.LocationService;
+import net.mceoin.cominghome.MainActivity;
+import net.mceoin.cominghome.PrefsFragment;
 import net.mceoin.cominghome.cloud.StatusArrivedHome;
+import net.mceoin.cominghome.history.HistoryUpdate;
 import net.mceoin.cominghome.oauth.OAuthFlowApp;
 import net.mceoin.cominghome.timehome.TimeHomeUpdate;
 
@@ -74,7 +78,7 @@ public class FenceHandling {
         // make sure there isn't an alarm set from a leftHome event
         alarm.CancelAlarm(context);
 
-        HistoryUpdate.add(context,"Geofence arrived home");
+        HistoryUpdate.add(context, "Geofence arrived home");
         prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String structure_id = prefs.getString(MainActivity.PREFS_STRUCTURE_ID, "");
         String access_token = prefs.getString(OAuthFlowApp.PREF_ACCESS_TOKEN, "");

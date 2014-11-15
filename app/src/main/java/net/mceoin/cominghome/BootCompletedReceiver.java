@@ -23,6 +23,10 @@ import android.util.Log;
 
 import com.google.android.gms.location.Geofence;
 
+import net.mceoin.cominghome.geofence.GeofenceRequester;
+import net.mceoin.cominghome.geofence.SimpleGeofence;
+import net.mceoin.cominghome.geofence.SimpleGeofenceStore;
+
 import java.util.ArrayList;
 import java.util.List;
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.mceoin.cominghome;
+package net.mceoin.cominghome.geofence;
 
 import com.google.android.gms.location.Geofence;
 
