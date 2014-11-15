@@ -14,8 +14,9 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
-    android:layout_height="?android:attr/listPreferredItemHeight"
+    android:layout_height="wrap_content"
     android:orientation="vertical">
 
     <TextView
@@ -25,8 +26,7 @@
         android:layout_marginTop="5sp"
         android:layout_marginLeft="5sp"
         android:gravity="center_vertical"
-        android:singleLine="true"
-        android:text="Example IP"
+        tools:text="Backend error: Some very long error that takes up too much space"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TextView
@@ -35,9 +35,10 @@
         android:layout_height="wrap_content"
         android:layout_gravity="right"
         android:layout_marginRight="5sp"
+        android:layout_marginBottom="5sp"
         android:gravity="center_vertical"
         android:singleLine="true"
-        android:text="Aug 24"
+        tools:text="11/12/2014 16:54:57"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
 </LinearLayout>
