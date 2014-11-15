@@ -19,6 +19,7 @@ import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -534,6 +535,9 @@ public class MainActivity extends FragmentActivity implements
                 last_info_check = System.currentTimeMillis();
             }
         }
+        NotificationManager mNotificationManager =
+                (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotificationManager.cancelAll();
 /*
         if (structure_id.isEmpty()) {
             sendETAButton.setEnabled(false);
