@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package net.mceoin.cominghome;
+package net.mceoin.cominghome.history;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -24,7 +24,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-import net.mceoin.cominghome.HistoryValues.History;
+import net.mceoin.cominghome.PrefsFragment;
 
 import android.content.ContentProvider;
 import android.content.ContentResolver;
@@ -74,11 +74,11 @@ public class HistoryProvider extends ContentProvider {
         @Override
         public void onCreate(SQLiteDatabase db) {
             db.execSQL("CREATE TABLE " + HISTORY_TABLE_NAME + " ("
-                    + History._ID + " INTEGER PRIMARY KEY,"
-                    + History.ENTRY + " TEXT,"
-                    + History.BITS + " INTEGER,"
-                    + History.CREATED_DATE + " INTEGER,"
-                    + History.CREATED_DATE_STR + " TEXT"
+                    + HistoryValues.History._ID + " INTEGER PRIMARY KEY,"
+                    + HistoryValues.History.ENTRY + " TEXT,"
+                    + HistoryValues.History.BITS + " INTEGER,"
+                    + HistoryValues.History.CREATED_DATE + " INTEGER,"
+                    + HistoryValues.History.CREATED_DATE_STR + " TEXT"
                     + ");");
         }
 
@@ -117,7 +117,7 @@ public class HistoryProvider extends ContentProvider {
                 if (path != null) {
                     String id = (String) path.get(1);
                     if (id != null) {
-                        qb.appendWhere(History._ID + "=" + id);
+                        qb.appendWhere(HistoryValues.History._ID + "=" + id);
                     }
                 }
                 break;
@@ -159,10 +159,10 @@ public class HistoryProvider extends ContentProvider {
     public String getType(Uri uri) {
         switch (sUriMatcher.match(uri)) {
             case HISTORY:
-                return History.CONTENT_TYPE;
+                return HistoryValues.History.CONTENT_TYPE;
 
             case HISTORY_ID:
-                return History.CONTENT_ITEM_TYPE;
+                return HistoryValues.History.CONTENT_ITEM_TYPE;
 
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
@@ -184,23 +184,23 @@ public class HistoryProvider extends ContentProvider {
 
         Long now = System.currentTimeMillis();
 
-        if (!values.containsKey(History.CREATED_DATE)) {
-            values.put(History.CREATED_DATE, now);
+        if (!values.containsKey(HistoryValues.History.CREATED_DATE)) {
+            values.put(HistoryValues.History.CREATED_DATE, now);
         }
 
-        if (!values.containsKey(History.CREATED_DATE_STR)) {
+        if (!values.containsKey(HistoryValues.History.CREATED_DATE_STR)) {
             DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
             Date today = Calendar.getInstance().getTime();
             String createdDateStr = df.format(today);
-            values.put(History.CREATED_DATE_STR, createdDateStr);
+            values.put(HistoryValues.History.CREATED_DATE_STR, createdDateStr);
         }
 
-        if (!values.containsKey(History.ENTRY)) {
-            values.put(History.ENTRY, "");
+        if (!values.containsKey(HistoryValues.History.ENTRY)) {
+            values.put(HistoryValues.History.ENTRY, "");
         }
 
-        if (!values.containsKey(History.BITS)) {
-            values.put(History.BITS, 0);
+        if (!values.containsKey(HistoryValues.History.BITS)) {
+            values.put(HistoryValues.History.BITS, 0);
         }
 
         Uri noteUri = null;
@@ -208,7 +208,7 @@ public class HistoryProvider extends ContentProvider {
             SQLiteDatabase db = mOpenHelper.getWritableDatabase();
             long rowId = db.insert(HISTORY_TABLE_NAME, null, values);
             if (rowId > 0) {
-                noteUri = ContentUris.withAppendedId(History.CONTENT_URI, rowId);
+                noteUri = ContentUris.withAppendedId(HistoryValues.History.CONTENT_URI, rowId);
                 notifyChange(uri);
                 keepCheck(db);
             }
@@ -248,13 +248,13 @@ public class HistoryProvider extends ContentProvider {
             if (debug) Log.d(TAG, "keepCheck: greater than " + maxRows);
             Cursor c;
             try {
-                String[] projection = {History._ID};
-                c = db.query(HISTORY_TABLE_NAME, projection, null, null, null, null, History.DEFAULT_SORT_ORDER);
+                String[] projection = {HistoryValues.History._ID};
+                c = db.query(HISTORY_TABLE_NAME, projection, null, null, null, null, HistoryValues.History.DEFAULT_SORT_ORDER);
                 c.moveToPosition(maxRows);
                 while (!c.isAfterLast()) {
                     int rowId = c.getInt(0);
                     if (debug) Log.d(TAG, "keepCheck: need to delete " + rowId);
-                    db.delete(HISTORY_TABLE_NAME, History._ID + "=" + rowId, null);
+                    db.delete(HISTORY_TABLE_NAME, HistoryValues.History._ID + "=" + rowId, null);
                     c.moveToNext();
                 }
                 c.close();
@@ -277,7 +277,7 @@ public class HistoryProvider extends ContentProvider {
                 List path = uri.getPathSegments();
                 if (path != null) {
                     String noteId = (String) path.get(1);
-                    count = db.delete(HISTORY_TABLE_NAME, History._ID + "=" + noteId
+                    count = db.delete(HISTORY_TABLE_NAME, HistoryValues.History._ID + "=" + noteId
                             + (!TextUtils.isEmpty(where) ? " AND (" + where + ')' : ""), whereArgs);
                 }
                 break;
@@ -312,7 +312,7 @@ public class HistoryProvider extends ContentProvider {
                     List path = uri.getPathSegments();
                     if (path != null) {
                         String noteId = (String) path.get(1);
-                        count = db.update(HISTORY_TABLE_NAME, values, History._ID + "=" + noteId
+                        count = db.update(HISTORY_TABLE_NAME, values, HistoryValues.History._ID + "=" + noteId
                                 + (!TextUtils.isEmpty(where) ? " AND (" + where + ')' : ""), whereArgs);
                     }
                     break;
@@ -334,10 +334,10 @@ public class HistoryProvider extends ContentProvider {
         sUriMatcher.addURI(HistoryValues.AUTHORITY, "history/#", HISTORY_ID);
 
         sHistoryProjectionMap = new HashMap<String, String>();
-        sHistoryProjectionMap.put(History._ID, History._ID);
-        sHistoryProjectionMap.put(History.ENTRY, History.ENTRY);
-        sHistoryProjectionMap.put(History.BITS, History.BITS);
-        sHistoryProjectionMap.put(History.CREATED_DATE, History.CREATED_DATE);
-        sHistoryProjectionMap.put(History.CREATED_DATE_STR, History.CREATED_DATE_STR);
+        sHistoryProjectionMap.put(HistoryValues.History._ID, HistoryValues.History._ID);
+        sHistoryProjectionMap.put(HistoryValues.History.ENTRY, HistoryValues.History.ENTRY);
+        sHistoryProjectionMap.put(HistoryValues.History.BITS, HistoryValues.History.BITS);
+        sHistoryProjectionMap.put(HistoryValues.History.CREATED_DATE, HistoryValues.History.CREATED_DATE);
+        sHistoryProjectionMap.put(HistoryValues.History.CREATED_DATE_STR, HistoryValues.History.CREATED_DATE_STR);
     }
 }

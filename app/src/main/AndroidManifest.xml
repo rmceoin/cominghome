@@ -34,11 +34,11 @@
         </activity>
         <activity android:name=".SettingsActivity" />
         <activity android:name=".oauth.OAuthFlowApp" />
-        <activity android:name=".HistoryList" />
+        <activity android:name=".history.HistoryList" />
         <activity android:name=".wizard.InitialWizardActivity" />
 
         <provider
-            android:name=".HistoryProvider"
+            android:name=".history.HistoryProvider"
             android:authorities="net.mceoin.cominghome.history"
             android:exported="false" />
 
@@ -48,7 +48,7 @@
             android:exported="false" />
 
         <receiver
-            android:name=".FenceHandlingAlarm"
+            android:name=".geofence.FenceHandlingAlarm"
             android:process=":remote" />
         <receiver android:name=".BootCompletedReceiver" >
             <intent-filter>

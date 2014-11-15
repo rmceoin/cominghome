@@ -19,9 +19,9 @@
  * limitations under the License.
  */
 
-package net.mceoin.cominghome;
+package net.mceoin.cominghome.history;
 
-import net.mceoin.cominghome.HistoryValues.History;
+import net.mceoin.cominghome.R;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -62,11 +62,11 @@ public class HistoryList extends ListActivity implements LoaderManager.LoaderCal
      * The columns we are interested in from the database
      */
     private static final String[] PROJECTION = new String[]{
-            History._ID, // 0
-            History.ENTRY, // 1
-            History.BITS, // 2
-            History.CREATED_DATE, // 3
-            History.CREATED_DATE_STR, // 4
+            HistoryValues.History._ID, // 0
+            HistoryValues.History.ENTRY, // 1
+            HistoryValues.History.BITS, // 2
+            HistoryValues.History.CREATED_DATE, // 3
+            HistoryValues.History.CREATED_DATE_STR, // 4
     };
 
     /**
@@ -91,7 +91,7 @@ public class HistoryList extends ListActivity implements LoaderManager.LoaderCal
         // as a MAIN activity), then use our default content provider.
         Intent intent = getIntent();
         if (intent.getData() == null) {
-            intent.setData(History.CONTENT_URI);
+            intent.setData(HistoryValues.History.CONTENT_URI);
         }
 
         // Inform the list we provide context menus for items
@@ -99,7 +99,7 @@ public class HistoryList extends ListActivity implements LoaderManager.LoaderCal
 
         mAdapter = new SimpleCursorAdapter(this,
                 R.layout.historylist_item, null,
-                new String[]{History.ENTRY, History.CREATED_DATE_STR},
+                new String[]{HistoryValues.History.ENTRY, HistoryValues.History.CREATED_DATE_STR},
                 new int[]{R.id.history_entry, R.id.history_date}, 0);
 
         setListAdapter(mAdapter);
@@ -129,7 +129,7 @@ public class HistoryList extends ListActivity implements LoaderManager.LoaderCal
                         .setTitle(R.string.delete_all)
                         .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
-                                getContentResolver().delete(History.CONTENT_URI, null, null);
+                                getContentResolver().delete(HistoryValues.History.CONTENT_URI, null, null);
                             }
                         })
                         .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
@@ -214,13 +214,13 @@ public class HistoryList extends ListActivity implements LoaderManager.LoaderCal
 
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 
-        Uri baseUri = History.CONTENT_URI;
+        Uri baseUri = HistoryValues.History.CONTENT_URI;
 
         // Now create and return a CursorLoader that will take care of
         // creating a Cursor for the data being displayed.
         return new CursorLoader(this, baseUri,
                 PROJECTION, null, null,
-                History.CREATED_DATE + " COLLATE LOCALIZED DESC");
+                HistoryValues.History.CREATED_DATE + " COLLATE LOCALIZED DESC");
     }
 
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {

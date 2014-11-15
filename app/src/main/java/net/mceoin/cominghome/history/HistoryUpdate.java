@@ -14,9 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.mceoin.cominghome;
+package net.mceoin.cominghome.history;
 
-import net.mceoin.cominghome.HistoryValues.History;
 import android.content.ContentValues;
 import android.content.Context;
 import android.net.Uri;
@@ -36,10 +35,10 @@ public class HistoryUpdate {
 
         if (debug) Log.d(TAG,"updateHistory("+entry+")");
         ContentValues values = new ContentValues();
-        values.put(History.ENTRY, entry);
-        values.put(History.CREATED_DATE, System.currentTimeMillis());
+        values.put(HistoryValues.History.ENTRY, entry);
+        values.put(HistoryValues.History.CREATED_DATE, System.currentTimeMillis());
 
-        mUri = History.CONTENT_URI;
+        mUri = HistoryValues.History.CONTENT_URI;
         Uri uri=context.getContentResolver().insert(mUri, values);
 
         if (debug) Log.d(TAG,"updateHistory: inserted uri="+uri);

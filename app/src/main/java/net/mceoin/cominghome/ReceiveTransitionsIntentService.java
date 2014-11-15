@@ -24,6 +24,9 @@ import android.util.Log;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.LocationClient;
 
+import net.mceoin.cominghome.geofence.FenceHandling;
+import net.mceoin.cominghome.geofence.GeofenceUtils;
+
 import java.util.List;
 
 /**

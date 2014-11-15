@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.mceoin.cominghome;
+package net.mceoin.cominghome.geofence;
 
 /**
  * This class defines constants used by location sample apps.

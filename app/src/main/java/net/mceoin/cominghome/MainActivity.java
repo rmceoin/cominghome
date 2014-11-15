@@ -61,6 +61,11 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import net.mceoin.cominghome.geofence.FenceHandling;
+import net.mceoin.cominghome.geofence.GeofenceRequester;
+import net.mceoin.cominghome.geofence.SimpleGeofence;
+import net.mceoin.cominghome.geofence.SimpleGeofenceStore;
+import net.mceoin.cominghome.history.HistoryList;
 import net.mceoin.cominghome.oauth.OAuthFlowApp;
 import net.mceoin.cominghome.wizard.InitialWizardActivity;
 

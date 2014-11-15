@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package net.mceoin.cominghome;
+package net.mceoin.cominghome.geofence;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+
+import net.mceoin.cominghome.MainActivity;
 
 /**
  * Storage for geofence values, implemented in SharedPreferences.
