@@ -22,6 +22,8 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 
+import java.util.HashSet;
+
 /**
  * Use this to update entries in the structures database
  */
@@ -34,6 +36,10 @@ public class StructuresUpdate {
             StructuresValues.Structures.STRUCTURE_ID,
             StructuresValues.Structures.NAME,
             StructuresValues.Structures.AWAY,
+    };
+
+    static final String[] mProjectionStructures = {
+            StructuresValues.Structures.STRUCTURE_ID,
     };
 
     /**
@@ -88,4 +94,44 @@ public class StructuresUpdate {
         if (debug) Log.d(TAG, "updateStructures: inserted uri=" + uri);
     }
 
+    /**
+     * Get all the structure_id's in a handy HashSet
+     *
+     * @param context Context of the app
+     * @return a HashSet of structure_id's
+     */
+    public static HashSet<String> getStructureIds(Context context) {
+        Uri mUri = StructuresValues.Structures.CONTENT_URI;
+
+        HashSet<String> structure_ids = new HashSet<String>();
+
+        Cursor mCursor = context.getContentResolver().query(mUri, mProjectionStructures, null, null, "");
+        if (mCursor != null) {
+
+            if (mCursor.getCount() > 0) {
+                // we found at least one entry ... not good if more than 1
+                while (mCursor.moveToNext()) {
+                    String row_structure_id = mCursor.getString(0);
+                    structure_ids.add(row_structure_id);
+                }
+            }
+        }
+        return structure_ids;
+    }
+
+    /**
+     * Delete a structure_id from the database
+     *
+     * @param context Context of the app
+     * @param structure_id ID of the structure
+     * @return Number of rows deleted
+     */
+    public static int deleteStructureId(Context context, String structure_id) {
+        Uri mUri = StructuresValues.Structures.CONTENT_URI;
+
+        String mSelectionClause = StructuresValues.Structures.STRUCTURE_ID + " = ?";
+        String[] mSelectionArgs = {structure_id};
+
+        return context.getContentResolver().delete(mUri, mSelectionClause, mSelectionArgs );
+    }
 }

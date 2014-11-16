@@ -54,6 +54,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.TimeZone;
 
@@ -113,6 +114,7 @@ public class NestUtils {
                         boolean current_in_structures = false;
                         String last_structure_name="";
                         String last_away_status="";
+                        HashSet<String> structure_ids = new HashSet<String>();
 
                         JSONObject structures;
                         try {
@@ -127,6 +129,8 @@ public class NestUtils {
                                 away_status = value.getString("away");
 
                                 StructuresUpdate.update(context, structure_id, structure_name, away_status);
+                                structure_ids.add(structure_id);
+
                                 if (structure_id_selected) {
                                     if (structure_id.equals(structure_id_current)) {
                                         current_in_structures = true;
@@ -175,6 +179,16 @@ public class NestUtils {
                             last_away_status = away_status;
                         }
 
+                        HashSet<String> stored_structure_ids = StructuresUpdate.getStructureIds(context);
+                        for (String id : stored_structure_ids) {
+                            if (!structure_ids.contains(id)) {
+                                //
+                                // if we have a stored id that wasn't in the array Nest just sent us,
+                                // then delete it from our database
+                                //
+                                StructuresUpdate.deleteStructureId(context, id);
+                            }
+                        }
                         Intent intent = new Intent(GOT_INFO);
                         intent.putExtra("structure_name", last_structure_name);
                         intent.putExtra("away_status", last_away_status);
