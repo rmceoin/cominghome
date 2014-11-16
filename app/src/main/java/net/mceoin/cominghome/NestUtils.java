@@ -65,7 +65,7 @@ import java.util.TimeZone;
  */
 public class NestUtils {
     public static final String TAG = NestUtils.class.getSimpleName();
-    public static final boolean debug = true;
+    public static final boolean debug = false;
 
     public static final String MSG_ETA = "eta";
     public static final String MSG_AWAY = "away";
@@ -377,7 +377,7 @@ public class NestUtils {
                         Iterator<String> keys = object.keys();
                         while (keys.hasNext()) {
                             String key = keys.next();
-                            if ((statusCode == 400) && (key.equals("error"))) {
+                            if ((key.equals("error"))) {
                                 errorResult = object.getString("error");
                                 if (debug) {
                                     Log.d(TAG, "errorResult=" + errorResult);
