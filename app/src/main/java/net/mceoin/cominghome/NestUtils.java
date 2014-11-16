@@ -107,6 +107,13 @@ public class NestUtils {
                         String structure_name = "";
                         String away_status = "";
 
+                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(AppController.getInstance().getApplicationContext());
+                        boolean structure_id_selected = prefs.contains(MainActivity.PREFS_STRUCTURE_ID);
+                        String structure_id_current = prefs.getString(MainActivity.PREFS_STRUCTURE_ID, "");
+                        boolean current_in_structures = false;
+                        String last_structure_name="";
+                        String last_away_status="";
+
                         JSONObject structures;
                         try {
                             structures = new JSONObject(response.toString());
@@ -120,22 +127,57 @@ public class NestUtils {
                                 away_status = value.getString("away");
 
                                 StructuresUpdate.update(context, structure_id, structure_name, away_status);
+                                if (structure_id_selected) {
+                                    if (structure_id.equals(structure_id_current)) {
+                                        current_in_structures = true;
+                                        //
+                                        // found the structure_id that we're associated with
+                                        // go ahead and update the name and away status
+                                        //
+                                        SharedPreferences.Editor pref = prefs.edit();
+                                        pref.putString(MainActivity.PREFS_STRUCTURE_NAME, structure_name);
+                                        pref.putString(MainActivity.PREFS_LAST_AWAY_STATUS, away_status);
+                                        pref.apply();
+
+                                        last_structure_name = structure_name;
+                                        last_away_status = away_status;
+                                    }
+                                }
                             }
                         } catch (JSONException e) {
                             Log.e(TAG, "error parsing JSON");
                             return;
                         }
 
-                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(AppController.getInstance().getApplicationContext());
-                        SharedPreferences.Editor pref = prefs.edit();
-                        pref.putString(MainActivity.PREFS_STRUCTURE_ID, structure_id);
-                        pref.putString(MainActivity.PREFS_STRUCTURE_NAME, structure_name);
-                        pref.putString(MainActivity.PREFS_LAST_AWAY_STATUS, away_status);
-                        pref.apply();
+                        if (structure_id_selected) {
+                            if (!current_in_structures) {
+                                // there is a structure_id selected, but it is no longer in the structures
+                                // listed from Nest, so clear it out
+                                SharedPreferences.Editor pref = prefs.edit();
+                                pref.remove(MainActivity.PREFS_STRUCTURE_ID);
+                                pref.remove(MainActivity.PREFS_STRUCTURE_NAME);
+                                pref.remove(MainActivity.PREFS_LAST_AWAY_STATUS);
+                                pref.apply();
+                            }
+                        } else {
+                            //
+                            // No structure_id currently selected, so go ahead and pick the
+                            // last structure_id.  This should work for most homes that will
+                            // only have one structure_id anyway.
+                            //
+                            SharedPreferences.Editor pref = prefs.edit();
+                            pref.putString(MainActivity.PREFS_STRUCTURE_ID, structure_id);
+                            pref.putString(MainActivity.PREFS_STRUCTURE_NAME, structure_name);
+                            pref.putString(MainActivity.PREFS_LAST_AWAY_STATUS, away_status);
+                            pref.apply();
+
+                            last_structure_name = structure_name;
+                            last_away_status = away_status;
+                        }
 
                         Intent intent = new Intent(GOT_INFO);
-                        intent.putExtra("structure_name", structure_name);
-                        intent.putExtra("away_status", away_status);
+                        intent.putExtra("structure_name", last_structure_name);
+                        intent.putExtra("away_status", last_away_status);
                         LocalBroadcastManager.getInstance(AppController.getInstance().getApplicationContext()).sendBroadcast(intent);
 
                     }

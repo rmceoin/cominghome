@@ -79,7 +79,7 @@ public class MainActivity extends FragmentActivity implements
         GooglePlayServicesClient.OnConnectionFailedListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
-    private static final boolean debug = false;
+    private static final boolean debug = true;
 
     private static final String KEY_IN_RESOLUTION = "is_in_resolution";
     public static final String PREFS_INITIAL_WIZARD = "initial_wizard";
@@ -616,13 +616,14 @@ public class MainActivity extends FragmentActivity implements
         if (debug) Log.d(TAG, "GoogleApiClient connected");
         if (map != null) {
             //
-            // The very first time we run, the map will be at 0,0
+            // The very first time we run, the map will be at 0,0 (or very near)
             // Check that we have a map and a location, if so, zoom to it
             //
             CameraPosition cameraPosition = map.getCameraPosition();
+            float distFrom0=LocationService.distFrom(cameraPosition.target.latitude, cameraPosition.target.longitude, 0, 0);
             if (debug) Log.d(TAG, "cameraPosition lat=" + cameraPosition.target.latitude +
-                    " long=" + cameraPosition.target.longitude);
-            if ((cameraPosition.target.latitude == 0) && (cameraPosition.target.longitude == 0)) {
+                    " long=" + cameraPosition.target.longitude + " distFrom0=" + distFrom0);
+            if (distFrom0 < 10000) {
                 if (mLocationClient == null) {
                     return;
                 }
