@@ -143,7 +143,7 @@ public class FenceHandling {
         long currentTimeMillis=System.currentTimeMillis();
         SharedPreferences.Editor editor = prefs.edit();
         editor.putLong(MainActivity.PREFS_TIME_LEFT_WORK, currentTimeMillis);
-        editor.commit();
+        editor.apply();
 
         boolean trackEta = prefs.getBoolean(PrefsFragment.PREFERENCE_TRACK_ETA, false);
 
