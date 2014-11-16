@@ -24,6 +24,7 @@ public class PrefsFragment extends PreferenceFragment {
     public static final String key_tell_nest_on_leaving_home="tell_nest_on_leaving_home";
 
     public static final String PREFERENCE_HISTORY_ENTRIES = "history_entries";
+    public static final String PREFERENCE_STRUCTURES_ENTRIES = "structures_entries";
     public static final String PREFERENCE_TIMEHOME_ENTRIES = "timehome_entries";
     public static final String PREFERENCE_TRACK_ETA = "track_eta";
 

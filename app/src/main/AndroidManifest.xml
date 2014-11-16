@@ -43,6 +43,11 @@
             android:exported="false" />
 
         <provider
+            android:name=".structures.StructuresProvider"
+            android:authorities="net.mceoin.cominghome.structures"
+            android:exported="false" />
+
+        <provider
             android:name=".timehome.TimeHomeProvider"
             android:authorities="net.mceoin.cominghome.timehome"
             android:exported="false" />

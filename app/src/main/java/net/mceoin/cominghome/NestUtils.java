@@ -38,6 +38,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 
 import net.mceoin.cominghome.history.HistoryUpdate;
 import net.mceoin.cominghome.oauth.OAuthFlowApp;
+import net.mceoin.cominghome.structures.StructuresUpdate;
 
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
@@ -73,7 +74,7 @@ public class NestUtils {
     public static final String GOT_INFO = "net.mceoin.cominghome.NetUtils.GotInfo";
     public static final String LOST_AUTH = "net.mceoin.cominghome.NetUtils.LostAuth";
 
-    public static void getInfo(Context context, String access_token) {
+    public static void getInfo(final Context context, String access_token) {
         if (debug) Log.d(TAG, "getInfo()");
         if (context == null) {
             Log.e(TAG, "missing context");
@@ -117,6 +118,8 @@ public class NestUtils {
                                 structure_id = value.getString("structure_id");
                                 structure_name = value.getString("name");
                                 away_status = value.getString("away");
+
+                                StructuresUpdate.update(context, structure_id, structure_name, away_status);
                             }
                         } catch (JSONException e) {
                             Log.e(TAG, "error parsing JSON");
