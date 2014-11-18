@@ -15,13 +15,14 @@
  */
 package net.mceoin.cominghome;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -29,14 +30,31 @@ import android.widget.Toast;
 
 import net.mceoin.cominghome.oauth.OAuthFlowApp;
 
-public class SettingsActivity extends Activity {
+public class SettingsActivity extends ActionBarActivity {
+
+    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        getFragmentManager().beginTransaction().replace(android.R.id.content,
+        setContentView(R.layout.settings);
+
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+        setActionBarIcon(R.drawable.home);
+
+        getFragmentManager().beginTransaction().replace(R.id.settings_area,
                 new PrefsFragment()).commit();
+    }
+
+    protected void setActionBarIcon(int iconRes) {
+        if (toolbar != null) {
+            toolbar.setNavigationIcon(iconRes);
+        }
     }
 
     @Override

@@ -13,3 +13,6 @@ adb shell setprop persist.log.tag.Volley INFO
 adb shell setprop log.tag.Volley ERROR
 adb shell setprop persist.log.tag.Volley ERROR
 
+
+Got some inspiration from:
+http://antonioleiva.com/material-design-everywhere/

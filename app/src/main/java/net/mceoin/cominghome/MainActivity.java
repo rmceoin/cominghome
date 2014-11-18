@@ -37,6 +37,8 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -78,12 +80,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MainActivity extends FragmentActivity implements
+public class MainActivity extends ActionBarActivity implements
         GooglePlayServicesClient.ConnectionCallbacks,
         GooglePlayServicesClient.OnConnectionFailedListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
-    private static final boolean debug = true;
+    private static final boolean debug = false;
 
     private static final String KEY_IN_RESOLUTION = "is_in_resolution";
     public static final String PREFS_INITIAL_WIZARD = "initial_wizard";
@@ -154,6 +156,8 @@ public class MainActivity extends FragmentActivity implements
 
     // Add geofences handler
     private GeofenceRequester mGeofenceRequester;
+
+    private Toolbar toolbar;
 
     public static class ErrorDialogFragment extends DialogFragment {
         // Global field to contain the error dialog
@@ -255,8 +259,17 @@ public class MainActivity extends FragmentActivity implements
         mCurrentGeofences = new ArrayList<Geofence>();
 
         loadFences();
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+        setActionBarIcon(R.drawable.home);
     }
 
+    protected void setActionBarIcon(int iconRes) {
+        toolbar.setNavigationIcon(iconRes);
+    }
     /**
      * Call using isMyServiceRunning(MyService.class)
      * http://stackoverflow.com/questions/600207/how-to-check-if-a-service-is-running-in-android
