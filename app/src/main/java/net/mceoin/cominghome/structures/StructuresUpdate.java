@@ -32,6 +32,8 @@ public class StructuresUpdate {
     public static final String TAG = StructuresUpdate.class.getSimpleName();
     public static final boolean debug = false;
 
+    static Uri mUri = StructuresValues.Structures.CONTENT_URI;
+
     static final String[] mProjection = {
             StructuresValues.Structures.STRUCTURE_ID,
             StructuresValues.Structures.NAME,
@@ -52,8 +54,6 @@ public class StructuresUpdate {
      * @param away         Away status
      */
     public static void update(Context context, String structure_id, String name, String away) {
-        Uri mUri = StructuresValues.Structures.CONTENT_URI;
-
         if (debug) Log.d(TAG, "updateStructures(" + structure_id + ")");
         ContentValues values = new ContentValues();
         values.put(StructuresValues.Structures.STRUCTURE_ID, structure_id);
@@ -80,9 +80,11 @@ public class StructuresUpdate {
                         if (updated != 1) {
                             Log.w(TAG, "did not update: " + mUri.toString());
                         }
+                        mCursor.close();
                         return;
                     }
                 }
+                mCursor.close();
                 // database did contain this structure_id, but didn't need updating, so just return
                 return;
             }
@@ -101,7 +103,6 @@ public class StructuresUpdate {
      * @return a HashSet of structure_id's
      */
     public static HashSet<String> getStructureIds(Context context) {
-        Uri mUri = StructuresValues.Structures.CONTENT_URI;
 
         HashSet<String> structure_ids = new HashSet<String>();
 
@@ -115,6 +116,7 @@ public class StructuresUpdate {
                     structure_ids.add(row_structure_id);
                 }
             }
+            mCursor.close();
         }
         return structure_ids;
     }
@@ -127,11 +129,41 @@ public class StructuresUpdate {
      * @return Number of rows deleted
      */
     public static int deleteStructureId(Context context, String structure_id) {
-        Uri mUri = StructuresValues.Structures.CONTENT_URI;
 
         String mSelectionClause = StructuresValues.Structures.STRUCTURE_ID + " = ?";
         String[] mSelectionArgs = {structure_id};
 
         return context.getContentResolver().delete(mUri, mSelectionClause, mSelectionArgs );
+    }
+
+    /**
+     * Count the number of structures
+     *
+     * @param context Context of the app
+     * @return Number of structures
+     */
+    public static int countStructureIds(Context context) {
+        int count = 0;
+        Cursor mCursor = context.getContentResolver().query(mUri, mProjectionStructures, null, null, "");
+        if (mCursor != null) {
+            count = mCursor.getCount();
+            mCursor.close();
+        }
+        return count;
+    }
+
+    public static String getStructureId(Context context, Uri mUri) {
+
+        String structure_id = "";
+        // CAUTION: The query() method should be called from a separate thread to avoid blocking
+        // your app's UI thread. (For simplicity of the sample, this code doesn't do that.)
+        // Consider using CursorLoader to perform the query.
+        Cursor mCursor = context.getContentResolver().query(mUri, mProjectionStructures, null, null, null);
+        if (mCursor != null) {
+            mCursor.moveToNext();
+            structure_id = mCursor.getString(0);
+            mCursor.close();
+        }
+        return structure_id;
     }
 }

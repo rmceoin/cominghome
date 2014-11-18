@@ -17,6 +17,9 @@
         android:id="@+id/settings"
         android:title="@string/settings" />
     <item
+        android:id="@+id/select_structure"
+        android:title="@string/select_structure" />
+    <item
         android:id="@+id/history"
         android:title="@string/history" />
     <item
