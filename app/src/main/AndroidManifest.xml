@@ -32,10 +32,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".SettingsActivity" />
-        <activity android:name=".oauth.OAuthFlowApp" />
-        <activity android:name=".history.HistoryList" />
-        <activity android:name=".structures.StructuresList" >
+        <activity android:name=".SettingsActivity"
+            android:parentActivityName=".MainActivity" />
+        <activity android:name=".oauth.OAuthFlowApp"
+            android:parentActivityName=".MainActivity" />
+        <activity android:name=".history.HistoryList"
+            android:parentActivityName=".MainActivity" />
+        <activity android:name=".structures.StructuresList"
+            android:parentActivityName=".MainActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.PICK"/>
                 <category android:name="android.intent.category.DEFAULT" />
