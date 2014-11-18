@@ -187,7 +187,7 @@ public class StatusEndpoint {
 
         response.setSuccess(true);
         log.info("track ETA: " + latitude + ", " + longitude +" : " + home_latitude +
-            ", " + home_longitude);
+            ", " + home_longitude + " access_token=" + access_token);
         logEvent(InstallationID, structure_id, "track ETA");
 
         response.setMessage("Success");
@@ -244,10 +244,16 @@ public class StatusEndpoint {
             for (Entity result : pq.asIterable(FetchOptions.Builder.withLimit(10))) {
                 String installation_ID = (String) result.getProperty("installation_id");
                 String away_status = (String) result.getProperty("away_status");
-//            Date date = (Date) result.getProperty("date");
+                Date date = (Date) result.getProperty("date");
 
                 if ((!installation_ID.equals(installation_id)) && (away_status != null)) {
-                    if (away_status.equals("home")) {
+                    Date now = new Date();
+                    long delta_hours = ((now.getTime() - date.getTime()) / 1000) / (60*60);
+                    log.info("installation_id=" + installation_ID + " date=" + date + " delta_hours=" + delta_hours);
+
+                    if ((away_status.equals("home")) && (delta_hours < 24)) {
+                        //
+                        // The other installation is at home and checked in with us in the last 24 hours
                         log.info("found somebody else at home");
                         return true;
                     }

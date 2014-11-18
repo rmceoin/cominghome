@@ -30,6 +30,7 @@ public class CronServlet extends HttpServlet {
 
         log.info("got get");
         purgeOldStatus();
+        purgeOldEvents();
     }
 
     private void purgeOldStatus() {
@@ -39,7 +40,7 @@ public class CronServlet extends HttpServlet {
         findStatusQuery.addSort("date", Query.SortDirection.ASCENDING);
         try {
             PreparedQuery pq = datastore.prepare(findStatusQuery);
-            for (Entity result : pq.asIterable(FetchOptions.Builder.withLimit(10))) {
+            for (Entity result : pq.asIterable(FetchOptions.Builder.withLimit(1000))) {
                 String installation_ID = (String) result.getProperty("installation_id");
                 Date date = (Date) result.getProperty("date");
 
@@ -49,7 +50,7 @@ public class CronServlet extends HttpServlet {
 
                 int hoursOld = 24;
                 if (delta > hoursOld * 60 * 60) {
-                    log.info("more than " + hoursOld);
+                    log.info("older than " + hoursOld + " hours: deleting " + result.getKey());
                     datastore.delete(result.getKey());
                 }
 
@@ -57,6 +58,11 @@ public class CronServlet extends HttpServlet {
         } catch (Exception e) {
             log.warning("Error: " + e.getLocalizedMessage());
         }
+
+    }
+
+    private void purgeOldEvents() {
+        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
         int logDaysOld = 7;
 
@@ -86,7 +92,7 @@ public class CronServlet extends HttpServlet {
                 log.info("installation_id=" + installation_ID + " date=" + date + " " + date.getTime() + " delta=" + delta);
 
                 if (delta > logDaysOld * 24 * 60 * 60) {
-                    log.info("more than " + logDaysOld);
+                    log.info("older than " + logDaysOld + " days: deleting " + result.getKey());
                     datastore.delete(result.getKey());
                     count++;
                 }
