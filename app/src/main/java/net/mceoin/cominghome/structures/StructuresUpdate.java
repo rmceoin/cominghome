@@ -152,18 +152,21 @@ public class StructuresUpdate {
         return count;
     }
 
-    public static String getStructureId(Context context, Uri mUri) {
+    public static StructuresBean getStructureId(Context context, Uri mUri) {
 
-        String structure_id = "";
+        StructuresBean structure = new StructuresBean();
+        structure.setId("");
         // CAUTION: The query() method should be called from a separate thread to avoid blocking
         // your app's UI thread. (For simplicity of the sample, this code doesn't do that.)
         // Consider using CursorLoader to perform the query.
-        Cursor mCursor = context.getContentResolver().query(mUri, mProjectionStructures, null, null, null);
+        Cursor mCursor = context.getContentResolver().query(mUri, mProjection, null, null, null);
         if (mCursor != null) {
             mCursor.moveToNext();
-            structure_id = mCursor.getString(0);
+            structure.setId(mCursor.getString(0));
+            structure.setName(mCursor.getString(1));
+            structure.setAway(mCursor.getString(2));
             mCursor.close();
         }
-        return structure_id;
+        return structure;
     }
 }

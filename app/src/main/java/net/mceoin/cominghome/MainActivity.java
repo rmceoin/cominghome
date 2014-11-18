@@ -68,6 +68,7 @@ import net.mceoin.cominghome.geofence.SimpleGeofence;
 import net.mceoin.cominghome.geofence.SimpleGeofenceStore;
 import net.mceoin.cominghome.history.HistoryList;
 import net.mceoin.cominghome.oauth.OAuthFlowApp;
+import net.mceoin.cominghome.structures.StructuresBean;
 import net.mceoin.cominghome.structures.StructuresUpdate;
 import net.mceoin.cominghome.structures.StructuresValues;
 import net.mceoin.cominghome.wizard.InitialWizardActivity;
@@ -617,13 +618,20 @@ public class MainActivity extends FragmentActivity implements
                 // Make sure the request was successful
                 if (resultCode == RESULT_OK) {
                     Uri structureUri = data.getData();
-                    structure_id = StructuresUpdate.getStructureId(this, structureUri);
+                    StructuresBean structuresBean = StructuresUpdate.getStructureId(this, structureUri);
                     if (debug) Log.d(TAG, "structureUri=" + structureUri.toString() +
-                            " structure_id=" + structure_id);
+                            " structureBean=" + structuresBean.toString());
+                    structure_id = structuresBean.getId();
+                    structure_name = structuresBean.getName();
+                    away_status = structuresBean.getAway();
 
-                    //TODO: store pref
+                    structureNameText.setText(structure_name);
+                    awayStatusText.setText(away_status);
+
                     SharedPreferences.Editor editor = prefs.edit();
                     editor.putString(PREFS_STRUCTURE_ID, structure_id);
+                    editor.putString(PREFS_STRUCTURE_NAME, structure_name);
+                    editor.putString(PREFS_LAST_AWAY_STATUS, away_status);
                     editor.apply();
                 }
             case REQUEST_CODE_RESOLUTION:
