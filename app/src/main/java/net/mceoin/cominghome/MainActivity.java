@@ -30,6 +30,7 @@ import android.content.IntentSender.SendIntentException;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -67,6 +68,8 @@ import net.mceoin.cominghome.geofence.SimpleGeofence;
 import net.mceoin.cominghome.geofence.SimpleGeofenceStore;
 import net.mceoin.cominghome.history.HistoryList;
 import net.mceoin.cominghome.oauth.OAuthFlowApp;
+import net.mceoin.cominghome.structures.StructuresUpdate;
+import net.mceoin.cominghome.structures.StructuresValues;
 import net.mceoin.cominghome.wizard.InitialWizardActivity;
 
 import java.util.ArrayList;
@@ -95,6 +98,8 @@ public class MainActivity extends FragmentActivity implements
      * Request code for auto Google Play Services error resolution.
      */
     protected static final int REQUEST_CODE_RESOLUTION = 1;
+
+    protected static final int REQUEST_PICK_STRUCTURE = 2;
 
     /**
      * Request code for the OAuth activity
@@ -429,6 +434,14 @@ public class MainActivity extends FragmentActivity implements
         fake_left_work.setVisible(debug);
         MenuItem stop_tracking = menu.findItem(R.id.stop_tracking);
         stop_tracking.setVisible(false);
+
+        MenuItem select_structures = menu.findItem(R.id.select_structure);
+        int structures = StructuresUpdate.countStructureIds(getApplicationContext());
+        if (structures > 1) {
+            select_structures.setVisible(true);
+        } else {
+            select_structures.setVisible(false);
+        }
         return true;
     }
 
@@ -456,6 +469,10 @@ public class MainActivity extends FragmentActivity implements
                 return true;
             case R.id.settings:
                 startActivity(new Intent(this, SettingsActivity.class));
+                return true;
+            case R.id.select_structure:
+                Intent pickContactIntent = new Intent(Intent.ACTION_PICK, StructuresValues.Structures.CONTENT_URI);
+                startActivityForResult(pickContactIntent, REQUEST_PICK_STRUCTURE);
                 return true;
             case R.id.history:
                 startActivity(new Intent(this, HistoryList.class));
@@ -594,7 +611,21 @@ public class MainActivity extends FragmentActivity implements
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
         switch (requestCode) {
+            case REQUEST_PICK_STRUCTURE:
+                // Make sure the request was successful
+                if (resultCode == RESULT_OK) {
+                    Uri structureUri = data.getData();
+                    structure_id = StructuresUpdate.getStructureId(this, structureUri);
+                    if (debug) Log.d(TAG, "structureUri=" + structureUri.toString() +
+                            " structure_id=" + structure_id);
+
+                    //TODO: store pref
+                    SharedPreferences.Editor editor = prefs.edit();
+                    editor.putString(PREFS_STRUCTURE_ID, structure_id);
+                    editor.apply();
+                }
             case REQUEST_CODE_RESOLUTION:
                 retryConnecting();
                 break;
@@ -620,7 +651,7 @@ public class MainActivity extends FragmentActivity implements
             // Check that we have a map and a location, if so, zoom to it
             //
             CameraPosition cameraPosition = map.getCameraPosition();
-            float distFrom0=LocationService.distFrom(cameraPosition.target.latitude, cameraPosition.target.longitude, 0, 0);
+            float distFrom0 = LocationService.distFrom(cameraPosition.target.latitude, cameraPosition.target.longitude, 0, 0);
             if (debug) Log.d(TAG, "cameraPosition lat=" + cameraPosition.target.latitude +
                     " long=" + cameraPosition.target.longitude + " distFrom0=" + distFrom0);
             if (distFrom0 < 10000) {

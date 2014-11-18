@@ -116,6 +116,10 @@ public class NestUtils {
                         String last_away_status="";
                         HashSet<String> structure_ids = new HashSet<String>();
 
+                        // use this for faking additional structures
+                        StructuresUpdate.update(context, "demo_id", "Demo Structure", "home");
+                        structure_ids.add("demo_id");
+
                         JSONObject structures;
                         try {
                             structures = new JSONObject(response.toString());

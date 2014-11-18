@@ -35,6 +35,13 @@
         <activity android:name=".SettingsActivity" />
         <activity android:name=".oauth.OAuthFlowApp" />
         <activity android:name=".history.HistoryList" />
+        <activity android:name=".structures.StructuresList" >
+            <intent-filter>
+                <action android:name="android.intent.action.PICK"/>
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.mceoin.cursor.dir/vnd.cominghome.structures" />
+            </intent-filter>
+        </activity>
         <activity android:name=".wizard.InitialWizardActivity" />
 
         <provider
