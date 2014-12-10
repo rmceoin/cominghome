@@ -35,7 +35,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
@@ -68,7 +67,7 @@ import net.mceoin.cominghome.geofence.FenceHandling;
 import net.mceoin.cominghome.geofence.GeofenceRequester;
 import net.mceoin.cominghome.geofence.SimpleGeofence;
 import net.mceoin.cominghome.geofence.SimpleGeofenceStore;
-import net.mceoin.cominghome.history.HistoryList;
+import net.mceoin.cominghome.history.HistoryListFragment;
 import net.mceoin.cominghome.oauth.OAuthFlowApp;
 import net.mceoin.cominghome.structures.StructuresBean;
 import net.mceoin.cominghome.structures.StructuresUpdate;
@@ -489,7 +488,7 @@ public class MainActivity extends ActionBarActivity implements
                 startActivityForResult(pickContactIntent, REQUEST_PICK_STRUCTURE);
                 return true;
             case R.id.history:
-                startActivity(new Intent(this, HistoryList.class));
+                startActivity(new Intent(this, HistoryActivity.class));
                 return true;
             case R.id.about_menu:
                 showAbout();
