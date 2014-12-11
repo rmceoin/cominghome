@@ -31,29 +31,21 @@ public class HistoryActivity extends ActionBarActivity {
 
     public static final int MENU_ITEM_DELETE_ALL = Menu.FIRST;
 
-    private Toolbar toolbar;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.historylist);
 
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            toolbar.setNavigationIcon(R.drawable.home);
         }
-        setActionBarIcon(R.drawable.home);
 
         getFragmentManager().beginTransaction().replace(R.id.list,
                 new HistoryListFragment()).commit();
-    }
-
-    protected void setActionBarIcon(int iconRes) {
-        if (toolbar != null) {
-            toolbar.setNavigationIcon(iconRes);
-        }
     }
 
     @Override

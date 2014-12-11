@@ -32,29 +32,21 @@ import net.mceoin.cominghome.oauth.OAuthFlowApp;
 
 public class SettingsActivity extends ActionBarActivity {
 
-    private Toolbar toolbar;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.settings);
 
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            toolbar.setNavigationIcon(R.drawable.home);
         }
-        setActionBarIcon(R.drawable.home);
 
         getFragmentManager().beginTransaction().replace(R.id.settings_area,
                 new PrefsFragment()).commit();
-    }
-
-    protected void setActionBarIcon(int iconRes) {
-        if (toolbar != null) {
-            toolbar.setNavigationIcon(iconRes);
-        }
     }
 
     @Override
