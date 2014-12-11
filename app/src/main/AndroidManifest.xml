@@ -37,8 +37,12 @@
         <activity android:name=".oauth.OAuthFlowApp"
             android:parentActivityName=".MainActivity" />
         <activity android:name=".HistoryActivity"
-            android:parentActivityName=".MainActivity" />
-        <activity android:name=".structures.StructuresList"
+            android:parentActivityName=".MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+            </activity>
+        <activity android:name=".StructuresActivity"
             android:parentActivityName=".MainActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.PICK"/>
