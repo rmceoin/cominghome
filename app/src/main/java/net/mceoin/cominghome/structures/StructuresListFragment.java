@@ -21,11 +21,10 @@
 
 package net.mceoin.cominghome.structures;
 
-import android.app.ListActivity;
+import android.app.Activity;
+import android.app.ListFragment;
 import android.app.LoaderManager;
-import android.content.ContentUris;
 import android.content.CursorLoader;
-import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
@@ -37,13 +36,9 @@ import android.widget.SimpleCursorAdapter;
 import net.mceoin.cominghome.R;
 
 /**
- * Displays the structures of log entries. Will display notes from the {@link Uri}
- * provided in the intent if there is one, otherwise defaults to displaying the
- * contents of the {@link StructuresProvider}
+ * Displays the structures from Nest.
  */
-public class StructuresList extends ListActivity implements LoaderManager.LoaderCallbacks<Cursor> {
-
-    private static final String TAG = StructuresList.class.getSimpleName();
+public class StructuresListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     /**
      * The columns we are interested in from the database
@@ -60,23 +55,23 @@ public class StructuresList extends ListActivity implements LoaderManager.Loader
     // This is the Adapter being used to display the list's data.
     SimpleCursorAdapter mAdapter;
 
+    OnStructureSelectedListener mCallback;
+
+    // Container Activity must implement this interface
+
+    /**
+     * Called by {@link net.mceoin.cominghome.structures.StructuresListFragment} after
+     * a user has selected a structure.
+     */
+    public interface OnStructureSelectedListener {
+        public void onStructureSelected(long id);
+    }
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setDefaultKeyMode(DEFAULT_KEYS_SHORTCUT);
-
-        // If no data was given in the intent (because we were started
-        // as a MAIN activity), then use our default content provider.
-        Intent intent = getIntent();
-        if (intent.getData() == null) {
-            intent.setData(StructuresValues.Structures.CONTENT_URI);
-        }
-
-        // Inform the list we provide context menus for items
-        getListView().setOnCreateContextMenuListener(this);
-
-        mAdapter = new SimpleCursorAdapter(this,
+        mAdapter = new SimpleCursorAdapter(getActivity(),
                 R.layout.structureslist_item, null,
                 new String[]{StructuresValues.Structures.NAME, StructuresValues.Structures.AWAY},
                 new int[]{R.id.structure_name, R.id.structure_away}, 0);
@@ -90,20 +85,25 @@ public class StructuresList extends ListActivity implements LoaderManager.Loader
     }
 
     @Override
-    protected void onListItemClick(ListView l, View v, int position, long id) {
-        Uri data = getIntent().getData();
-        if (data == null) {
-            return;
-        }
-        Uri uri = ContentUris.withAppendedId(data, id);
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
 
-        String action = getIntent().getAction();
-        if (Intent.ACTION_PICK.equals(action) || Intent.ACTION_GET_CONTENT.equals(action)) {
-            // The caller is waiting for us to return a note selected by
-            // the user.  The have clicked on one, so return it now.
-            setResult(RESULT_OK, new Intent().setData(uri));
-            finish();
+        // This makes sure that the container activity has implemented
+        // the callback interface. If not, it throws an exception
+        try {
+            mCallback = (OnStructureSelectedListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement OnStructureSelectedListener");
         }
+    }
+
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        // Send the event to the host activity
+        mCallback.onStructureSelected(id);
+
+
     }
 
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -112,7 +112,7 @@ public class StructuresList extends ListActivity implements LoaderManager.Loader
 
         // Now create and return a CursorLoader that will take care of
         // creating a Cursor for the data being displayed.
-        return new CursorLoader(this, baseUri,
+        return new CursorLoader(getActivity(), baseUri,
                 PROJECTION, null, null,
                 StructuresValues.Structures.CREATED_DATE + " COLLATE LOCALIZED DESC");
     }
