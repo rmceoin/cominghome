@@ -17,6 +17,8 @@ package net.mceoin.cominghome.cloud;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -75,16 +77,19 @@ public class StatusLeftHome extends AsyncTask<Void, Void, StatusBean> {
             return null;
         }
         int retry=0;
+
         while (retry<3) {
             try {
                 return myApiService.leftHome(InstallationId, access_token, structure_id, tell_nest).execute();
             } catch (IOException e) {
                 Log.w(TAG, "IOException: " + e.getLocalizedMessage());
-                HistoryUpdate.add(context, "Endpoint error: " + e.getLocalizedMessage());
+                String networkStatus = CloudUtil.getNetworkStatus(context);
+                HistoryUpdate.add(context, "Backend error: " + e.getLocalizedMessage() + " " +
+                    networkStatus);
             }
             try {
                 Random randomGenerator = new Random();
-                int seconds = (retry*15) + randomGenerator.nextInt(15);
+                int seconds = (retry*90) + randomGenerator.nextInt(15);
                 if (debug) Log.d(TAG,
                         "retry in "+seconds+" seconds");
                 Thread.sleep(seconds*1000);

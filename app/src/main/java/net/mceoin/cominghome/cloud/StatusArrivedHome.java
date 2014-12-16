@@ -81,11 +81,14 @@ public class StatusArrivedHome extends AsyncTask<Void, Void, StatusBean> {
                 return myApiService.arrivedHome(InstallationId, access_token, structure_id, tell_nest).execute();
             } catch (IOException e) {
                 Log.w(TAG, "IOException: " + e.getLocalizedMessage());
-                HistoryUpdate.add(context, "Backend error: " + e.getLocalizedMessage());
+                String networkStatus = CloudUtil.getNetworkStatus(context);
+                HistoryUpdate.add(context, "Backend error: " + e.getLocalizedMessage() + " " +
+                        networkStatus);
+
             }
             try {
                 Random randomGenerator = new Random();
-                int seconds = (retry*15) + randomGenerator.nextInt(15);
+                int seconds = (retry*60) + randomGenerator.nextInt(15);
                 if (debug) Log.d(TAG,
                         "retry in "+seconds+" seconds");
                 Thread.sleep(seconds*1000);
