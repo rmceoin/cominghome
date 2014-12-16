@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender.SendIntentException;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
@@ -67,7 +68,6 @@ import net.mceoin.cominghome.geofence.FenceHandling;
 import net.mceoin.cominghome.geofence.GeofenceRequester;
 import net.mceoin.cominghome.geofence.SimpleGeofence;
 import net.mceoin.cominghome.geofence.SimpleGeofenceStore;
-import net.mceoin.cominghome.history.HistoryListFragment;
 import net.mceoin.cominghome.oauth.OAuthFlowApp;
 import net.mceoin.cominghome.structures.StructuresBean;
 import net.mceoin.cominghome.structures.StructuresUpdate;
@@ -269,6 +269,7 @@ public class MainActivity extends ActionBarActivity implements
     protected void setActionBarIcon(int iconRes) {
         toolbar.setNavigationIcon(iconRes);
     }
+
     /**
      * Call using isMyServiceRunning(MyService.class)
      * http://stackoverflow.com/questions/600207/how-to-check-if-a-service-is-running-in-android
@@ -501,6 +502,23 @@ public class MainActivity extends ActionBarActivity implements
     protected void showAbout() {
         // Inflate the about message contents
         @SuppressLint("InflateParams") View messageView = getLayoutInflater().inflate(R.layout.about, null, false);
+
+        PackageInfo pi;
+        String version = "";
+        try {
+            PackageManager pm = this.getPackageManager();
+            String pn = this.getPackageName();
+            if (pm == null) {
+                version = "unknown";
+            } else {
+                pi = pm.getPackageInfo(pn, 0);
+                version = pi.versionName;
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        TextView versionView = (TextView) messageView.findViewById(R.id.about_version);
+        versionView.setText(version);
 
         // When linking text, force to always use default color. This works
         // around a pressed color state bug.
