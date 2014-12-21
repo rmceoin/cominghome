@@ -112,13 +112,15 @@ public class NestUtils {
                         boolean structure_id_selected = prefs.contains(MainActivity.PREFS_STRUCTURE_ID);
                         String structure_id_current = prefs.getString(MainActivity.PREFS_STRUCTURE_ID, "");
                         boolean current_in_structures = false;
-                        String last_structure_name="";
-                        String last_away_status="";
-                        HashSet<String> structure_ids = new HashSet<String>();
+                        String last_structure_name = "";
+                        String last_away_status = "";
+                        HashSet<String> structure_ids = new HashSet<>();
 
                         // use this for faking additional structures
-                        StructuresUpdate.update(context, "demo_id", "Demo Structure", "home");
-                        structure_ids.add("demo_id");
+                        if (debug) {
+                            StructuresUpdate.update(context, "demo_id", "Demo Structure", "home");
+                            structure_ids.add("demo_id");
+                        }
 
                         JSONObject structures;
                         try {
@@ -203,7 +205,7 @@ public class NestUtils {
 
             @Override
             public void onErrorResponse(VolleyError error) {
-                if (error.networkResponse!=null) {
+                if (error.networkResponse != null) {
                     if (debug)
                         Log.d(TAG, "getInfo volley statusCode=" + error.networkResponse.statusCode);
 
@@ -616,6 +618,7 @@ public class NestUtils {
                     InputStream response;
                     if (statusCode == 200) {
                         response = urlConnection.getInputStream();
+                        if (debug) Log.d(TAG, "response=" + response);
                     } else {
                         response = urlConnection.getErrorStream();
                         error = true;
