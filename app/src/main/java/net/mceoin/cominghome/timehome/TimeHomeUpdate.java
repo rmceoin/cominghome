@@ -29,7 +29,7 @@ import net.mceoin.cominghome.timehome.TimeHomeValues.TimeHome;
 public class TimeHomeUpdate {
 
     public static final String TAG = TimeHomeUpdate.class.getSimpleName();
-    public static final boolean debug = true;
+    public static final boolean debug = false;
 
     public static void add(Context context, long timeseconds) {
         Uri mUri;
