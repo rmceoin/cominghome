@@ -35,15 +35,34 @@ public class NestUtil {
 
     private static final Logger log = Logger.getLogger(NestUtil.class.getName());
 
+    public static String tellNestAwayStatus(String access_token, String structure_id, String away_status) {
+        String result = tellNestAwayStatusCall(access_token, structure_id, away_status);
+
+        if ((result.contains("Error:")) && (!result.contains("Unauthorized"))) {
+            // Try again if it was an Error but not an Unauthorized
+            try {
+                Random randomGenerator = new Random();
+                int seconds = 5 + randomGenerator.nextInt(10);
+                log.info("retry in "+seconds+" seconds");
+                Thread.sleep(seconds*1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            result = tellNestAwayStatusCall(access_token, structure_id, away_status);
+        }
+
+        return result;
+    }
+
     /**
      * Make HTTP/JSON call to Nest and set away status.
      *
      * @param access_token OAuth token to allow access to Nest
-     * @param structure_id ID of structure with thermostate
+     * @param structure_id ID of structure with thermostat
      * @param away_status Either "home" or "away"
-     * @return Equal to "Success" if succesful, otherwise it contains a hint on the error.
+     * @return Equal to "Success" if successful, otherwise it contains a hint on the error.
      */
-    public static String tellNestAwayStatus(String access_token, String structure_id, String away_status) {
+    public static String tellNestAwayStatusCall(String access_token, String structure_id, String away_status) {
 
         String urlString = "https://developer-api.nest.com/structures/" + structure_id + "/away?auth=" + access_token;
         log.info("url=" + urlString);
@@ -143,9 +162,11 @@ public class NestUtil {
             }
 
         } catch (IOException e) {
+            error = true;
             errorResult = e.getLocalizedMessage();
             log.warning("IOException: " + errorResult);
         } catch (Exception e) {
+            error = true;
             errorResult = e.getLocalizedMessage();
             log.warning("Exception: " + errorResult);
         } finally {
