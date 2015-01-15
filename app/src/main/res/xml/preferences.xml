@@ -23,6 +23,14 @@
             android:summary="@string/summary_notifications_preference"
             android:defaultValue="true"/>
 
+        <net.mceoin.cominghome.VNTNumberPickerPreference
+            xmlns:vntnumberpickerpreference="http://schemas.android.com/apk/res-auto"
+            android:defaultValue="@integer/geofence_radius_default"
+            android:key="geofence_radius"
+            android:title="@string/title_geofence_radius_preference"
+            vntnumberpickerpreference:summary="@string/summary_geofence_radius_preference"
+            vntnumberpickerpreference:maxValue="@integer/geofence_radius_max_value"
+            vntnumberpickerpreference:minValue="@integer/geofence_radius_min_value" />
     </PreferenceCategory>
 
 </PreferenceScreen>
