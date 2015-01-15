@@ -84,7 +84,7 @@ public class MainActivity extends ActionBarActivity implements
         GooglePlayServicesClient.OnConnectionFailedListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
-    private static final boolean debug = false;
+    private static final boolean debug = true;
 
     private static final String KEY_IN_RESOLUTION = "is_in_resolution";
     public static final String PREFS_INITIAL_WIZARD = "initial_wizard";
@@ -136,6 +136,8 @@ public class MainActivity extends ActionBarActivity implements
     LocationClient mLocationClient;
     Location mCurrentLocation;
 
+    boolean updateHomeOnConnected =false;
+
     GoogleMap map;
     Map<String, Marker> mapMarkers = new HashMap<String, Marker>();
     Map<String, Circle> mapCircles = new HashMap<String, Circle>();
@@ -143,7 +145,7 @@ public class MainActivity extends ActionBarActivity implements
     public static final String FENCE_HOME = "home";
     public static final String FENCE_WORK = "work";
 
-    float fenceRadius = 100;    // meters
+    float fenceRadius = PrefsFragment.PREFERENCE_GEOFENCE_RADIUS_DEFAULT;    // meters
 
     private SimpleGeofenceStore mGeofenceStorage;
 
@@ -194,6 +196,9 @@ public class MainActivity extends ActionBarActivity implements
         access_token = prefs.getString(OAuthFlowApp.PREF_ACCESS_TOKEN, "");
         structure_id = prefs.getString(PREFS_STRUCTURE_ID, "");
 
+        fenceRadius = prefs.getInt(PrefsFragment.PREFERENCE_GEOFENCE_RADIUS,
+                PrefsFragment.PREFERENCE_GEOFENCE_RADIUS_DEFAULT);
+
         Installation.id(this);
 
         setContentView(R.layout.main);
@@ -238,8 +243,7 @@ public class MainActivity extends ActionBarActivity implements
         atHomeButton = (Button) findViewById(R.id.buttonSetAtHome);
         atHomeButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
-                homeGeofence = updateGeofenceLocation(FENCE_HOME);
-                if (homeGeofence != null) updateGeofences();
+                updateHome();
             }
         });
 
@@ -264,6 +268,21 @@ public class MainActivity extends ActionBarActivity implements
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
         setActionBarIcon(R.drawable.home);
+    }
+
+    private void updateHome() {
+        if (mLocationClient == null) {
+            return;
+        }
+        if (!mLocationClient.isConnected()) {
+
+            if (debug) Log.d(TAG,"mLocationClient not connected");
+            updateHomeOnConnected =true;
+            return;
+        }
+
+        homeGeofence = updateGeofenceLocation(FENCE_HOME);
+        if (homeGeofence != null) updateGeofences();
     }
 
     protected void setActionBarIcon(int iconRes) {
@@ -304,14 +323,15 @@ public class MainActivity extends ActionBarActivity implements
     }
 
     private SimpleGeofence updateGeofenceLocation(String geofenceId) {
-        if (mLocationClient == null) {
+        if ((mLocationClient == null) || (!mLocationClient.isConnected())) {
             return null;
         }
         mCurrentLocation = mLocationClient.getLastLocation();
-        if (debug) Log.d(TAG, mCurrentLocation.toString());
         if (mCurrentLocation == null) {
             return null;
         }
+        if (debug) Log.d(TAG, "updateGeofenceLocation: mCurrentLocation="+mCurrentLocation.toString());
+
         double latitude = mCurrentLocation.getLatitude();
         double longitude = mCurrentLocation.getLongitude();
 
@@ -353,6 +373,7 @@ public class MainActivity extends ActionBarActivity implements
             circle = mapCircles.get(geofenceId);
             if (circle != null) {
                 circle.setCenter(current);
+                circle.setRadius(fenceRadius);
             } else {
                 Log.e(TAG, "missing circle for " + geofenceId);
             }
@@ -368,6 +389,7 @@ public class MainActivity extends ActionBarActivity implements
                 CircleOptions circleOptions = new CircleOptions()
                         .center(current)
                         .radius(fenceRadius); // In meters
+
                 circle = map.addCircle(circleOptions);
                 mapCircles.put(geofenceId, circle);
 
@@ -574,6 +596,14 @@ public class MainActivity extends ActionBarActivity implements
         structureNameText.setText(structure_name);
         awayStatusText.setText(away_status);
 
+        float previousFenceRadius = fenceRadius;
+        fenceRadius = prefs.getInt(PrefsFragment.PREFERENCE_GEOFENCE_RADIUS,
+                PrefsFragment.PREFERENCE_GEOFENCE_RADIUS_DEFAULT);
+        if (fenceRadius != previousFenceRadius) {
+            // it must have been changed by settings
+            updateHome();
+        }
+
         access_token = prefs.getString(OAuthFlowApp.PREF_ACCESS_TOKEN, "");
         if (access_token.isEmpty()) {
             connectButton.setEnabled(true);
@@ -683,6 +713,10 @@ public class MainActivity extends ActionBarActivity implements
     @Override
     public void onConnected(Bundle connectionHint) {
         if (debug) Log.d(TAG, "GoogleApiClient connected");
+        if (updateHomeOnConnected) {
+            updateHomeOnConnected=false;
+            updateHome();
+        }
         if (map != null) {
             //
             // The very first time we run, the map will be at 0,0 (or very near)

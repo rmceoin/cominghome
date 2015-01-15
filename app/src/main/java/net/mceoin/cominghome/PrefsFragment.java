@@ -27,6 +27,9 @@ public class PrefsFragment extends PreferenceFragment {
     public static final String PREFERENCE_STRUCTURES_ENTRIES = "structures_entries";
     public static final String PREFERENCE_TIMEHOME_ENTRIES = "timehome_entries";
     public static final String PREFERENCE_TRACK_ETA = "track_eta";
+    public static final String PREFERENCE_GEOFENCE_RADIUS = "geofence_radius";
+    // radius default in meters
+    public static final int PREFERENCE_GEOFENCE_RADIUS_DEFAULT = 100;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
