@@ -84,7 +84,7 @@ public class MainActivity extends ActionBarActivity implements
         GooglePlayServicesClient.OnConnectionFailedListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
-    private static final boolean debug = true;
+    private static final boolean debug = false;
 
     private static final String KEY_IN_RESOLUTION = "is_in_resolution";
     public static final String PREFS_INITIAL_WIZARD = "initial_wizard";
@@ -401,7 +401,7 @@ public class MainActivity extends ActionBarActivity implements
                 mapMarkers.put(geofenceId, marker);
             }
         }
-        if ((move) && (map != null)) map.moveCamera(CameraUpdateFactory.newLatLngZoom(current, 13));
+        if ((move) && (map != null)) map.moveCamera(CameraUpdateFactory.newLatLngZoom(current, 14));
     }
 
     private void updateGeofences() {
