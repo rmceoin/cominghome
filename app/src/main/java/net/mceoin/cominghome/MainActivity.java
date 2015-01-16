@@ -143,7 +143,7 @@ public class MainActivity extends ActionBarActivity implements
     public static final String FENCE_HOME = "home";
     public static final String FENCE_WORK = "work";
 
-    float fenceRadius = PrefsFragment.PREFERENCE_GEOFENCE_RADIUS_DEFAULT;    // meters
+    float fenceRadius;    // meters
 
     private SimpleGeofenceStore mGeofenceStorage;
 
@@ -195,7 +195,8 @@ public class MainActivity extends ActionBarActivity implements
         structure_id = prefs.getString(PREFS_STRUCTURE_ID, "");
 
         fenceRadius = prefs.getInt(PrefsFragment.PREFERENCE_GEOFENCE_RADIUS,
-                PrefsFragment.PREFERENCE_GEOFENCE_RADIUS_DEFAULT);
+                getResources().getInteger(R.integer.geofence_radius_default));
+
 
         Installation.id(this);
 
@@ -610,7 +611,7 @@ public class MainActivity extends ActionBarActivity implements
 
         float previousFenceRadius = fenceRadius;
         fenceRadius = prefs.getInt(PrefsFragment.PREFERENCE_GEOFENCE_RADIUS,
-                PrefsFragment.PREFERENCE_GEOFENCE_RADIUS_DEFAULT);
+                getResources().getInteger(R.integer.geofence_radius_default));
         if (fenceRadius != previousFenceRadius) {
             // it must have been changed by settings
             updateHome(true);
