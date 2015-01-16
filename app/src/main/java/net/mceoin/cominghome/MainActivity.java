@@ -136,8 +136,6 @@ public class MainActivity extends ActionBarActivity implements
     LocationClient mLocationClient;
     Location mCurrentLocation;
 
-    boolean updateHomeOnConnected =false;
-
     GoogleMap map;
     Map<String, Marker> mapMarkers = new HashMap<String, Marker>();
     Map<String, Circle> mapCircles = new HashMap<String, Circle>();
@@ -243,14 +241,14 @@ public class MainActivity extends ActionBarActivity implements
         atHomeButton = (Button) findViewById(R.id.buttonSetAtHome);
         atHomeButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
-                updateHome();
+                updateHome(false);
             }
         });
 
         atWorkButton = (Button) findViewById(R.id.buttonSetAtWork);
         atWorkButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
-                workGeofence = updateGeofenceLocation(FENCE_WORK);
+                workGeofence = updateGeofenceLocation(FENCE_WORK, false);
                 if (workGeofence != null) updateGeofences();
             }
         });
@@ -270,18 +268,19 @@ public class MainActivity extends ActionBarActivity implements
         setActionBarIcon(R.drawable.home);
     }
 
-    private void updateHome() {
-        if (mLocationClient == null) {
-            return;
-        }
-        if (!mLocationClient.isConnected()) {
+    private void updateHome(boolean keepOldFence) {
+        if (!keepOldFence) {
+            if (mLocationClient == null) {
+                return;
+            }
+            if (!mLocationClient.isConnected()) {
 
-            if (debug) Log.d(TAG,"mLocationClient not connected");
-            updateHomeOnConnected =true;
-            return;
+                if (debug) Log.d(TAG, "mLocationClient not connected");
+                return;
+            }
         }
 
-        homeGeofence = updateGeofenceLocation(FENCE_HOME);
+        homeGeofence = updateGeofenceLocation(FENCE_HOME, keepOldFence);
         if (homeGeofence != null) updateGeofences();
     }
 
@@ -322,18 +321,32 @@ public class MainActivity extends ActionBarActivity implements
 
     }
 
-    private SimpleGeofence updateGeofenceLocation(String geofenceId) {
-        if ((mLocationClient == null) || (!mLocationClient.isConnected())) {
-            return null;
-        }
-        mCurrentLocation = mLocationClient.getLastLocation();
-        if (mCurrentLocation == null) {
-            return null;
-        }
-        if (debug) Log.d(TAG, "updateGeofenceLocation: mCurrentLocation="+mCurrentLocation.toString());
+    private SimpleGeofence updateGeofenceLocation(String geofenceId, boolean keepOldLatLong) {
 
-        double latitude = mCurrentLocation.getLatitude();
-        double longitude = mCurrentLocation.getLongitude();
+        double latitude;
+        double longitude;
+        SimpleGeofence oldFence = mGeofenceStorage.getGeofence(geofenceId);
+
+        if (keepOldLatLong) {
+            if (oldFence == null) {
+                return null;
+            }
+            latitude = oldFence.getLatitude();
+            longitude = oldFence.getLongitude();
+        } else {
+            if ((mLocationClient == null) || (!mLocationClient.isConnected())) {
+                return null;
+            }
+            mCurrentLocation = mLocationClient.getLastLocation();
+            if (mCurrentLocation == null) {
+                return null;
+            }
+            if (debug)
+                Log.d(TAG, "updateGeofenceLocation: mCurrentLocation=" + mCurrentLocation.toString());
+
+            latitude = mCurrentLocation.getLatitude();
+            longitude = mCurrentLocation.getLongitude();
+        }
 
         SimpleGeofence newFence = new SimpleGeofence(
                 geofenceId,
@@ -343,7 +356,6 @@ public class MainActivity extends ActionBarActivity implements
                 Geofence.NEVER_EXPIRE,
                 Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT);
 
-        SimpleGeofence oldFence = mGeofenceStorage.getGeofence(geofenceId);
         if (oldFence != null) {
             mGeofenceStorage.clearGeofence(geofenceId);
         }
@@ -357,7 +369,7 @@ public class MainActivity extends ActionBarActivity implements
         }
         mCurrentGeofences.add(newFence.toGeofence());
 
-        updateMarker(latitude, longitude, geofenceId, true);
+        updateMarker(latitude, longitude, geofenceId, !keepOldLatLong);
 
         return newFence;
     }
@@ -601,7 +613,7 @@ public class MainActivity extends ActionBarActivity implements
                 PrefsFragment.PREFERENCE_GEOFENCE_RADIUS_DEFAULT);
         if (fenceRadius != previousFenceRadius) {
             // it must have been changed by settings
-            updateHome();
+            updateHome(true);
         }
 
         access_token = prefs.getString(OAuthFlowApp.PREF_ACCESS_TOKEN, "");
@@ -713,10 +725,6 @@ public class MainActivity extends ActionBarActivity implements
     @Override
     public void onConnected(Bundle connectionHint) {
         if (debug) Log.d(TAG, "GoogleApiClient connected");
-        if (updateHomeOnConnected) {
-            updateHomeOnConnected=false;
-            updateHome();
-        }
         if (map != null) {
             //
             // The very first time we run, the map will be at 0,0 (or very near)
