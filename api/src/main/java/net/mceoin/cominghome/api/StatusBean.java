@@ -7,6 +7,15 @@ public class StatusBean {
     private String message;
     private boolean nestSuccess;
     private boolean nestUpdated;
+    private boolean othersAtHome;
+
+    public boolean isOthersAtHome() {
+        return othersAtHome;
+    }
+
+    public void setOthersAtHome(boolean othersAtHome) {
+        this.othersAtHome = othersAtHome;
+    }
 
     public boolean isNestUpdated() {
         return nestUpdated;
