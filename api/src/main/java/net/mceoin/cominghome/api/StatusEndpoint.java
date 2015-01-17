@@ -143,8 +143,10 @@ public class StatusEndpoint {
         saveStatus(InstallationID, structure_id, "away");
 
         boolean others = checkOthersAtHome(InstallationID, structure_id);
+        response.setOthersAtHome(others);
 
         if (others) {
+            response.setNestSuccess(true);
             response.setNestUpdated(false);
             response.setMessage("Others still at home");
         } else if (tell_nest) {
