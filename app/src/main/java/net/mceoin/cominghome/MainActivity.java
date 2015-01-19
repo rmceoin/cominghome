@@ -137,8 +137,8 @@ public class MainActivity extends ActionBarActivity implements
     Location mCurrentLocation;
 
     GoogleMap map;
-    Map<String, Marker> mapMarkers = new HashMap<String, Marker>();
-    Map<String, Circle> mapCircles = new HashMap<String, Circle>();
+    Map<String, Marker> mapMarkers = new HashMap<>();
+    Map<String, Circle> mapCircles = new HashMap<>();
 
     public static final String FENCE_HOME = "home";
     public static final String FENCE_WORK = "work";
@@ -258,7 +258,7 @@ public class MainActivity extends ActionBarActivity implements
 
         mGeofenceStorage = new SimpleGeofenceStore(getApplicationContext());
         // Instantiate the current List of geofences
-        mCurrentGeofences = new ArrayList<Geofence>();
+        mCurrentGeofences = new ArrayList<>();
 
         loadFences();
         toolbar = (Toolbar) findViewById(R.id.toolbar);
