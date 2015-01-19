@@ -333,7 +333,7 @@ public class HistoryProvider extends ContentProvider {
         sUriMatcher.addURI(HistoryValues.AUTHORITY, "history", HISTORY);
         sUriMatcher.addURI(HistoryValues.AUTHORITY, "history/#", HISTORY_ID);
 
-        sHistoryProjectionMap = new HashMap<String, String>();
+        sHistoryProjectionMap = new HashMap<>();
         sHistoryProjectionMap.put(HistoryValues.History._ID, HistoryValues.History._ID);
         sHistoryProjectionMap.put(HistoryValues.History.ENTRY, HistoryValues.History.ENTRY);
         sHistoryProjectionMap.put(HistoryValues.History.BITS, HistoryValues.History.BITS);
