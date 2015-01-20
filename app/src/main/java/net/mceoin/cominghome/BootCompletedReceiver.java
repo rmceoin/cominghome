@@ -36,36 +36,27 @@ import java.util.List;
 public class BootCompletedReceiver extends BroadcastReceiver {
 
     private final static String TAG = BootCompletedReceiver.class.getSimpleName();
-    private final static boolean debug = false;
 
     private GeofenceRequester mGeofenceRequester;
     List<Geofence> mCurrentGeofences;
 
     @Override
     public void onReceive(Context context, Intent arg1) {
-        if (debug) Log.d(TAG, "starting service...");
-//        context.startService(new Intent(context, LocationService.class));
 
         mGeofenceRequester = new GeofenceRequester(context);
 
-
         SimpleGeofenceStore mGeofenceStorage = new SimpleGeofenceStore(context);
         // Instantiate the current List of geofences
-        mCurrentGeofences = new ArrayList<Geofence>();
+        mCurrentGeofences = new ArrayList<>();
 
         SimpleGeofence homeGeofence = mGeofenceStorage.getGeofence(MainActivity.FENCE_HOME);
-        if (homeGeofence !=null) {
+        if (homeGeofence != null) {
             mCurrentGeofences.add(homeGeofence.toGeofence());
-        }
-        SimpleGeofence workGeofence = mGeofenceStorage.getGeofence(MainActivity.FENCE_WORK);
-        if (workGeofence !=null) {
-            mCurrentGeofences.add(workGeofence.toGeofence());
         }
 
         if (!mCurrentGeofences.isEmpty()) {
             updateGeofences();
         }
-
     }
 
     private void updateGeofences() {
@@ -75,7 +66,7 @@ public class BootCompletedReceiver extends BroadcastReceiver {
             // Try to add geofences
             mGeofenceRequester.addGeofences(mCurrentGeofences);
         } catch (UnsupportedOperationException e) {
-            Log.e(TAG,"already queued");
+            Log.e(TAG, "already queued");
         }
     }
 

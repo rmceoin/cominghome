@@ -24,7 +24,7 @@
 
     <include
         android:id="@+id/toolbar"
-        layout="@layout/toolbar"/>
+        layout="@layout/toolbar" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -51,25 +51,12 @@
             android:layout_height="wrap_content"
             tools:text="@string/away_status" />
 
-        <LinearLayout
+        <Button
+            android:id="@+id/buttonSetAtHome"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-            <Button
-                android:id="@+id/buttonSetAtHome"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/at_home"
-                tools:ignore="ButtonStyle" />
-
-            <Button
-                android:id="@+id/buttonSetAtWork"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/at_work"
-                android:visibility="gone"
-                tools:ignore="ButtonStyle" />
-        </LinearLayout>
+            android:layout_height="wrap_content"
+            android:text="@string/at_home"
+            tools:ignore="ButtonStyle" />
 
     </LinearLayout>
 
