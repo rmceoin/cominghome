@@ -16,7 +16,6 @@
 package net.mceoin.cominghome;
 
 import android.annotation.SuppressLint;
-import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.NotificationManager;
@@ -68,6 +67,7 @@ import net.mceoin.cominghome.geofence.FenceHandling;
 import net.mceoin.cominghome.geofence.GeofenceRequester;
 import net.mceoin.cominghome.geofence.SimpleGeofence;
 import net.mceoin.cominghome.geofence.SimpleGeofenceStore;
+import net.mceoin.cominghome.history.HistoryUpdate;
 import net.mceoin.cominghome.oauth.OAuthFlowApp;
 import net.mceoin.cominghome.structures.StructuresBean;
 import net.mceoin.cominghome.structures.StructuresUpdate;
@@ -94,7 +94,6 @@ public class MainActivity extends ActionBarActivity implements
     public static final String PREFS_LAST_MAP_LATITUDE = "last_map_latitude";
     public static final String PREFS_LAST_MAP_LONGITUDE = "last_map_longitude";
     public static final String PREFS_NOTIFICATIONS = "notifications";
-    public static final String PREFS_TIME_LEFT_WORK = "time_left_work";
 
     /**
      * Request code for auto Google Play Services error resolution.
@@ -124,7 +123,6 @@ public class MainActivity extends ActionBarActivity implements
     TextView structureNameText;
     TextView awayStatusText;
     Button atHomeButton;
-    Button atWorkButton;
 
     public static String access_token = "";
     public static String structure_id = "";
@@ -141,7 +139,6 @@ public class MainActivity extends ActionBarActivity implements
     Map<String, Circle> mapCircles = new HashMap<>();
 
     public static final String FENCE_HOME = "home";
-    public static final String FENCE_WORK = "work";
 
     float fenceRadius;    // meters
 
@@ -151,7 +148,6 @@ public class MainActivity extends ActionBarActivity implements
     List<Geofence> mCurrentGeofences;
 
     private SimpleGeofence homeGeofence;
-    private SimpleGeofence workGeofence;
 
     // Add geofences handler
     private GeofenceRequester mGeofenceRequester;
@@ -231,9 +227,6 @@ public class MainActivity extends ActionBarActivity implements
         mLocationClient = new LocationClient(this, this, this);
 
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
-                new IntentFilter(LocationService.LOCATION_CHANGED));
-
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                 new IntentFilter(NestUtils.GOT_INFO));
 
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
@@ -243,16 +236,10 @@ public class MainActivity extends ActionBarActivity implements
         atHomeButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
                 updateHome(false);
+                HistoryUpdate.add(getApplicationContext(), "Updated home");
             }
         });
 
-        atWorkButton = (Button) findViewById(R.id.buttonSetAtWork);
-        atWorkButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View arg0) {
-                workGeofence = updateGeofenceLocation(FENCE_WORK, false);
-                if (workGeofence != null) updateGeofences();
-            }
-        });
         // Instantiate a Geofence requester
         mGeofenceRequester = new GeofenceRequester(this);
 
@@ -289,31 +276,12 @@ public class MainActivity extends ActionBarActivity implements
         toolbar.setNavigationIcon(iconRes);
     }
 
-    /**
-     * Call using isMyServiceRunning(MyService.class)
-     * http://stackoverflow.com/questions/600207/how-to-check-if-a-service-is-running-in-android
-     */
-    public static boolean isMyServiceRunning(Context context, Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     private void loadFences() {
 
         homeGeofence = mGeofenceStorage.getGeofence(FENCE_HOME);
         if (homeGeofence != null) {
             updateMarker(homeGeofence.getLatitude(), homeGeofence.getLongitude(), FENCE_HOME, false);
             mCurrentGeofences.add(homeGeofence.toGeofence());
-        }
-        workGeofence = mGeofenceStorage.getGeofence(FENCE_WORK);
-        if (workGeofence != null) {
-            updateMarker(workGeofence.getLatitude(), workGeofence.getLongitude(), FENCE_WORK, false);
-            mCurrentGeofences.add(workGeofence.toGeofence());
         }
 
         if (!mCurrentGeofences.isEmpty()) {
@@ -479,10 +447,6 @@ public class MainActivity extends ActionBarActivity implements
         fake_arrived.setVisible(debug);
         MenuItem fake_left = menu.findItem(R.id.fake_left);
         fake_left.setVisible(debug);
-        MenuItem fake_left_work = menu.findItem(R.id.fake_left_work);
-        fake_left_work.setVisible(debug);
-        MenuItem stop_tracking = menu.findItem(R.id.stop_tracking);
-        stop_tracking.setVisible(false);
 
         MenuItem select_structures = menu.findItem(R.id.select_structure);
         int structures = StructuresUpdate.countStructureIds(getApplicationContext());
@@ -507,14 +471,6 @@ public class MainActivity extends ActionBarActivity implements
                 if ((structure_id != null) && (!structure_id.isEmpty())) {
                     FenceHandling.leftHome(getApplicationContext());
                 }
-                return true;
-            case R.id.fake_left_work:
-                if ((structure_id != null) && (!structure_id.isEmpty())) {
-                    FenceHandling.leftWork(getApplicationContext());
-                }
-                return true;
-            case R.id.stop_tracking:
-                LocationService.sendTrackingStop(getApplicationContext());
                 return true;
             case R.id.settings:
                 startActivity(new Intent(this, SettingsActivity.class));
@@ -732,7 +688,7 @@ public class MainActivity extends ActionBarActivity implements
             // Check that we have a map and a location, if so, zoom to it
             //
             CameraPosition cameraPosition = map.getCameraPosition();
-            float distFrom0 = LocationService.distFrom(cameraPosition.target.latitude, cameraPosition.target.longitude, 0, 0);
+            float distFrom0 = LocationUtils.distFrom(cameraPosition.target.latitude, cameraPosition.target.longitude, 0, 0);
             if (debug) Log.d(TAG, "cameraPosition lat=" + cameraPosition.target.latitude +
                     " long=" + cameraPosition.target.longitude + " distFrom0=" + distFrom0);
             if (distFrom0 < 10000) {

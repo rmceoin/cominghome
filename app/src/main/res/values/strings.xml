@@ -9,7 +9,6 @@
     <string name="name">Name</string>
     <string name="away_status">Away Status</string>
     <string name="at_home">At Home</string>
-    <string name="at_work">At Work</string>
 
     <string name="lost_auth">Lost our Nest authorization</string>
 
@@ -48,7 +47,6 @@
 
     <string name="get_others">Get Others</string>
     <string name="fake_left">Fake Left</string>
-    <string name="fake_left_work">Fake Left Work</string>
     <string name="fake_arrived">Fake Arrived</string>
     <string name="settings">Settings</string>
     <string name="about">About</string>
@@ -61,11 +59,6 @@
         Nest set to %1$s
     </string>
     <string name="nest_transition_notification_text">Coming Home Update</string>
-
-    <string name="tracking_notification_title">Tracking ETA to home</string>
-    <string name="tracking_notification_text">Coming Home</string>
-
-    <string name="stop_tracking">Stop tracking ETA</string>
 
     <string name="history">History</string>
     <string name="delete">Delete</string>

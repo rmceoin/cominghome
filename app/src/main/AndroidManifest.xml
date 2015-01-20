@@ -9,9 +9,6 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
-    <!-- <uses-permission android:name="android.permission.WAKE_LOCK" /> -->
-
-
     <!-- this is used by Google Maps API -->
     <uses-feature
         android:glEsVersion="0x00020000"
@@ -62,11 +59,6 @@
             android:authorities="net.mceoin.cominghome.structures"
             android:exported="false" />
 
-        <provider
-            android:name=".timehome.TimeHomeProvider"
-            android:authorities="net.mceoin.cominghome.timehome"
-            android:exported="false" />
-
         <receiver
             android:name=".geofence.FenceHandlingAlarm"
             android:process=":remote" />
@@ -80,12 +72,6 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        <service
-            android:name=".LocationService"
-            android:enabled="true"
-            android:exported="true"
-            android:permission="com.rmceoin.whereyouare.app.permission.LOCATION" >
-        </service>
         <service
             android:name=".ReceiveTransitionsIntentService"
             android:exported="false" />
