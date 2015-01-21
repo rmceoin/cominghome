@@ -48,10 +48,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.Geofence;
-import com.google.android.gms.location.LocationClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
@@ -80,8 +80,8 @@ import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends ActionBarActivity implements
-        GooglePlayServicesClient.ConnectionCallbacks,
-        GooglePlayServicesClient.OnConnectionFailedListener {
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final boolean debug = false;
@@ -108,9 +108,9 @@ public class MainActivity extends ActionBarActivity implements
 //    protected static final int REQUEST_CODE_OAUTH = 2;
 
     /**
-     * Google API client.
+     * Provides the entry point to Google Play services.
      */
-//    private GoogleApiClient mGoogleApiClient;
+    protected GoogleApiClient mGoogleApiClient;
 
     /**
      * Determines if the client is in a resolution state, and
@@ -131,7 +131,6 @@ public class MainActivity extends ActionBarActivity implements
 
     long last_info_check = 0;
 
-    LocationClient mLocationClient;
     Location mCurrentLocation;
 
     GoogleMap map;
@@ -224,8 +223,6 @@ public class MainActivity extends ActionBarActivity implements
             }
         }
 
-        mLocationClient = new LocationClient(this, this, this);
-
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                 new IntentFilter(NestUtils.GOT_INFO));
 
@@ -254,16 +251,15 @@ public class MainActivity extends ActionBarActivity implements
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
         setActionBarIcon(R.drawable.home);
+
+        buildGoogleApiClient();
     }
 
     private void updateHome(boolean keepOldFence) {
         if (!keepOldFence) {
-            if (mLocationClient == null) {
-                return;
-            }
-            if (!mLocationClient.isConnected()) {
+            if (!mGoogleApiClient.isConnected()) {
 
-                if (debug) Log.d(TAG, "mLocationClient not connected");
+                if (debug) Log.d(TAG, "mGoogleApiClient not connected");
                 return;
             }
         }
@@ -303,11 +299,12 @@ public class MainActivity extends ActionBarActivity implements
             latitude = oldFence.getLatitude();
             longitude = oldFence.getLongitude();
         } else {
-            if ((mLocationClient == null) || (!mLocationClient.isConnected())) {
+            if ((!mGoogleApiClient.isConnected())) {
                 return null;
             }
-            mCurrentLocation = mLocationClient.getLastLocation();
+            mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             if (mCurrentLocation == null) {
+                Log.i(TAG, "updateGeofenceLocation mCurrentLocation is null");
                 return null;
             }
             if (debug)
@@ -315,6 +312,7 @@ public class MainActivity extends ActionBarActivity implements
 
             latitude = mCurrentLocation.getLatitude();
             longitude = mCurrentLocation.getLongitude();
+            Log.i(TAG, "updateGeofenceLocation latitude=" + latitude);
         }
 
         SimpleGeofence newFence = new SimpleGeofence(
@@ -526,6 +524,17 @@ public class MainActivity extends ActionBarActivity implements
     }
 
     /**
+     * Builds a GoogleApiClient. Uses the addApi() method to request the LocationServices API.
+     */
+    protected synchronized void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+    }
+
+    /**
      * Called when the Activity is made visible.
      * A connection to Play Services need to be initiated as
      * soon as the activity is visible. Registers {@code ConnectionCallbacks}
@@ -535,17 +544,8 @@ public class MainActivity extends ActionBarActivity implements
     @Override
     protected void onStart() {
         super.onStart();
-/*
-        if (mGoogleApiClient == null) {
-            mGoogleApiClient = new GoogleApiClient.Builder(this)
-                    // Optionally, add additional APIs and scopes if required.
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .build();
-        }
+
         mGoogleApiClient.connect();
-*/
-        mLocationClient.connect();
     }
 
     @Override
@@ -619,11 +619,10 @@ public class MainActivity extends ActionBarActivity implements
      */
     @Override
     protected void onStop() {
-//        if (mGoogleApiClient != null) {
-//            mGoogleApiClient.disconnect();
-//        }
-        mLocationClient.disconnect();
         super.onStop();
+        if (mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.disconnect();
+        }
     }
 
     /**
@@ -692,10 +691,7 @@ public class MainActivity extends ActionBarActivity implements
             if (debug) Log.d(TAG, "cameraPosition lat=" + cameraPosition.target.latitude +
                     " long=" + cameraPosition.target.longitude + " distFrom0=" + distFrom0);
             if (distFrom0 < 10000) {
-                if (mLocationClient == null) {
-                    return;
-                }
-                mCurrentLocation = mLocationClient.getLastLocation();
+                mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
                 if (debug) Log.d(TAG, mCurrentLocation.toString());
                 if (mCurrentLocation == null) {
                     return;
@@ -757,13 +753,6 @@ public class MainActivity extends ActionBarActivity implements
         }
     }
 
-    @Override
-    public void onDisconnected() {
-        // Display the connection status
-        Toast.makeText(this, "Disconnected. Please re-connect.",
-                Toast.LENGTH_SHORT).show();
-    }
-
     /**
      * Verify that Google Play services is available before making a request.
      *
@@ -802,5 +791,13 @@ public class MainActivity extends ActionBarActivity implements
             }
             return false;
         }
+    }
+
+    @Override
+    public void onConnectionSuspended(int cause) {
+        // The connection to Google Play services was lost for some reason. We call connect() to
+        // attempt to re-establish the connection.
+        Log.i(TAG, "Connection suspended");
+        mGoogleApiClient.connect();
     }
 }
