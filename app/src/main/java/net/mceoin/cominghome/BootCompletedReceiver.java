@@ -23,7 +23,7 @@ import android.util.Log;
 
 import com.google.android.gms.location.Geofence;
 
-import net.mceoin.cominghome.geofence.GeofenceRequester;
+import net.mceoin.cominghome.geofence.GeofenceRegister;
 import net.mceoin.cominghome.geofence.SimpleGeofence;
 import net.mceoin.cominghome.geofence.SimpleGeofenceStore;
 
@@ -37,13 +37,14 @@ public class BootCompletedReceiver extends BroadcastReceiver {
 
     private final static String TAG = BootCompletedReceiver.class.getSimpleName();
 
-    private GeofenceRequester mGeofenceRequester;
+    private GeofenceRegister mGeofenceRegister;
+
     List<Geofence> mCurrentGeofences;
 
     @Override
     public void onReceive(Context context, Intent arg1) {
 
-        mGeofenceRequester = new GeofenceRequester(context);
+        mGeofenceRegister = new GeofenceRegister(context);
 
         SimpleGeofenceStore mGeofenceStorage = new SimpleGeofenceStore(context);
         // Instantiate the current List of geofences
@@ -64,7 +65,8 @@ public class BootCompletedReceiver extends BroadcastReceiver {
         // Start the request. Fail if there's already a request in progress
         try {
             // Try to add geofences
-            mGeofenceRequester.addGeofences(mCurrentGeofences);
+            mGeofenceRegister.populateGeofenceList();
+            mGeofenceRegister.addGeofences();
         } catch (UnsupportedOperationException e) {
             Log.e(TAG, "already queued");
         }

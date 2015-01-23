@@ -64,7 +64,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import net.mceoin.cominghome.geofence.FenceHandling;
-import net.mceoin.cominghome.geofence.GeofenceRequester;
+import net.mceoin.cominghome.geofence.GeofenceRegister;
 import net.mceoin.cominghome.geofence.SimpleGeofence;
 import net.mceoin.cominghome.geofence.SimpleGeofenceStore;
 import net.mceoin.cominghome.history.HistoryUpdate;
@@ -149,7 +149,7 @@ public class MainActivity extends ActionBarActivity implements
     private SimpleGeofence homeGeofence;
 
     // Add geofences handler
-    private GeofenceRequester mGeofenceRequester;
+    private GeofenceRegister mGeofenceRegister;
 
     private Toolbar toolbar;
 
@@ -238,7 +238,7 @@ public class MainActivity extends ActionBarActivity implements
         });
 
         // Instantiate a Geofence requester
-        mGeofenceRequester = new GeofenceRequester(this);
+        mGeofenceRegister = new GeofenceRegister(this);
 
         mGeofenceStorage = new SimpleGeofenceStore(getApplicationContext());
         // Instantiate the current List of geofences
@@ -388,7 +388,8 @@ public class MainActivity extends ActionBarActivity implements
         // Start the request. Fail if there's already a request in progress
         try {
             // Try to add geofences
-            mGeofenceRequester.addGeofences(mCurrentGeofences);
+            mGeofenceRegister.populateGeofenceList();
+            mGeofenceRegister.addGeofences();
         } catch (UnsupportedOperationException e) {
             // Notify user that previous request hasn't finished.
             Toast.makeText(this, R.string.add_geofences_already_requested_error,
