@@ -72,10 +72,8 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        <service
-            android:name=".ReceiveTransitionsIntentService"
+        <service android:name=".geofence.GeofenceTransitionsIntentService"
             android:exported="false" />
-
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyAq9FEsYxHetlyC2VoOr1IAfCnuxIwU8h8" />

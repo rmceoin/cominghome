@@ -37,7 +37,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="end"
             android:enabled="false"
-            android:text="@string/use_pincode" />
+            android:text="@string/go" />
     </LinearLayout>
 
     <WebView
