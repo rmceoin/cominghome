@@ -214,6 +214,7 @@ public class MainActivity extends ActionBarActivity implements
 
         if (map != null) {
             map.setMyLocationEnabled(true);
+            map.getUiSettings().setZoomControlsEnabled(true);
 
             float lastLatitude = prefs.getFloat(PREFS_LAST_MAP_LATITUDE, 0);
             float lastLongitude = prefs.getFloat(PREFS_LAST_MAP_LONGITUDE, 0);

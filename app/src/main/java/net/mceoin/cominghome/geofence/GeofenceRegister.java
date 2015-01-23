@@ -94,7 +94,7 @@ public class GeofenceRegister implements
      */
     @Override
     public void onConnectionSuspended(int cause) {
-        Log.i(TAG, "GoogleApiClient connection suspended");
+        if (debug) Log.d(TAG, "GoogleApiClient connection suspended");
         retryConnecting();
     }
 

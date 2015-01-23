@@ -76,7 +76,7 @@ public class StatusLeftHome extends AsyncTask<Void, Void, StatusBean> {
         }
         int retry = 0;
 
-        while (retry < 3) {
+        while (retry < 4) {
             try {
                 return myApiService.leftHome(InstallationId, access_token, structure_id, tell_nest).execute();
             } catch (IOException e) {

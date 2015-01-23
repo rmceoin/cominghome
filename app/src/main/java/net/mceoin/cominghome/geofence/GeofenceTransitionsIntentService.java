@@ -17,7 +17,6 @@
 package net.mceoin.cominghome.geofence;
 
 import android.app.IntentService;
-import android.content.Context;
 import android.content.Intent;
 import android.text.TextUtils;
 import android.util.Log;
@@ -40,6 +39,7 @@ import java.util.List;
 public class GeofenceTransitionsIntentService extends IntentService {
 
     protected static final String TAG = GeofenceTransitionsIntentService.class.getSimpleName();
+    private static final boolean debug = false;
 
     /**
      * This constructor is required, and calls the super IntentService(String)
@@ -83,13 +83,11 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
             // Get the transition details as a String.
             String geofenceTransitionDetails = getGeofenceTransitionDetails(
-                    this,
                     geofenceTransition,
                     triggeringGeofences
             );
 
-            // Send notification and log the transition details.
-            Log.i(TAG, geofenceTransitionDetails);
+            if (debug) Log.d(TAG, geofenceTransitionDetails);
             FenceHandling.process(geofenceTransition, triggeringGeofences, getApplicationContext());
 
         } else {
@@ -101,20 +99,18 @@ public class GeofenceTransitionsIntentService extends IntentService {
     /**
      * Gets transition details and returns them as a formatted string.
      *
-     * @param context             The app context.
      * @param geofenceTransition  The ID of the geofence transition.
      * @param triggeringGeofences The geofence(s) triggered.
      * @return The transition details formatted as String.
      */
     private String getGeofenceTransitionDetails(
-            Context context,
             int geofenceTransition,
             List<Geofence> triggeringGeofences) {
 
         String geofenceTransitionString = getTransitionString(geofenceTransition);
 
         // Get the Ids of each geofence that was triggered.
-        ArrayList triggeringGeofencesIdsList = new ArrayList();
+        ArrayList<String> triggeringGeofencesIdsList = new ArrayList<>();
         for (Geofence geofence : triggeringGeofences) {
             triggeringGeofencesIdsList.add(geofence.getRequestId());
         }
