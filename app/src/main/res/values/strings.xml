@@ -86,7 +86,7 @@
     <string name="summary_geofence_radius_preference">Meters</string>
     <item name="geofence_radius_default" type="integer">100</item>
     <item name="geofence_radius_min_value" type="integer">20</item>
-    <item name="geofence_radius_max_value" type="integer">1000</item>
+    <item name="geofence_radius_max_value" type="integer">10000</item>
 
     <!-- Initial Wizard -->
     <string name="step1_description">Coming Home works with your Nest Thermostat to automatically set the status to home or away.\n

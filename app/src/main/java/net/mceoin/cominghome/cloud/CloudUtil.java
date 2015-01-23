@@ -28,9 +28,11 @@ public class CloudUtil {
      *
      * @param context Context of application
      * @return A concatenated string with two fields separated by a colon.  The first field is Wifi
-     * and second field is Mobile.  If wifi is up, there will be a 'w', otherwise no character.
-     * If mobile is up, there will be a 'm', otherwise no character.  If neither is up, then the
-     * string will only be the colon.
+     * and second field is Mobile.  If wifi is up, there will be an uppercase 'W', otherwise
+     * lowercase 'w'.
+     * If mobile is up, there will be an uppercase 'M', otherwise lowercsae 'm'.
+     * <p/>
+     * For example, if WiFi is up, but Mobile is down, the return string will be W:m
      */
     public static String getNetworkStatus(Context context) {
 
@@ -50,9 +52,17 @@ public class CloudUtil {
             mobileConnected = false;
         }
 
-        if (wifiConnected) result+="w";
+        if (wifiConnected) {
+            result+="W";
+        } else {
+            result+="w";
+        }
         result+=":";
-        if (mobileConnected) result+="m";
+        if (mobileConnected) {
+            result+="M";
+        } else {
+            result+="m";
+        }
         return result;
     }
 }
