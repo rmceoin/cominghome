@@ -33,7 +33,10 @@ import java.util.logging.Logger;
 import javax.inject.Named;
 
 /**
- * An endpoint class we are exposing
+ * Cloud Endpoint to allow the backend to track away/home status for each Android
+ * installation.  If two installations share a common structure_id, then it is assumed
+ * they belong to the same household.  This allows the backend to automagically know
+ * if another member of the household is still at home or not.
  */
 @Api(name = "myApi", version = "v1", namespace = @ApiNamespace(ownerDomain = "api.cominghome.mceoin.net", ownerName = "api.cominghome.mceoin.net", packagePath = ""))
 public class StatusEndpoint {
@@ -48,9 +51,9 @@ public class StatusEndpoint {
      *
      * @param InstallationID Unique identifier for device sending the message
      * @param access_token   Token to be used to allow access to Nest
-     * @param structure_id   Nest id for the structure where the thermostate is located
+     * @param structure_id   Nest id for the structure where the thermostat is located
      * @param tell_nest      Whether or not to let Nest know
-     * @return Outcome of the update
+     * @return {@link net.mceoin.cominghome.api.StatusBean} Outcome of the update
      */
     @ApiMethod(name = "arrivedHome")
     public StatusBean arrivedHome(@Named("InstallationID") String InstallationID,
@@ -85,25 +88,30 @@ public class StatusEndpoint {
 
         if (tell_nest) {
             String nest_away = NestUtil.getNestAwayStatus(access_token);
-            if (nest_away.equals("away") || nest_away.equals("auto-away")) {
-                String result = NestUtil.tellNestAwayStatus(access_token, structure_id, "home");
-                response.setMessage("Nest updated");
-                if (result.equals("Success")) {
+            switch (nest_away) {
+                case "away":
+                case "auto-away":
+                    String result = NestUtil.tellNestAwayStatus(access_token, structure_id, "home");
+                    response.setMessage("Nest updated");
+                    if (result.equals("Success")) {
+                        response.setNestSuccess(true);
+                        response.setNestUpdated(true);
+                    } else {
+                        response.setNestSuccess(false);
+                        response.setNestUpdated(false);
+                        response.setMessage(result);
+                    }
+                    break;
+                case "home":
                     response.setNestSuccess(true);
-                    response.setNestUpdated(true);
-                } else {
+                    response.setNestUpdated(false);
+                    response.setMessage("Nest already home");
+                    break;
+                default:
                     response.setNestSuccess(false);
                     response.setNestUpdated(false);
-                    response.setMessage(result);
-                }
-            } else if (nest_away.equals("home")) {
-                response.setNestSuccess(true);
-                response.setNestUpdated(false);
-                response.setMessage("Nest already home");
-            } else {
-                response.setNestSuccess(false);
-                response.setNestUpdated(false);
-                response.setMessage(nest_away);
+                    response.setMessage(nest_away);
+                    break;
             }
         } else {
             response.setNestSuccess(true);
@@ -154,49 +162,35 @@ public class StatusEndpoint {
         } else if (tell_nest) {
             String nest_away = NestUtil.getNestAwayStatus(access_token);
 
-            if (nest_away.equals("home")) {
-                String result = NestUtil.tellNestAwayStatus(access_token, structure_id, "away");
-                response.setMessage("Nest updated");
-                if (result.equals("Success")) {
+            switch (nest_away) {
+                case "home":
+                    String result = NestUtil.tellNestAwayStatus(access_token, structure_id, "away");
+                    response.setMessage("Nest updated");
+                    if (result.equals("Success")) {
+                        response.setNestSuccess(true);
+                        response.setNestUpdated(true);
+                    } else {
+                        response.setNestSuccess(false);
+                        response.setMessage(result);
+                    }
+                    break;
+                case "away":
+                case "auto-away":
                     response.setNestSuccess(true);
-                    response.setNestUpdated(true);
-                } else {
+                    response.setNestUpdated(false);
+                    response.setMessage("Nest already " + nest_away);
+                    break;
+                default:
                     response.setNestSuccess(false);
-                    response.setMessage(result);
-                }
-            } else if (nest_away.equals("away") || nest_away.equals("auto-away")) {
-                response.setNestSuccess(true);
-                response.setNestUpdated(false);
-                response.setMessage("Nest already "+nest_away);
-            } else {
-                response.setNestSuccess(false);
-                response.setNestUpdated(false);
-                response.setMessage(nest_away);
+                    response.setNestUpdated(false);
+                    response.setMessage(nest_away);
+                    break;
             }
         } else {
             response.setNestSuccess(true);
             response.setNestUpdated(false);
             response.setMessage("Backend was updated");
         }
-        return response;
-    }
-
-    @ApiMethod(name = "trackETA")
-    public StatusBean trackETA(@Named("InstallationID") String InstallationID,
-                               @Named("access_token") String access_token,
-                               @Named("structure_id") String structure_id,
-                               @Named("latitude") double latitude,
-                               @Named("longitude") double longitude,
-                               @Named("home_latitude") double home_latitude,
-                               @Named("home_longitude") double home_longitude) {
-        StatusBean response = new StatusBean();
-
-        response.setSuccess(true);
-        log.info("track ETA: " + latitude + ", " + longitude +" : " + home_latitude +
-            ", " + home_longitude + " access_token=" + access_token);
-        logEvent(InstallationID, structure_id, "track ETA");
-
-        response.setMessage("Success");
         return response;
     }
 
