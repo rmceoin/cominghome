@@ -106,7 +106,9 @@ public class StatusEndpoint {
                 response.setMessage(nest_away);
             }
         } else {
-            response.setMessage("Backend updated");
+            response.setNestSuccess(true);
+            response.setNestUpdated(false);
+            response.setMessage("Backend was updated");
         }
         return response;
     }
@@ -172,7 +174,9 @@ public class StatusEndpoint {
                 response.setMessage(nest_away);
             }
         } else {
-            response.setMessage("Backend updated");
+            response.setNestSuccess(true);
+            response.setNestUpdated(false);
+            response.setMessage("Backend was updated");
         }
         return response;
     }
