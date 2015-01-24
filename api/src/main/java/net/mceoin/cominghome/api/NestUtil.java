@@ -29,13 +29,29 @@ import java.util.Random;
 import java.util.logging.Logger;
 
 /**
- * Utilities for calling Nest
+ * Utilities for calling Nest.
+ *
+ * <ul>
+ * <li>{@link #getNestAwayStatus(String)}</li>
+ * <li>{@link #tellNestAwayStatus(String, String, String)}</li>
+ * </ul>
  */
 public class NestUtil {
 
     private static final Logger log = Logger.getLogger(NestUtil.class.getName());
 
+    /**
+     * A wrapper for the actual call {@link #tellNestAwayStatusCall(String, String, String)}.
+     * It tries the actual call.  If that returns an error, it
+     * will sleep for a random period then try one more time.
+     *
+     * @param access_token Token to be used to allow access to Nest
+     * @param structure_id Nest id for the structure where the thermostat is located
+     * @param away_status  Either "home" or "away"
+     * @return Equal to "Success" if successful, otherwise it contains a hint on the error.
+     */
     public static String tellNestAwayStatus(String access_token, String structure_id, String away_status) {
+
         String result = tellNestAwayStatusCall(access_token, structure_id, away_status);
 
         if ((result.contains("Error:")) && (!result.contains("Unauthorized"))) {
@@ -43,8 +59,8 @@ public class NestUtil {
             try {
                 Random randomGenerator = new Random();
                 int seconds = 5 + randomGenerator.nextInt(10);
-                log.info("retry in "+seconds+" seconds");
-                Thread.sleep(seconds*1000);
+                log.info("retry in " + seconds + " seconds");
+                Thread.sleep(seconds * 1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -59,13 +75,13 @@ public class NestUtil {
      *
      * @param access_token OAuth token to allow access to Nest
      * @param structure_id ID of structure with thermostat
-     * @param away_status Either "home" or "away"
+     * @param away_status  Either "home" or "away"
      * @return Equal to "Success" if successful, otherwise it contains a hint on the error.
      */
     public static String tellNestAwayStatusCall(String access_token, String structure_id, String away_status) {
 
         String urlString = "https://developer-api.nest.com/structures/" + structure_id + "/away?auth=" + access_token;
-        log.info("url=" + urlString);
+        //log.info("url=" + urlString);
 
         StringBuilder builder = new StringBuilder();
         boolean error = false;
@@ -189,8 +205,8 @@ public class NestUtil {
             try {
                 Random randomGenerator = new Random();
                 int seconds = 5 + randomGenerator.nextInt(10);
-                log.info("retry in "+seconds+" seconds");
-                Thread.sleep(seconds*1000);
+                log.info("retry in " + seconds + " seconds");
+                Thread.sleep(seconds * 1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -205,7 +221,7 @@ public class NestUtil {
         String away_status = "";
 
         String urlString = "https://developer-api.nest.com/structures?auth=" + access_token;
-        log.info("url=" + urlString);
+        //log.info("url=" + urlString);
 
         StringBuilder builder = new StringBuilder();
         boolean error = false;
@@ -327,7 +343,7 @@ public class NestUtil {
             }
         }
 
-        if (error) away_status = "Error: "+errorResult;
+        if (error) away_status = "Error: " + errorResult;
         return away_status;
     }
 
