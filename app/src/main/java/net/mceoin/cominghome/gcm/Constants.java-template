@@ -1,0 +1,13 @@
+package net.mceoin.cominghome.gcm;
+
+/**
+ * Copy this file to Constants.java and update the SENDER_ID with what is
+ * provided by the Google Developers Console.
+ *
+ */public class Constants {
+    /**
+     * Substitute you own sender ID here. This is the project number you got
+     * from the API Console, as described in "Getting Started."
+     */
+    static String SENDER_ID = "Your-Sender-ID";
+}

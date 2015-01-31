@@ -63,6 +63,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import net.mceoin.cominghome.gcm.GcmRegister;
 import net.mceoin.cominghome.geofence.FenceHandling;
 import net.mceoin.cominghome.geofence.GeofenceRegister;
 import net.mceoin.cominghome.geofence.SimpleGeofence;
@@ -84,7 +85,7 @@ public class MainActivity extends ActionBarActivity implements
         GoogleApiClient.OnConnectionFailedListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
-    private static final boolean debug = false;
+    private static final boolean debug = true;
 
     private static final String KEY_IN_RESOLUTION = "is_in_resolution";
     public static final String PREFS_INITIAL_WIZARD = "initial_wizard";
@@ -254,6 +255,11 @@ public class MainActivity extends ActionBarActivity implements
         setActionBarIcon(R.drawable.home);
 
         buildGoogleApiClient();
+
+        // setup Google Cloud Messaging
+        GcmRegister gcmRegister = new GcmRegister();
+        gcmRegister.register(getApplicationContext());
+
     }
 
     private void updateHome(boolean keepOldFence) {
@@ -694,10 +700,10 @@ public class MainActivity extends ActionBarActivity implements
                     " long=" + cameraPosition.target.longitude + " distFrom0=" + distFrom0);
             if (distFrom0 < 10000) {
                 mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-                if (debug) Log.d(TAG, mCurrentLocation.toString());
                 if (mCurrentLocation == null) {
                     return;
                 }
+                if (debug) Log.d(TAG, mCurrentLocation.toString());
                 double latitude = mCurrentLocation.getLatitude();
                 double longitude = mCurrentLocation.getLongitude();
 
