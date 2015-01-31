@@ -29,7 +29,7 @@ public class GeofenceRegister implements
         GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
 
     public final static String TAG = GeofenceRegister.class.getSimpleName();
-    private static final boolean debug = false;
+    private static final boolean debug = true;
 
     // Storage for a reference to the calling client
     private final Context mActivity;

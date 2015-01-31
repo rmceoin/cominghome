@@ -28,7 +28,16 @@ and update
 
 ### Installing Cloud Endpoints
 
-./gradlew api:appengineUpdate
+1. Go to [https://console.developers.google.com/] and Create Project
+2. Any Project Name can be used.  Take note of the Project ID.
+3. Update application in api/src/main/webapp/WEB-INF/appengine-web.xml to match the Project ID.
+4. In APIs, enable:
+..* Google Cloud Datastore API
+..* Google Cloud Messaging for Android
+..* Google Cloud SQL
+..* Google Maps Android API v2
+5. Using Android Studio -> Build -> Deploy Module to App Engine
+
 
 ### Play Store entry
 
