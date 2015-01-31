@@ -5,7 +5,8 @@
         <servlet-class>com.google.api.server.spi.SystemServiceServlet</servlet-class>
         <init-param>
             <param-name>services</param-name>
-            <param-value>net.mceoin.cominghome.api.StatusEndpoint, net.mceoin.cominghome.api.StatusEndpointV2</param-value>
+            <param-value>net.mceoin.cominghome.api.StatusEndpointV1,
+                net.mceoin.cominghome.api.StatusEndpointV2</param-value>
         </init-param>
     </servlet>
     <servlet-mapping>

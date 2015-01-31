@@ -52,12 +52,12 @@ import java.util.Iterator;
  */
 public class NestUtils {
     public static final String TAG = NestUtils.class.getSimpleName();
-    public static final boolean debug = false;
+    public static final boolean debug = true;
 
     public static final String GOT_INFO = "net.mceoin.cominghome.NetUtils.GotInfo";
     public static final String LOST_AUTH = "net.mceoin.cominghome.NetUtils.LostAuth";
 
-    public static void getInfo(final Context context, String access_token) {
+    public static void getInfo(final Context context, final String access_token, final String redirectLocation) {
         if (debug) Log.d(TAG, "getInfo()");
         if (context == null) {
             Log.e(TAG, "missing context");
@@ -68,6 +68,9 @@ public class NestUtils {
         String tag_update_status = "nest_info_req";
 
         String url = "https://developer-api.nest.com/structures?auth=" + access_token;
+        if ((redirectLocation!=null) && (redirectLocation.isEmpty()) ){
+            url = redirectLocation;
+        }
 
         JsonObjectRequest updateStatusReq = new JsonObjectRequest(Request.Method.GET,
                 url, null,
@@ -77,6 +80,7 @@ public class NestUtils {
                     public void onResponse(JSONObject response) {
                         if (debug) Log.d(TAG, "response=" + response.toString());
 
+                        // curl -v -L https://developer-api.nest.com/structures?auth=...
                         // {
                         // "structure_id":"njBTS-gAhF1mJ8_oF23ne7JNDyx1m1hULWixOD6IQWEe-SFA",
                         // "thermostats":["n232323jy8Xr1HVc2OGqICVP45i-Mc"],
@@ -207,9 +211,16 @@ public class NestUtils {
 
                         Intent intent = new Intent(LOST_AUTH);
                         LocalBroadcastManager.getInstance(AppController.getInstance().getApplicationContext()).sendBroadcast(intent);
-
+                    } else if (error.networkResponse.statusCode == HttpStatus.SC_TEMPORARY_REDIRECT) {
+                        if ((redirectLocation == null) && error.networkResponse.headers.containsKey("Location")) {
+                            String location = error.networkResponse.headers.get("Location");
+                            getInfo(context, access_token, location);
+                        } else {
+                            HistoryUpdate.add(context, "getInfo Error: Temporary redirect");
+                        }
                     } else {
-                        HistoryUpdate.add(context, "getInfo Error: " + error.getLocalizedMessage());
+                        HistoryUpdate.add(context, "getInfo Error: " + error.getLocalizedMessage() + ":" +
+                            error.networkResponse.statusCode);
                         VolleyLog.d(TAG, "getInfo Error: " + error.getMessage());
                     }
                 }
