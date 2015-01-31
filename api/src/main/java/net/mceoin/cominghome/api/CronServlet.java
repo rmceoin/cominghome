@@ -36,7 +36,7 @@ public class CronServlet extends HttpServlet {
     private void purgeOldStatus() {
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
-        Query findStatusQuery = new Query(StatusEndpoint.KIND_STATUS);
+        Query findStatusQuery = new Query(StatusEndpointV1.KIND_STATUS);
         findStatusQuery.addSort("date", Query.SortDirection.ASCENDING);
         try {
             PreparedQuery pq = datastore.prepare(findStatusQuery);
@@ -66,7 +66,7 @@ public class CronServlet extends HttpServlet {
 
         int logDaysOld = 7;
 
-        Query findEventQuery = new Query(StatusEndpoint.KIND_EVENT);
+        Query findEventQuery = new Query(StatusEndpointV1.KIND_EVENT);
 
         Date now = new Date();
         Date earlier = new Date();

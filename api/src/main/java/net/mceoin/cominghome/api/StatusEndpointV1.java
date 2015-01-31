@@ -30,13 +30,12 @@ import javax.inject.Named;
  * they belong to the same household.  This allows the backend to automagically know
  * if another member of the household is still at home or not.
  */
-@Api(name = "myApi", version = "v2",
-        defaultVersion = AnnotationBoolean.TRUE,
-        description = "API to tell backend user arrived or left home",
+@Api(name = "myApi", version = "v1", description = "Original API",
+        defaultVersion = AnnotationBoolean.FALSE,
         namespace = @ApiNamespace(ownerDomain = "api.cominghome.mceoin.net", ownerName = "api.cominghome.mceoin.net", packagePath = ""))
-public class StatusEndpointV2 extends StatusEndpoint {
+public class StatusEndpointV1 extends StatusEndpoint {
 
-    private static final Logger log = Logger.getLogger(StatusEndpointV2.class.getName());
+    private static final Logger log = Logger.getLogger(StatusEndpointV1.class.getName());
 
     /**
      * Let the backend know that user has arrived home.  If set, let Nest know as well.
@@ -45,19 +44,17 @@ public class StatusEndpointV2 extends StatusEndpoint {
      * @param access_token   Token to be used to allow access to Nest
      * @param structure_id   Nest id for the structure where the thermostat is located
      * @param tell_nest      Whether or not to let Nest know
-     * @return {@link StatusBean} Outcome of the update
+     * @return {@link net.mceoin.cominghome.api.StatusBean} Outcome of the update
      */
     @ApiMethod(name = "arrivedHome")
     public StatusBean arrivedHome(@Named("InstallationID") String InstallationID,
                                   @Named("access_token") String access_token,
                                   @Named("structure_id") String structure_id,
-                                  @Named("tell_nest") boolean tell_nest,
-                                  @Named("Gcm_reg_id") String Gcm_reg_id) {
+                                  @Named("tell_nest") boolean tell_nest) {
         StatusBean response = new StatusBean();
 
         response.setSuccess(true);
         log.info("arrived home: tell_nest=" + tell_nest);
-        log.info("arrived home: Gcm_reg_id=" + Gcm_reg_id);
         logEvent(InstallationID, structure_id, "arrived home");
 
         if (InstallationID.isEmpty()) {

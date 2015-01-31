@@ -591,7 +591,7 @@ public class MainActivity extends ActionBarActivity implements
             long currentTime = System.currentTimeMillis();
             // make sure it's been at least 60 seconds since last time we got info
             if (currentTime > (last_info_check + 60 * 1000)) {
-                NestUtils.getInfo(getApplicationContext(), access_token);
+                NestUtils.getInfo(getApplicationContext(), access_token, null);
                 last_info_check = System.currentTimeMillis();
             }
         }
