@@ -68,7 +68,7 @@ public class NestUtils {
         String tag_update_status = "nest_info_req";
 
         String url = "https://developer-api.nest.com/structures?auth=" + access_token;
-        if ((redirectLocation!=null) && (redirectLocation.isEmpty()) ){
+        if ((redirectLocation!=null) && (!redirectLocation.isEmpty()) ){
             url = redirectLocation;
         }
 
