@@ -29,6 +29,11 @@ import javax.inject.Named;
  * installation.  If two installations share a common structure_id, then it is assumed
  * they belong to the same household.  This allows the backend to automagically know
  * if another member of the household is still at home or not.
+ * <p/>
+ * One way to test using curl is like so:
+ * <pre>
+ * curl --header "Content-length: 0" -X POST https://coming-home-testing-840.appspot.com/_ah/api/myApi/v2/arrivedHome/testinstall/testaccess/none/false/1234
+ * </pre>
  */
 @Api(name = "myApi", version = "v1", description = "Original API",
         defaultVersion = AnnotationBoolean.FALSE,

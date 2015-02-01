@@ -5,8 +5,10 @@
         <servlet-class>com.google.api.server.spi.SystemServiceServlet</servlet-class>
         <init-param>
             <param-name>services</param-name>
-            <param-value>net.mceoin.cominghome.api.StatusEndpointV1,
-                net.mceoin.cominghome.api.StatusEndpointV2</param-value>
+            <!-- order of classes makes a difference.  The first one becomes the default version
+                for the Android endpoint -->
+            <param-value>net.mceoin.cominghome.api.StatusEndpointV2,
+                net.mceoin.cominghome.api.StatusEndpointV1</param-value>
         </init-param>
     </servlet>
     <servlet-mapping>
