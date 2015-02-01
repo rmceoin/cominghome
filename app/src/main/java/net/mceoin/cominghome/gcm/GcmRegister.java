@@ -46,7 +46,7 @@ public class GcmRegister {
     private GoogleCloudMessaging mGcm;
     private String mRegid;
 
-    protected static final String PROPERTY_REG_ID = "gcm_registration_id";
+    public static final String PROPERTY_REG_ID = "gcm_registration_id";
     protected static final String PROPERTY_APP_VERSION = "appVersion";
 
     public void register(Context context) {

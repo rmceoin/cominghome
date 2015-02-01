@@ -24,6 +24,7 @@ import android.util.Log;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 
+import net.mceoin.cominghome.gcm.GcmRegister;
 import net.mceoin.cominghome.history.HistoryUpdate;
 import net.mceoin.cominghome.Installation;
 import net.mceoin.cominghome.MainActivity;
@@ -46,6 +47,7 @@ public class StatusArrivedHome extends AsyncTask<Void, Void, StatusBean> {
     private String structure_id;
     private String InstallationId;
     private boolean tell_nest;
+    private String regid;
 
     public StatusArrivedHome(Context context) {
         this.context = context;
@@ -55,6 +57,7 @@ public class StatusArrivedHome extends AsyncTask<Void, Void, StatusBean> {
         structure_id = prefs.getString(MainActivity.PREFS_STRUCTURE_ID, "");
         InstallationId = Installation.id(context);
         tell_nest = prefs.getBoolean(PrefsFragment.key_tell_nest_on_arrival_home, true);
+        regid = prefs.getString(GcmRegister.PROPERTY_REG_ID, "none");
     }
 
     @Override
@@ -62,7 +65,7 @@ public class StatusArrivedHome extends AsyncTask<Void, Void, StatusBean> {
         if (myApiService == null) { // Only do this once
             MyApi.Builder builder = new MyApi.Builder(AndroidHttp.newCompatibleTransport(),
                     new AndroidJsonFactory(), null);
-
+            builder.setApplicationName("ComingHome");
             myApiService = builder.build();
         }
 
@@ -74,11 +77,15 @@ public class StatusArrivedHome extends AsyncTask<Void, Void, StatusBean> {
             Log.w(TAG, "missing structure_id");
             return null;
         }
+        if ((regid == null) || (regid.isEmpty())) {
+            Log.w(TAG, "missing regid");
+            return null;
+        }
         int retry=0;
         while (retry<3) {
 
             try {
-                return myApiService.arrivedHome(InstallationId, access_token, structure_id, tell_nest).execute();
+                return myApiService.arrivedHome(InstallationId, access_token, structure_id, tell_nest, regid).execute();
             } catch (IOException e) {
                 Log.w(TAG, "IOException: " + e.getLocalizedMessage());
                 String networkStatus = CloudUtil.getNetworkStatus(context);
@@ -109,15 +116,19 @@ public class StatusArrivedHome extends AsyncTask<Void, Void, StatusBean> {
         tell_nest = prefs.getBoolean(PrefsFragment.key_tell_nest_on_arrival_home, true);
 
         if (tell_nest) {
-            if (result.getNestSuccess()) {
-                if (result.getNestUpdated()) {
-                    NestUtils.sendNotification(context, "Home");
-                    HistoryUpdate.add(context, "Backend updated: Nest Home");
+            if (result != null) {
+                if (result.getNestSuccess()) {
+                    if (result.getNestUpdated()) {
+                        NestUtils.sendNotification(context, "Home");
+                        HistoryUpdate.add(context, "Backend updated: Nest Home");
+                    } else {
+                        HistoryUpdate.add(context, "Backend updated: Nest already home");
+                    }
                 } else {
-                    HistoryUpdate.add(context, "Backend updated: Nest already home");
+                    HistoryUpdate.add(context, "Backend updated: Nest errored: " + result.getMessage());
                 }
             } else {
-                HistoryUpdate.add(context, "Backend updated: Nest errored: " + result.getMessage());
+                HistoryUpdate.add(context, "Backend errored: no result");
             }
         } else {
             HistoryUpdate.add(context, "Backend updated");
