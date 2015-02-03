@@ -1,22 +1,15 @@
 package net.mceoin.cominghome.api;
 
-import com.google.appengine.repackaged.com.google.api.client.http.HttpResponse;
 import com.google.appengine.repackaged.org.codehaus.jackson.map.ObjectMapper;
-
-import org.omg.DynamicAny.NameValuePair;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
-
-import sun.net.www.http.HttpClient;
 
 /**
  * Post to Google Cloud Messaging
@@ -42,7 +35,7 @@ public class Post2GCM {
 
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json");
-            conn.setRequestProperty("Authorization", "key=" + GcmConstants.API_KEY);
+            conn.setRequestProperty("Authorization", "key=" + CloudConstants.GCM_API_KEY);
             conn.setDoOutput(true);
             conn.setDoInput(true);
             conn.setChunkedStreamingMode(0);

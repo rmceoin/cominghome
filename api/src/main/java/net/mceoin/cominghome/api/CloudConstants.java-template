@@ -9,6 +9,6 @@ public class GcmConstants {
      * Get this from the Google Developers Console in
      * APIs & auth -> Credentials -> Key for server applications
      */
-    public final static String API_KEY = "YOUR_KEY_FROM_CONSOLE";
+    public final static String GCM_API_KEY = "YOUR_KEY_FROM_CONSOLE";
 
 }
