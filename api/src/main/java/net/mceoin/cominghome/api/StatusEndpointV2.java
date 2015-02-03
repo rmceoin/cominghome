@@ -64,7 +64,6 @@ public class StatusEndpointV2 extends StatusEndpoint {
 
         response.setSuccess(true);
         log.info("arrived home: tell_nest=" + tell_nest);
-        log.info("arrived home: Gcm_reg_id=" + Gcm_reg_id);
         logEvent(InstallationID, structure_id, "arrived home");
 
         if (InstallationID.isEmpty()) {
