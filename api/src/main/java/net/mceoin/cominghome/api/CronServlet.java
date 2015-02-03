@@ -48,7 +48,7 @@ public class CronServlet extends HttpServlet {
                 long delta = (now.getTime() - date.getTime()) / 1000;
                 log.info("installation_id=" + installation_ID + " date=" + date + " delta=" + delta);
 
-                int hoursOld = 24;
+                int hoursOld = 48;
                 if (delta > hoursOld * 60 * 60) {
                     log.info("older than " + hoursOld + " hours: deleting " + result.getKey());
                     datastore.delete(result.getKey());
