@@ -33,7 +33,7 @@ import java.util.logging.Logger;
 public class StatusEndpoint {
 
     private static final Logger log = Logger.getLogger(StatusEndpoint.class.getName());
-    
+
     public static final String KIND_EVENT = "Event";
     public static final String KIND_STATUS = "Status";
 
@@ -108,7 +108,7 @@ public class StatusEndpoint {
 
                 if ((!installation_ID.equals(installation_id)) && (away_status != null)) {
                     Date now = new Date();
-                    long delta_hours = ((now.getTime() - date.getTime()) / 1000) / (60*60);
+                    long delta_hours = ((now.getTime() - date.getTime()) / 1000) / (60 * 60);
                     log.info("installation_id=" + installation_ID + " date=" + date + " delta_hours=" + delta_hours);
 
                     if ((away_status.equals("home")) && (delta_hours < 24)) {
@@ -120,16 +120,20 @@ public class StatusEndpoint {
                             if (content == null) {
                                 content = new GcmContent();
                             }
-                            content.addRegId(gcm_reg_id);
+                            if (gcm_reg_id.length() > 10) {
+                                // basic sanity check on registration_id, make sure it's at least
+                                // 10 characters long
+                                content.addRegId(gcm_reg_id);
+                            }
                         }
                     }
                 }
             }
         } catch (Exception e) {
-            log.warning("Error: "+e.getLocalizedMessage());
+            log.warning("Error: " + e.getLocalizedMessage());
         }
         if (content != null) {
-            content.createData("check-in","Somebody else left home");
+            content.createData("check-in", "Somebody else left home");
             Post2GCM.post(content);
         }
         log.info("somebodyAtHome: " + somebodyAtHome);
