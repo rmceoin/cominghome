@@ -1,3 +1,18 @@
+/*
+ * Copyright 2014 Randy McEoin
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package net.mceoin.cominghome.gcm;
 
 import android.app.Activity;
@@ -8,13 +23,13 @@ import android.support.v4.content.WakefulBroadcastReceiver;
 import android.util.Log;
 
 /**
- * Receives a Google Cloud Messaging broadcast
+ * Receives a Google Cloud Messaging broadcast, which kicks off a {@link net.mceoin.cominghome.gcm.GcmIntentService}
  * <p/>
  * Inspired from https://developer.android.com/google/gcm/client.html
  */
 public class GcmBroadcastReceiver extends WakefulBroadcastReceiver {
     private static final String TAG = GcmBroadcastReceiver.class.getSimpleName();
-    private static final boolean debug = true;
+    private static final boolean debug = false;
 
     @Override
     public void onReceive(Context context, Intent intent) {

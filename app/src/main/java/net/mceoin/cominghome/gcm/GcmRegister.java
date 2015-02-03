@@ -37,7 +37,7 @@ import java.io.IOException;
 public class GcmRegister {
 
     private static final String TAG = GcmRegister.class.getSimpleName();
-    private static final boolean debug = true;
+    private static final boolean debug = false;
 
     private Context mContext;
 
@@ -90,7 +90,7 @@ public class GcmRegister {
     private String getRegistrationId(Context context) {
         String registrationId = mPrefs.getString(PROPERTY_REG_ID, "");
         if (registrationId.isEmpty()) {
-            Log.i(TAG, "Registration not found.");
+            if (debug) Log.d(TAG, "Registration not found.");
             return "";
         }
         // Check if app was updated; if so, it must clear the registration ID
@@ -99,7 +99,7 @@ public class GcmRegister {
         int registeredVersion = mPrefs.getInt(PROPERTY_APP_VERSION, Integer.MIN_VALUE);
         int currentVersion = getAppVersion(context);
         if (registeredVersion != currentVersion) {
-            Log.i(TAG, "App version changed.");
+            if (debug) Log.d(TAG, "App version changed.");
             return "";
         }
         return registrationId;
@@ -121,7 +121,7 @@ public class GcmRegister {
 
     /**
      * Registers the application with GCM servers asynchronously.
-     * <p>
+     * <p/>
      * Stores the registration ID and app versionCode in the application's
      * shared preferences.
      */
@@ -160,11 +160,11 @@ public class GcmRegister {
      * {@code SharedPreferences}.
      *
      * @param context application's context.
-     * @param regId registration ID
+     * @param regId   registration ID
      */
     private void storeRegistrationId(Context context, String regId) {
         int appVersion = getAppVersion(context);
-        Log.i(TAG, "Saving regId on app version " + appVersion);
+        if (debug) Log.d(TAG, "Saving regId on app version " + appVersion);
         SharedPreferences.Editor editor = mPrefs.edit();
         editor.putString(PROPERTY_REG_ID, regId);
         editor.putInt(PROPERTY_APP_VERSION, appVersion);
