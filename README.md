@@ -36,6 +36,8 @@ and update
 ..* Google Cloud Messaging for Android
 ..* Google Cloud SQL
 ..* Google Maps Android API v2
+5. Go to API's and Auth -> Credentials -> Public API Access -> Create new key
+6. Create a new key -> Server Key -> In accept request field: 0.0.0.0/0 -> Create
 5. Using Android Studio -> Build -> Deploy Module to App Engine
 
 

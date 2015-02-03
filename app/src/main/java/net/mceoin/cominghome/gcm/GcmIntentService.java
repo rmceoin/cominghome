@@ -46,6 +46,7 @@ public class GcmIntentService extends IntentService {
                 case GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE:
                     // If it's a regular GCM message, do some work.
                     Log.i(TAG, "Received: " + extras.toString());
+                    processMessage(extras);
                     break;
             }
         }
@@ -53,4 +54,19 @@ public class GcmIntentService extends IntentService {
         GcmBroadcastReceiver.completeWakefulIntent(intent);
     }
 
+    protected void processMessage(Bundle extras) {
+        String command = extras.getString( "command", "none");
+        String message = extras.getString( "message", "none");
+     
+        if (debug) Log.d(TAG, "command=" + command + " message="+ message);
+        switch (command) {
+            case "check-in":
+                if (debug) Log.d(TAG, "need to check in");
+                break;
+            case "none":
+            default:
+                Log.w(TAG, "unknown command: " + command);
+                break;
+        }
+    }
 }

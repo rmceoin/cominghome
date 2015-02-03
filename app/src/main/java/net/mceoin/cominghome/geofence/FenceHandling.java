@@ -36,7 +36,7 @@ import java.util.List;
 public class FenceHandling {
 
     public final static String TAG = FenceHandling.class.getSimpleName();
-    public final static boolean debug = false;
+    public final static boolean debug = true;
 
     private static SharedPreferences prefs;
     private static FenceHandlingAlarm alarm = new FenceHandlingAlarm();

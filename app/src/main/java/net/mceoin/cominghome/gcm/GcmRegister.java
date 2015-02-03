@@ -47,6 +47,7 @@ public class GcmRegister {
     private String mRegid;
 
     public static final String PROPERTY_REG_ID = "gcm_registration_id";
+    public static final String PROPERTY_REG_ID_NONE = "none";
     protected static final String PROPERTY_APP_VERSION = "appVersion";
 
     public void register(Context context) {
