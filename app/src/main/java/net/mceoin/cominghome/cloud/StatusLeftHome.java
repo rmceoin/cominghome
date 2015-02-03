@@ -30,6 +30,7 @@ import net.mceoin.cominghome.NestUtils;
 import net.mceoin.cominghome.PrefsFragment;
 import net.mceoin.cominghome.api.myApi.MyApi;
 import net.mceoin.cominghome.api.myApi.model.StatusBean;
+import net.mceoin.cominghome.gcm.GcmRegister;
 import net.mceoin.cominghome.history.HistoryUpdate;
 import net.mceoin.cominghome.oauth.OAuthFlowApp;
 
@@ -46,6 +47,7 @@ public class StatusLeftHome extends AsyncTask<Void, Void, StatusBean> {
     private String structure_id;
     private String InstallationId;
     private boolean tell_nest;
+    private String regid;
 
     public StatusLeftHome(Context context) {
         this.context = context;
@@ -55,6 +57,7 @@ public class StatusLeftHome extends AsyncTask<Void, Void, StatusBean> {
         structure_id = prefs.getString(MainActivity.PREFS_STRUCTURE_ID, "");
         InstallationId = Installation.id(context);
         tell_nest = prefs.getBoolean(PrefsFragment.key_tell_nest_on_leaving_home, true);
+        regid = prefs.getString(GcmRegister.PROPERTY_REG_ID, GcmRegister.PROPERTY_REG_ID_NONE);
     }
 
     @Override
@@ -74,11 +77,15 @@ public class StatusLeftHome extends AsyncTask<Void, Void, StatusBean> {
             Log.w(TAG, "missing structure_id");
             return null;
         }
+        if ((regid == null) || (regid.isEmpty())) {
+            Log.w(TAG, "missing regid");
+            return null;
+        }
         int retry = 0;
 
         while (retry < 4) {
             try {
-                return myApiService.leftHome(InstallationId, access_token, structure_id, tell_nest).execute();
+                return myApiService.leftHome(InstallationId, access_token, structure_id, tell_nest, false, "-", regid).execute();
             } catch (IOException e) {
                 Log.w(TAG, "IOException: " + e.getLocalizedMessage());
                 String networkStatus = CloudUtil.getNetworkStatus(context);

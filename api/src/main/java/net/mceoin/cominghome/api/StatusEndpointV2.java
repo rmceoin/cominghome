@@ -29,6 +29,11 @@ import javax.inject.Named;
  * installation.  If two installations share a common structure_id, then it is assumed
  * they belong to the same household.  This allows the backend to automagically know
  * if another member of the household is still at home or not.
+ * <p/>
+ * One way to test using curl is like so:
+ * <pre>
+ * curl --header "Content-length: 0" -X POST https://coming-home-testing-840.appspot.com/_ah/api/myApi/v2/arrivedHome/testinstall/testaccess/teststruct/false/false/dude/1234
+ * </pre>
  */
 @Api(name = "myApi", version = "v2",
         defaultVersion = AnnotationBoolean.TRUE,
@@ -52,6 +57,8 @@ public class StatusEndpointV2 extends StatusEndpoint {
                                   @Named("access_token") String access_token,
                                   @Named("structure_id") String structure_id,
                                   @Named("tell_nest") boolean tell_nest,
+                                  @Named("tell_others") boolean tell_others,
+                                  @Named("my_name") String my_name,
                                   @Named("Gcm_reg_id") String Gcm_reg_id) {
         StatusBean response = new StatusBean();
 
@@ -78,7 +85,13 @@ public class StatusEndpointV2 extends StatusEndpoint {
             return response;
         }
 
-        saveStatus(InstallationID, structure_id, "home");
+        if (Gcm_reg_id.isEmpty()) {
+            response.setSuccess(false);
+            response.setMessage("Gcm_reg_id is empty");
+            return response;
+        }
+
+        saveStatus(InstallationID, structure_id, "home", Gcm_reg_id);
 
         if (tell_nest) {
             String nest_away = NestUtil.getNestAwayStatus(access_token);
@@ -115,11 +128,30 @@ public class StatusEndpointV2 extends StatusEndpoint {
         return response;
     }
 
+    /**
+     * Let the backend know that the user has left home.
+     *
+     * @param InstallationID Unique identifier for device sending the message
+     * @param access_token   Token to be used to allow access to Nest
+     * @param structure_id   Nest id for the structure where the thermostat is located
+     * @param tell_nest      Whether or not to let Nest know
+     * @param tell_others    Let others associated with the same structure know
+     * @param my_name        Name to use when telling others
+     * @param Gcm_reg_id     GCM registration id
+     * @return {@link StatusBean} Outcome of the update
+     *
+     *  <pre>
+     * curl --header "Content-length: 0" -X POST https://coming-home-testing-840.appspot.com/_ah/api/myApi/v2/leftHome/testinstall/testaccess/teststruct/false/false/dude/1234
+     * </pre>
+     */
     @ApiMethod(name = "leftHome")
     public StatusBean leftHome(@Named("InstallationID") String InstallationID,
                                @Named("access_token") String access_token,
                                @Named("structure_id") String structure_id,
-                               @Named("tell_nest") boolean tell_nest) {
+                               @Named("tell_nest") boolean tell_nest,
+                               @Named("tell_others") boolean tell_others,
+                               @Named("my_name") String my_name,
+                               @Named("Gcm_reg_id") String Gcm_reg_id) {
         StatusBean response = new StatusBean();
 
         response.setSuccess(true);
@@ -144,7 +176,13 @@ public class StatusEndpointV2 extends StatusEndpoint {
             return response;
         }
 
-        saveStatus(InstallationID, structure_id, "away");
+        if (Gcm_reg_id.isEmpty()) {
+            response.setSuccess(false);
+            response.setMessage("Gcm_reg_id is empty");
+            return response;
+        }
+
+        saveStatus(InstallationID, structure_id, "away", Gcm_reg_id);
 
         boolean others = checkOthersAtHome(InstallationID, structure_id);
         response.setOthersAtHome(others);

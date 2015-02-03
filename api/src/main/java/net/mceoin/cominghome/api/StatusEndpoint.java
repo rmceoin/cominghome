@@ -62,6 +62,21 @@ public class StatusEndpoint {
         datastore.put(status);
     }
 
+    protected void saveStatus(String installation_id, String structure_id, String away_status,
+                              String Gcm_reg_id) {
+        Key statusKey = KeyFactory.createKey(KIND_STATUS, installation_id);
+        Date date = new Date();
+        Entity status = new Entity(statusKey);
+        status.setProperty("installation_id", installation_id);
+        status.setProperty("date", date);
+        status.setProperty("structure_id", structure_id);
+        status.setProperty("away_status", away_status);
+        status.setProperty("gcm_reg_id", Gcm_reg_id);
+
+        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+        datastore.put(status);
+    }
+
     /**
      * Check for anybody else still at home
      *
@@ -81,11 +96,14 @@ public class StatusEndpoint {
         findStructureQuery.setFilter(structureFilter);
         findStructureQuery.addSort("date", Query.SortDirection.DESCENDING);
 
+        boolean somebodyAtHome = false;
+        GcmContent content = null;
         try {
             PreparedQuery pq = datastore.prepare(findStructureQuery);
             for (Entity result : pq.asIterable(FetchOptions.Builder.withLimit(10))) {
                 String installation_ID = (String) result.getProperty("installation_id");
                 String away_status = (String) result.getProperty("away_status");
+                String gcm_reg_id = (String) result.getProperty("gcm_reg_id");
                 Date date = (Date) result.getProperty("date");
 
                 if ((!installation_ID.equals(installation_id)) && (away_status != null)) {
@@ -97,15 +115,25 @@ public class StatusEndpoint {
                         //
                         // The other installation is at home and checked in with us in the last 24 hours
                         log.info("found somebody else at home");
-                        return true;
+                        somebodyAtHome = true;
+                        if (!gcm_reg_id.isEmpty()) {
+                            if (content == null) {
+                                content = new GcmContent();
+                            }
+                            content.addRegId(gcm_reg_id);
+                        }
                     }
                 }
             }
         } catch (Exception e) {
             log.warning("Error: "+e.getLocalizedMessage());
         }
-        log.info("nobody else home");
-        return false;
+        if (content != null) {
+            content.createData("check-in","Somebody else left home");
+            Post2GCM.post(content);
+        }
+        log.info("somebodyAtHome: " + somebodyAtHome);
+        return somebodyAtHome;
     }
 
 }

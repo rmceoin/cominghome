@@ -57,7 +57,7 @@ public class StatusArrivedHome extends AsyncTask<Void, Void, StatusBean> {
         structure_id = prefs.getString(MainActivity.PREFS_STRUCTURE_ID, "");
         InstallationId = Installation.id(context);
         tell_nest = prefs.getBoolean(PrefsFragment.key_tell_nest_on_arrival_home, true);
-        regid = prefs.getString(GcmRegister.PROPERTY_REG_ID, "none");
+        regid = prefs.getString(GcmRegister.PROPERTY_REG_ID, GcmRegister.PROPERTY_REG_ID_NONE);
     }
 
     @Override
@@ -85,7 +85,7 @@ public class StatusArrivedHome extends AsyncTask<Void, Void, StatusBean> {
         while (retry<3) {
 
             try {
-                return myApiService.arrivedHome(InstallationId, access_token, structure_id, tell_nest, regid).execute();
+                return myApiService.arrivedHome(InstallationId, access_token, structure_id, tell_nest, false, "-", regid).execute();
             } catch (IOException e) {
                 Log.w(TAG, "IOException: " + e.getLocalizedMessage());
                 String networkStatus = CloudUtil.getNetworkStatus(context);
