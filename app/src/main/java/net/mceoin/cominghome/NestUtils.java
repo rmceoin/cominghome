@@ -52,7 +52,7 @@ import java.util.Iterator;
  */
 public class NestUtils {
     public static final String TAG = NestUtils.class.getSimpleName();
-    public static final boolean debug = true;
+    public static final boolean debug = false;
 
     public static final String GOT_INFO = "net.mceoin.cominghome.NetUtils.GotInfo";
     public static final String LOST_AUTH = "net.mceoin.cominghome.NetUtils.LostAuth";
@@ -68,7 +68,7 @@ public class NestUtils {
         String tag_update_status = "nest_info_req";
 
         String url = "https://developer-api.nest.com/structures?auth=" + access_token;
-        if ((redirectLocation!=null) && (!redirectLocation.isEmpty()) ){
+        if ((redirectLocation != null) && (!redirectLocation.isEmpty())) {
             url = redirectLocation;
         }
 
@@ -220,7 +220,7 @@ public class NestUtils {
                         }
                     } else {
                         HistoryUpdate.add(context, "getInfo Error: " + error.getLocalizedMessage() + ":" +
-                            error.networkResponse.statusCode);
+                                error.networkResponse.statusCode);
                         VolleyLog.d(TAG, "getInfo Error: " + error.getMessage());
                     }
                 }

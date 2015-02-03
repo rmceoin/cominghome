@@ -36,7 +36,7 @@ import java.util.List;
 public class FenceHandling {
 
     public final static String TAG = FenceHandling.class.getSimpleName();
-    public final static boolean debug = true;
+    public final static boolean debug = false;
 
     private static SharedPreferences prefs;
     private static FenceHandlingAlarm alarm = new FenceHandlingAlarm();
@@ -46,6 +46,7 @@ public class FenceHandling {
             if (geofence.getRequestId().equals(MainActivity.FENCE_HOME)) {
                 switch (transition) {
                     case Geofence.GEOFENCE_TRANSITION_ENTER:
+                        HistoryUpdate.add(context, "Geofence arrived home");
                         arrivedHome(context);
                         break;
                     case Geofence.GEOFENCE_TRANSITION_EXIT:
@@ -65,7 +66,6 @@ public class FenceHandling {
         // make sure there isn't an alarm set from a leftHome event
         alarm.CancelAlarm(context);
 
-        HistoryUpdate.add(context, "Geofence arrived home");
         prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String structure_id = prefs.getString(MainActivity.PREFS_STRUCTURE_ID, "");
         String access_token = prefs.getString(OAuthFlowApp.PREF_ACCESS_TOKEN, "");
