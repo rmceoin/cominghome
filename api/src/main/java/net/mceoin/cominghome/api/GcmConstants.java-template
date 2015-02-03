@@ -1,0 +1,14 @@
+package net.mceoin.cominghome.api;
+
+/**
+ * Constants used for GCM
+ */
+public class GcmConstants {
+
+    /**
+     * Get this from the Google Developers Console in
+     * APIs & auth -> Credentials -> Key for server applications
+     */
+    public final static String API_KEY = "YOUR_KEY_FROM_CONSOLE";
+
+}
