@@ -134,6 +134,8 @@ public class StatusEndpoint {
         }
         if (content != null) {
             content.createData("check-in", "Somebody else left home");
+            content.setTime_to_live( 60*60 );   // live for one hour
+            content.setCollapse_key("check-in");
             Post2GCM.post(content);
         }
         log.info("somebodyAtHome: " + somebodyAtHome);
