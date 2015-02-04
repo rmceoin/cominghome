@@ -3,11 +3,13 @@ package net.mceoin.cominghome.api;
 /**
  * Constants used for GCM
  */
-public class GcmConstants {
+public class CloudConstants {
 
     /**
      * Get this from the Google Developers Console in
      * APIs & auth -> Credentials -> Key for server applications
+     *
+     * @see <a href="https://developers.google.com/console">https://developers.google.com/console</a>
      */
     public final static String GCM_API_KEY = "YOUR_KEY_FROM_CONSOLE";
 
