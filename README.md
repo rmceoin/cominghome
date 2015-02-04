@@ -38,6 +38,10 @@ and update
 ..* Google Maps Android API v2
 5. Go to API's and Auth -> Credentials -> Public API Access -> Create new key
 6. Create a new key -> Server Key -> In accept request field: 0.0.0.0/0 -> Create
+7. Copy api/src/main/java/net/mceoin/cominghome/api/CloudConstants.java-template to
+the same filename but without the "-template".  Update accordingly.
+8. Copy app/src/main/java/net.mceoin/cominghome/gcm/Constants.java-temp to
+the same filename but without the "-template".  Update accordingly.
 5. Using Android Studio -> Build -> Deploy Module to App Engine
 
 
