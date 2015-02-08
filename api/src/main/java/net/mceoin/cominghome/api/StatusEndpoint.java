@@ -124,6 +124,7 @@ public class StatusEndpoint {
                                 // basic sanity check on registration_id, make sure it's at least
                                 // 10 characters long
                                 content.addRegId(gcm_reg_id);
+                                log.info("added reg_id: " + gcm_reg_id);
                             }
                         }
                     }
@@ -133,6 +134,7 @@ public class StatusEndpoint {
             log.warning("Error: " + e.getLocalizedMessage());
         }
         if (content != null) {
+            log.info("prepare to Post2GCM");
             content.createData("check-in", "Somebody else left home");
             content.setTime_to_live( 60*60 );   // live for one hour
             content.setCollapse_key("check-in");
