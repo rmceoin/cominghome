@@ -18,8 +18,6 @@ package net.mceoin.cominghome;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
-import android.preference.PreferenceManager;
-import android.util.Log;
 
 public class PrefsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -62,7 +60,7 @@ public class PrefsFragment extends PreferenceFragment implements SharedPreferenc
             if (exitRadius != fenceRadius) {
                 SharedPreferences.Editor editor = sp.edit();
                 editor.putInt(PREFERENCE_GEOFENCE_RADIUS_EXIT, fenceRadius);
-                editor.commit();
+                editor.apply();
             }
         }
 
@@ -80,7 +78,7 @@ public class PrefsFragment extends PreferenceFragment implements SharedPreferenc
 
         boolean sameRadius = sharedPreferences.getBoolean(PREFERENCE_GEOFENCE_SAME_RADIUS, true);
         getPreferenceScreen().findPreference(PREFERENCE_GEOFENCE_RADIUS_EXIT).setEnabled(!sameRadius);
-        
+
         // should we use the same radius for both entering and exiting?
         if (sameRadius) {
             //
