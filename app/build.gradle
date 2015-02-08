@@ -8,8 +8,8 @@ android {
         applicationId "net.mceoin.cominghome"
         minSdkVersion 15
         targetSdkVersion 21
-        versionCode 9
-        versionName "1.1.0-alpha"
+        versionCode 10
+        versionName "1.1.1-alpha"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 }

@@ -42,14 +42,19 @@ public class FenceHandling {
     private static FenceHandlingAlarm alarm = new FenceHandlingAlarm();
 
     public static void process(int transition, List<Geofence> geofences, Context context) {
+        String fenceEnterId = MainActivity.FENCE_HOME;
+        String fenceExitId = fenceEnterId + "-Exit";
+        
         for (Geofence geofence : geofences) {
-            if (geofence.getRequestId().equals(MainActivity.FENCE_HOME)) {
+            if (geofence.getRequestId().equals(fenceEnterId) ||
+                    geofence.getRequestId().equals(fenceExitId)) {
                 switch (transition) {
                     case Geofence.GEOFENCE_TRANSITION_ENTER:
                         HistoryUpdate.add(context, "Geofence arrived home");
                         arrivedHome(context);
                         break;
                     case Geofence.GEOFENCE_TRANSITION_EXIT:
+                        HistoryUpdate.add(context, "Geofence left home");
                         leftHome(context);
                         break;
                     default:
@@ -84,8 +89,6 @@ public class FenceHandling {
 
     public static void leftHome(Context context) {
         if (debug) Log.d(TAG, "left home");
-
-        HistoryUpdate.add(context, "Geofence left home");
 
         prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String structure_id = prefs.getString(MainActivity.PREFS_STRUCTURE_ID, "");

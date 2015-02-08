@@ -82,11 +82,17 @@
     <string name="title_notifications_preference">Notifications</string>
     <string name="summary_notifications_preference">After updating Nest, show notification</string>
 
-    <string name="title_geofence_radius_preference">Geofence Radius</string>
+    <string name="title_geofence_radius_preference">Geofence Radius Arriving</string>
     <string name="summary_geofence_radius_preference">Meters</string>
     <item name="geofence_radius_default" type="integer">100</item>
+    <string name="title_geofence_radius_exit_preference">Geofence Radius Leaving</string>
+    <string name="summary_geofence_radius_exit_preference">Meters</string>
+    <item name="geofence_radius_exit_default" type="integer">100</item>
     <item name="geofence_radius_min_value" type="integer">20</item>
     <item name="geofence_radius_max_value" type="integer">10000</item>
+
+    <string name="title_same_radius_preference">Same Radius</string>
+    <string name="summary_same_radius_preference">Use same radius for both arriving and leaving</string>
 
     <!-- Initial Wizard -->
     <string name="step1_description">Coming Home works with your Nest Thermostat to automatically set the status to home or away.\n

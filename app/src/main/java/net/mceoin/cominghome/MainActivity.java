@@ -29,6 +29,7 @@ import android.content.IntentSender.SendIntentException;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -140,7 +141,8 @@ public class MainActivity extends ActionBarActivity implements
 
     public static final String FENCE_HOME = "home";
 
-    float fenceRadius;    // meters
+    float fenceRadius;      // meters
+    float fenceRadiusExit;  // meters
 
     private SimpleGeofenceStore mGeofenceStorage;
 
@@ -192,7 +194,13 @@ public class MainActivity extends ActionBarActivity implements
 
         fenceRadius = prefs.getInt(PrefsFragment.PREFERENCE_GEOFENCE_RADIUS,
                 getResources().getInteger(R.integer.geofence_radius_default));
-
+        boolean sameRadius = prefs.getBoolean(PrefsFragment.PREFERENCE_GEOFENCE_SAME_RADIUS, true);
+        if (sameRadius) {
+            fenceRadiusExit = fenceRadius;
+        } else {
+            fenceRadiusExit = prefs.getInt(PrefsFragment.PREFERENCE_GEOFENCE_RADIUS_EXIT,
+                    getResources().getInteger(R.integer.geofence_radius_exit_default));
+        }
 
         Installation.id(this);
 
@@ -330,18 +338,31 @@ public class MainActivity extends ActionBarActivity implements
                 Geofence.NEVER_EXPIRE,
                 Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT);
 
+        String geofenceExitId = geofenceId + "-Exit";
+        SimpleGeofence newFenceExit = new SimpleGeofence(
+                geofenceExitId,
+                latitude,
+                longitude,
+                fenceRadiusExit,
+                Geofence.NEVER_EXPIRE,
+                Geofence.GEOFENCE_TRANSITION_EXIT);
+
         if (oldFence != null) {
             mGeofenceStorage.clearGeofence(geofenceId);
         }
         // Store this flat version
         mGeofenceStorage.setGeofence(geofenceId, newFence);
+        mGeofenceStorage.setGeofence(geofenceExitId, newFenceExit);
 
         for (Geofence fence : mCurrentGeofences) {
             if (fence.getRequestId().equals(geofenceId)) {
                 mCurrentGeofences.remove(fence);
+            } else if (fence.getRequestId().equals(geofenceExitId)) {
+                mCurrentGeofences.remove(fence);
             }
         }
         mCurrentGeofences.add(newFence.toGeofence());
+        mCurrentGeofences.add(newFenceExit.toGeofence());
 
         updateMarker(latitude, longitude, geofenceId, !keepOldLatLong);
 
@@ -349,6 +370,7 @@ public class MainActivity extends ActionBarActivity implements
     }
 
     private void updateMarker(double latitude, double longitude, String geofenceId, boolean move) {
+        String geofenceExitId = geofenceId + "-exit";
         LatLng current = new LatLng(latitude, longitude);
         Marker marker;
         Circle circle;
@@ -363,6 +385,13 @@ public class MainActivity extends ActionBarActivity implements
             } else {
                 Log.e(TAG, "missing circle for " + geofenceId);
             }
+            circle = mapCircles.get(geofenceExitId);
+            if (circle != null) {
+                circle.setCenter(current);
+                circle.setRadius(fenceRadiusExit);
+            } else {
+                Log.e(TAG, "missing circle for " + geofenceExitId);
+            }
         } else {
             int iconId;
             if (geofenceId.equals(FENCE_HOME)) {
@@ -376,8 +405,16 @@ public class MainActivity extends ActionBarActivity implements
                         .center(current)
                         .radius(fenceRadius); // In meters
 
+                CircleOptions circleExitOptions = new CircleOptions()
+                        .center(current)
+                        .strokeColor(Color.BLUE)
+                        .radius(fenceRadiusExit); // In meters
+
                 circle = map.addCircle(circleOptions);
                 mapCircles.put(geofenceId, circle);
+
+                circle = map.addCircle(circleExitOptions);
+                mapCircles.put(geofenceExitId, circle);
 
                 marker = map.addMarker(new MarkerOptions()
                         .icon(BitmapDescriptorFactory.fromResource(iconId))
@@ -574,9 +611,17 @@ public class MainActivity extends ActionBarActivity implements
         awayStatusText.setText(away_status);
 
         float previousFenceRadius = fenceRadius;
+        float previousFenceRadiusExit = fenceRadiusExit;
         fenceRadius = prefs.getInt(PrefsFragment.PREFERENCE_GEOFENCE_RADIUS,
                 getResources().getInteger(R.integer.geofence_radius_default));
-        if (fenceRadius != previousFenceRadius) {
+        boolean sameRadius = prefs.getBoolean(PrefsFragment.PREFERENCE_GEOFENCE_SAME_RADIUS, true);
+        if (sameRadius) {
+            fenceRadiusExit = fenceRadius;
+        } else {
+            fenceRadiusExit = prefs.getInt(PrefsFragment.PREFERENCE_GEOFENCE_RADIUS_EXIT,
+                    getResources().getInteger(R.integer.geofence_radius_exit_default));
+        }
+        if ((fenceRadius != previousFenceRadius) || (fenceRadiusExit != previousFenceRadiusExit)) {
             // it must have been changed by settings
             updateHome(true);
         }
@@ -598,13 +643,6 @@ public class MainActivity extends ActionBarActivity implements
         NotificationManager mNotificationManager =
                 (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
         mNotificationManager.cancelAll();
-/*
-        if (structure_id.isEmpty()) {
-            sendETAButton.setEnabled(false);
-        } else {
-            sendETAButton.setEnabled(true);
-        }
-*/
     }
 
     @Override
