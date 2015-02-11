@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.LocalBroadcastManager;
@@ -57,12 +58,9 @@ public class NestUtils {
     public static final String GOT_INFO = "net.mceoin.cominghome.NetUtils.GotInfo";
     public static final String LOST_AUTH = "net.mceoin.cominghome.NetUtils.LostAuth";
 
-    public static void getInfo(final Context context, final String access_token, final String redirectLocation) {
+    public static void getInfo(@NonNull final Context context, @NonNull final String access_token,
+                               final String redirectLocation) {
         if (debug) Log.d(TAG, "getInfo()");
-        if (context == null) {
-            Log.e(TAG, "missing context");
-            return;
-        }
 
         // Tag used to cancel the request
         String tag_update_status = "nest_info_req";
@@ -235,7 +233,7 @@ public class NestUtils {
      *
      * @param transitionType The type of transition that occurred.
      */
-    public static void sendNotification(Context context, String transitionType) {
+    public static void sendNotification(@NonNull Context context, @NonNull String transitionType) {
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         boolean notifications = prefs.getBoolean(MainActivity.PREFS_NOTIFICATIONS, true);
