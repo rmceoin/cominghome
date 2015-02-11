@@ -20,7 +20,9 @@ package net.mceoin.cominghome;
  * http://android-developers.blogspot.com/2011/03/identifying-app-installations.html
  *
  */
+
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -46,14 +48,14 @@ public class Installation {
      * @param context Context of app
      * @return String unique identifier
      */
-    public synchronized static String id(Context context) {
+    public synchronized static String id(@NonNull Context context) {
         if (sID == null) {
             File installation = new File(context.getFilesDir(), INSTALLATION);
             try {
                 if (!installation.exists())
                     writeInstallationFile(installation);
                 sID = readInstallationFile(installation);
-                if (sID.length()<5) {
+                if (sID.length() < 5) {
                     // something wrong happened, sID is too short, recreate it
                     writeInstallationFile(installation);
                     sID = readInstallationFile(installation);
@@ -65,7 +67,7 @@ public class Installation {
         return sID;
     }
 
-    private static String readInstallationFile(File installation) throws IOException {
+    private static String readInstallationFile(@NonNull File installation) throws IOException {
         RandomAccessFile f = new RandomAccessFile(installation, "r");
         byte[] bytes = new byte[(int) f.length()];
         f.readFully(bytes);
@@ -73,7 +75,7 @@ public class Installation {
         return new String(bytes);
     }
 
-    private static void writeInstallationFile(File installation) throws IOException {
+    private static void writeInstallationFile(@NonNull File installation) throws IOException {
         FileOutputStream out = new FileOutputStream(installation);
         String id = UUID.randomUUID().toString();
         out.write(id.getBytes());

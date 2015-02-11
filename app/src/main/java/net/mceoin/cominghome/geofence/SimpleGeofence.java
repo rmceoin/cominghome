@@ -16,6 +16,8 @@
 
 package net.mceoin.cominghome.geofence;
 
+import android.support.annotation.NonNull;
+
 import com.google.android.gms.location.Geofence;
 
 /**
@@ -32,15 +34,15 @@ public class SimpleGeofence {
 
     /**
      * @param geofenceId The Geofence's request ID
-     * @param latitude Latitude of the Geofence's center. The value is not checked for validity.
-     * @param longitude Longitude of the Geofence's center. The value is not checked for validity.
-     * @param radius Radius of the geofence circle. The value is not checked for validity
+     * @param latitude   Latitude of the Geofence's center. The value is not checked for validity.
+     * @param longitude  Longitude of the Geofence's center. The value is not checked for validity.
+     * @param radius     Radius of the geofence circle. The value is not checked for validity
      * @param expiration Geofence expiration duration in milliseconds The value is not checked for
-     * validity.
+     *                   validity.
      * @param transition Type of Geofence transition. The value is not checked for validity.
      */
     public SimpleGeofence(
-            String geofenceId,
+            @NonNull String geofenceId,
             double latitude,
             double longitude,
             float radius,
@@ -68,6 +70,7 @@ public class SimpleGeofence {
 
     /**
      * Get the geofence ID
+     *
      * @return A SimpleGeofence ID
      */
     public String getId() {
@@ -76,6 +79,7 @@ public class SimpleGeofence {
 
     /**
      * Get the geofence latitude
+     *
      * @return A latitude value
      */
     public double getLatitude() {
@@ -84,6 +88,7 @@ public class SimpleGeofence {
 
     /**
      * Get the geofence longitude
+     *
      * @return A longitude value
      */
     public double getLongitude() {
@@ -92,6 +97,7 @@ public class SimpleGeofence {
 
     /**
      * Get the geofence radius
+     *
      * @return A radius value
      */
     public float getRadius() {
@@ -100,6 +106,7 @@ public class SimpleGeofence {
 
     /**
      * Get the geofence expiration duration
+     *
      * @return Expiration duration in milliseconds
      */
     public long getExpirationDuration() {
@@ -108,6 +115,7 @@ public class SimpleGeofence {
 
     /**
      * Get the geofence transition type
+     *
      * @return Transition type (see Geofence)
      */
     public int getTransitionType() {
@@ -123,13 +131,13 @@ public class SimpleGeofence {
     public Geofence toGeofence() {
         // Build a new Geofence object
         return new Geofence.Builder()
-                       .setRequestId(getId())
-                       .setTransitionTypes(mTransitionType)
-                       .setCircularRegion(
-                               getLatitude(),
-                               getLongitude(),
-                               getRadius())
-                       .setExpirationDuration(mExpirationDuration)
-                       .build();
+                .setRequestId(getId())
+                .setTransitionTypes(mTransitionType)
+                .setCircularRegion(
+                        getLatitude(),
+                        getLongitude(),
+                        getRadius())
+                .setExpirationDuration(mExpirationDuration)
+                .build();
     }
 }

@@ -22,6 +22,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import net.mceoin.cominghome.cloud.StatusLeftHome;
@@ -57,7 +58,7 @@ public class FenceHandlingAlarm extends BroadcastReceiver {
         CancelAlarm(context);
     }
 
-    public void SetAlarm(Context context) {
+    public void SetAlarm(@NonNull Context context) {
         if (debug) Log.d(TAG, "SetAlarm()");
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent i = new Intent(context, FenceHandlingAlarm.class);
@@ -75,7 +76,7 @@ public class FenceHandlingAlarm extends BroadcastReceiver {
                 AlarmManager.INTERVAL_FIFTEEN_MINUTES, pi);
     }
 
-    public void CancelAlarm(Context context) {
+    public void CancelAlarm(@NonNull Context context) {
         Intent intent = new Intent(context, FenceHandlingAlarm.class);
         PendingIntent sender = PendingIntent.getBroadcast(context, 0, intent, 0);
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);

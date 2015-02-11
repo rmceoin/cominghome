@@ -19,6 +19,7 @@ package net.mceoin.cominghome.geofence;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.google.android.gms.location.Geofence;
@@ -41,10 +42,10 @@ public class FenceHandling {
     private static SharedPreferences prefs;
     private static FenceHandlingAlarm alarm = new FenceHandlingAlarm();
 
-    public static void process(int transition, List<Geofence> geofences, Context context) {
+    public static void process(int transition, List<Geofence> geofences, @NonNull Context context) {
         String fenceEnterId = MainActivity.FENCE_HOME;
         String fenceExitId = fenceEnterId + "-Exit";
-        
+
         for (Geofence geofence : geofences) {
             if (geofence.getRequestId().equals(fenceEnterId) ||
                     geofence.getRequestId().equals(fenceExitId)) {
@@ -65,7 +66,7 @@ public class FenceHandling {
 
     }
 
-    public static void arrivedHome(Context context) {
+    public static void arrivedHome(@NonNull Context context) {
         if (debug) Log.d(TAG, "arrived home");
 
         // make sure there isn't an alarm set from a leftHome event
@@ -87,7 +88,7 @@ public class FenceHandling {
         }
     }
 
-    public static void leftHome(Context context) {
+    public static void leftHome(@NonNull Context context) {
         if (debug) Log.d(TAG, "left home");
 
         prefs = PreferenceManager.getDefaultSharedPreferences(context);

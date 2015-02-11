@@ -19,6 +19,7 @@ package net.mceoin.cominghome.geofence;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.support.annotation.NonNull;
 
 import net.mceoin.cominghome.MainActivity;
 
@@ -34,10 +35,10 @@ public class SimpleGeofenceStore {
 
     // The name of the resulting SharedPreferences
     private static final String SHARED_PREFERENCE_NAME =
-                    MainActivity.class.getSimpleName();
+            MainActivity.class.getSimpleName();
 
     // Create the SharedPreferences storage with private access only
-    public SimpleGeofenceStore(Context context) {
+    public SimpleGeofenceStore(@NonNull Context context) {
         mPrefs =
                 context.getSharedPreferences(
                         SHARED_PREFERENCE_NAME,
@@ -52,7 +53,7 @@ public class SimpleGeofenceStore {
      * @return A geofence defined by its center and radius. See
      * {@link SimpleGeofence}
      */
-    public SimpleGeofence getGeofence(String id) {
+    public SimpleGeofence getGeofence(@NonNull String id) {
 
         /*
          * Get the latitude for the geofence identified by id, or GeofenceUtils.INVALID_VALUE
@@ -96,16 +97,16 @@ public class SimpleGeofenceStore {
 
         // If none of the values is incorrect, return the object
         if (
-            lat != GeofenceUtils.INVALID_FLOAT_VALUE &&
-            lng != GeofenceUtils.INVALID_FLOAT_VALUE &&
-            radius != GeofenceUtils.INVALID_FLOAT_VALUE &&
-            expirationDuration != GeofenceUtils.INVALID_LONG_VALUE &&
-            transitionType != GeofenceUtils.INVALID_INT_VALUE) {
+                lat != GeofenceUtils.INVALID_FLOAT_VALUE &&
+                        lng != GeofenceUtils.INVALID_FLOAT_VALUE &&
+                        radius != GeofenceUtils.INVALID_FLOAT_VALUE &&
+                        expirationDuration != GeofenceUtils.INVALID_LONG_VALUE &&
+                        transitionType != GeofenceUtils.INVALID_INT_VALUE) {
 
             // Return a true Geofence object
             return new SimpleGeofence(id, lat, lng, radius, expirationDuration, transitionType);
 
-        // Otherwise, return null.
+            // Otherwise, return null.
         } else {
             return null;
         }
@@ -113,11 +114,11 @@ public class SimpleGeofenceStore {
 
     /**
      * Save a geofence.
-
+     *
      * @param geofence The {@link SimpleGeofence} containing the
-     * values you want to save in SharedPreferences
+     *                 values you want to save in SharedPreferences
      */
-    public void setGeofence(String id, SimpleGeofence geofence) {
+    public void setGeofence(@NonNull String id, @NonNull SimpleGeofence geofence) {
 
         /*
          * Get a SharedPreferences editor instance. Among other
@@ -151,7 +152,7 @@ public class SimpleGeofenceStore {
         editor.apply();
     }
 
-    public void clearGeofence(String id) {
+    public void clearGeofence(@NonNull String id) {
 
         // Remove a flattened geofence object from storage by removing all of its keys
         Editor editor = mPrefs.edit();
@@ -168,16 +169,16 @@ public class SimpleGeofenceStore {
      * (for example, GeofenceUtils.KEY_LATITUDE), return the key name of the
      * object's values in SharedPreferences.
      *
-     * @param id The ID of a Geofence object
+     * @param id        The ID of a Geofence object
      * @param fieldName The field represented by the key
      * @return The full key name of a value in SharedPreferences
      */
-    private String getGeofenceFieldKey(String id, String fieldName) {
+    private String getGeofenceFieldKey(@NonNull String id, @NonNull String fieldName) {
 
         return
                 GeofenceUtils.KEY_PREFIX +
-                id +
-                "_" +
-                fieldName;
+                        id +
+                        "_" +
+                        fieldName;
     }
 }
