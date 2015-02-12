@@ -41,8 +41,9 @@ public class GcmContent implements Serializable {
     }
 
     public void addRegId(String regId) {
+        if (regId == null) return;
         if (registration_ids == null)
-            registration_ids = new LinkedList<String>();
+            registration_ids = new LinkedList<>();
         if (!registration_ids.contains(regId)) {
             // don't allow duplicates
             registration_ids.add(regId);
@@ -51,7 +52,7 @@ public class GcmContent implements Serializable {
 
     public void createData(String command, String message) {
         if (data == null)
-            data = new HashMap<String, String>();
+            data = new HashMap<>();
 
         data.put("command", command);
         data.put("message", message);
