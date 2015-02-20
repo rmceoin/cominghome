@@ -332,7 +332,7 @@ public class MainActivity extends ActionBarActivity implements
             latitude = mCurrentLocation.getLatitude();
             longitude = mCurrentLocation.getLongitude();
             Log.i(TAG, "updateGeofenceLocation latitude=" + latitude);
-            //TODO: add a dialog to confirm
+
             if (!confirmed && (oldFence != null)) {
 
                 float distFromOldFence = LocationUtils.distFrom(oldFence.getLatitude(), oldFence.getLongitude(),
@@ -402,12 +402,10 @@ public class MainActivity extends ActionBarActivity implements
         builder.setIcon(android.R.drawable.ic_dialog_map);
         builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
-                if (debug) Log.d(TAG, "Got no");
             }
         });
         builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
-                if (debug) Log.d(TAG, "Got yes");
                 updateHome(false, true);
             }
         });
