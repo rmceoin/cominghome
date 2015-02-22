@@ -36,14 +36,14 @@ public class FenceHandlingAlarm extends BroadcastReceiver {
     public final static String TAG = FenceHandlingAlarm.class.getSimpleName();
     public final static boolean debug = false;
 
+    protected long startTime;
 
     @Override
     public void onReceive(Context context, Intent intent) {
         if (debug) Log.d(TAG, "onReceive()");
 
-
         long currentTime = System.currentTimeMillis();
-        long alarmStartTime = intent.getLongExtra("start", 0);
+        long alarmStartTime = intent.getLongExtra("start", startTime);
         long timeElapsedSeconds = (currentTime - alarmStartTime) / 1000;
         if (debug)
             Log.d(TAG, "extra alarmStartTime=" + alarmStartTime + " timeElapsedSeconds=" + timeElapsedSeconds);
@@ -64,6 +64,7 @@ public class FenceHandlingAlarm extends BroadcastReceiver {
         Intent i = new Intent(context, FenceHandlingAlarm.class);
 
         long alarmStartTime = System.currentTimeMillis();
+        startTime = alarmStartTime;
 
         Bundle mBundle = new Bundle();
         mBundle.putLong("start", alarmStartTime);
@@ -71,9 +72,10 @@ public class FenceHandlingAlarm extends BroadcastReceiver {
         PendingIntent pi = PendingIntent.getBroadcast(context, 0, i, 0);
         if (debug) Log.d(TAG, "alarmStartTime=" + alarmStartTime);
 
+        long interval = AlarmManager.INTERVAL_FIFTEEN_MINUTES;
         am.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                AlarmManager.INTERVAL_FIFTEEN_MINUTES,
-                AlarmManager.INTERVAL_FIFTEEN_MINUTES, pi);
+                interval,
+                interval, pi);
     }
 
     public void CancelAlarm(@NonNull Context context) {
