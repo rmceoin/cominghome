@@ -31,6 +31,6 @@ dependencies {
     // App's dependencies, including test
     compile 'com.android.support:support-annotations:21.0.3'
 
-    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.0'
-    androidTestCompile 'com.android.support.test:testing-support-lib:0.1'
+//    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.0'
+//    androidTestCompile 'com.android.support.test:testing-support-lib:0.1'
 }
