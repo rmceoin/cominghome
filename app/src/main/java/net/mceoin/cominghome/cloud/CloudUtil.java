@@ -18,6 +18,7 @@ package net.mceoin.cominghome.cloud;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.support.annotation.NonNull;
 
 /**
  * Cloud utility functions
@@ -34,9 +35,9 @@ public class CloudUtil {
      * <p/>
      * For example, if WiFi is up, but Mobile is down, the return string will be W:m
      */
-    public static String getNetworkStatus(Context context) {
+    public static String getNetworkStatus(@NonNull Context context) {
 
-        String result="";
+        String result = "";
 
         ConnectivityManager connMgr = (ConnectivityManager)
                 context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -53,15 +54,15 @@ public class CloudUtil {
         }
 
         if (wifiConnected) {
-            result+="W";
+            result += "W";
         } else {
-            result+="w";
+            result += "w";
         }
-        result+=":";
+        result += ":";
         if (mobileConnected) {
-            result+="M";
+            result += "M";
         } else {
-            result+="m";
+            result += "m";
         }
         return result;
     }

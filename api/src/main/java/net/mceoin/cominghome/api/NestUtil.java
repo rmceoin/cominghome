@@ -303,6 +303,7 @@ public class NestUtil {
                 // bad auth
                 error = true;
                 errorResult = "Unauthorized";
+                log.warning("Unauthorized");
             } else if (statusCode == HttpURLConnection.HTTP_BAD_REQUEST) {
                 error = true;
                 InputStream response;

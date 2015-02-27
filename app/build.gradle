@@ -8,8 +8,8 @@ android {
         applicationId "net.mceoin.cominghome"
         minSdkVersion 15
         targetSdkVersion 21
-        versionCode 10
-        versionName "1.1.0"
+        versionCode 11
+        versionName "1.1.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 }
@@ -31,6 +31,6 @@ dependencies {
     // App's dependencies, including test
     compile 'com.android.support:support-annotations:21.0.3'
 
-    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.0'
-    androidTestCompile 'com.android.support.test:testing-support-lib:0.1'
+//    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.0'
+//    androidTestCompile 'com.android.support.test:testing-support-lib:0.1'
 }

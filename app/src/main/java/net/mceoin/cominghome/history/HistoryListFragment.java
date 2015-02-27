@@ -39,7 +39,7 @@ import net.mceoin.cominghome.R;
  */
 public class HistoryListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private static final String TAG = HistoryListFragment.class.getSimpleName();
+//    private static final String TAG = HistoryListFragment.class.getSimpleName();
 
     /**
      * The columns we are interested in from the database

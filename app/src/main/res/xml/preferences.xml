@@ -31,6 +31,23 @@
             vntnumberpickerpreference:summary="@string/summary_geofence_radius_preference"
             vntnumberpickerpreference:maxValue="@integer/geofence_radius_max_value"
             vntnumberpickerpreference:minValue="@integer/geofence_radius_min_value" />
+
+        <CheckBoxPreference
+            android:key="geofence_same_radius"
+            android:title="@string/title_same_radius_preference"
+            android:summary="@string/summary_same_radius_preference"
+            android:defaultValue="true"/>
+
+        <net.mceoin.cominghome.VNTNumberPickerPreference
+            xmlns:vntnumberpickerpreference="http://schemas.android.com/apk/res-auto"
+            android:defaultValue="@integer/geofence_radius_exit_default"
+            android:key="geofence_radius_exit"
+            android:title="@string/title_geofence_radius_exit_preference"
+            vntnumberpickerpreference:summary="@string/summary_geofence_radius_exit_preference"
+            vntnumberpickerpreference:maxValue="@integer/geofence_radius_max_value"
+            vntnumberpickerpreference:minValue="@integer/geofence_radius_min_value" 
+            android:enabled="false" />
+
     </PreferenceCategory>
 
 </PreferenceScreen>

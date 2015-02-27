@@ -124,6 +124,11 @@ public class StatusEndpointV2 extends StatusEndpoint {
             response.setNestUpdated(false);
             response.setMessage("Backend was updated");
         }
+        if (response.isNestSuccess()) {
+            log.info("response message=" + response.getMessage() + " for " + InstallationID);
+        } else {
+            log.warning("response message=" + response.getMessage() + " for " + InstallationID);
+        }
         return response;
     }
 
@@ -221,6 +226,11 @@ public class StatusEndpointV2 extends StatusEndpoint {
             response.setNestSuccess(true);
             response.setNestUpdated(false);
             response.setMessage("Backend was updated");
+        }
+        if (response.isNestSuccess()) {
+            log.info("response message=" + response.getMessage() + " for " + InstallationID);
+        } else {
+            log.warning("response message=" + response.getMessage() + " for " + InstallationID);
         }
         return response;
     }

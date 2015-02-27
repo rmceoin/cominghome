@@ -24,6 +24,7 @@ import android.util.Log;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 
+import net.mceoin.cominghome.R;
 import net.mceoin.cominghome.gcm.GcmRegister;
 import net.mceoin.cominghome.history.HistoryUpdate;
 import net.mceoin.cominghome.Installation;
@@ -65,7 +66,8 @@ public class StatusArrivedHome extends AsyncTask<Void, Void, StatusBean> {
         if (myApiService == null) { // Only do this once
             MyApi.Builder builder = new MyApi.Builder(AndroidHttp.newCompatibleTransport(),
                     new AndroidJsonFactory(), null);
-            builder.setApplicationName("ComingHome");
+
+            builder.setApplicationName(context.getString(R.string.app_name).replace(" ","-"));
             myApiService = builder.build();
         }
 
