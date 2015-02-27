@@ -20,6 +20,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.util.HashSet;
@@ -53,7 +54,8 @@ public class StructuresUpdate {
      * @param name         Name of the structure
      * @param away         Away status
      */
-    public static void update(Context context, String structure_id, String name, String away) {
+    public static void update(@NonNull Context context, @NonNull String structure_id,
+                              @NonNull String name, @NonNull String away) {
         if (debug) Log.d(TAG, "updateStructures(" + structure_id + ")");
         ContentValues values = new ContentValues();
         values.put(StructuresValues.Structures.STRUCTURE_ID, structure_id);
@@ -102,7 +104,7 @@ public class StructuresUpdate {
      * @param context Context of the app
      * @return a HashSet of structure_id's
      */
-    public static HashSet<String> getStructureIds(Context context) {
+    public static HashSet<String> getStructureIds(@NonNull Context context) {
 
         HashSet<String> structure_ids = new HashSet<String>();
 
@@ -124,16 +126,16 @@ public class StructuresUpdate {
     /**
      * Delete a structure_id from the database
      *
-     * @param context Context of the app
+     * @param context      Context of the app
      * @param structure_id ID of the structure
      * @return Number of rows deleted
      */
-    public static int deleteStructureId(Context context, String structure_id) {
+    public static int deleteStructureId(@NonNull Context context, @NonNull String structure_id) {
 
         String mSelectionClause = StructuresValues.Structures.STRUCTURE_ID + " = ?";
         String[] mSelectionArgs = {structure_id};
 
-        return context.getContentResolver().delete(mUri, mSelectionClause, mSelectionArgs );
+        return context.getContentResolver().delete(mUri, mSelectionClause, mSelectionArgs);
     }
 
     /**
@@ -142,7 +144,7 @@ public class StructuresUpdate {
      * @param context Context of the app
      * @return Number of structures
      */
-    public static int countStructureIds(Context context) {
+    public static int countStructureIds(@NonNull Context context) {
         int count = 0;
         Cursor mCursor = context.getContentResolver().query(mUri, mProjectionStructures, null, null, "");
         if (mCursor != null) {
@@ -152,7 +154,7 @@ public class StructuresUpdate {
         return count;
     }
 
-    public static StructuresBean getStructureId(Context context, Uri mUri) {
+    public static StructuresBean getStructureId(@NonNull Context context, @NonNull Uri mUri) {
 
         StructuresBean structure = new StructuresBean();
         structure.setId("");

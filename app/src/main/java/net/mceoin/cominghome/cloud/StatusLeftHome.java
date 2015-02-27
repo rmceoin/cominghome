@@ -28,6 +28,7 @@ import net.mceoin.cominghome.Installation;
 import net.mceoin.cominghome.MainActivity;
 import net.mceoin.cominghome.NestUtils;
 import net.mceoin.cominghome.PrefsFragment;
+import net.mceoin.cominghome.R;
 import net.mceoin.cominghome.api.myApi.MyApi;
 import net.mceoin.cominghome.api.myApi.model.StatusBean;
 import net.mceoin.cominghome.gcm.GcmRegister;
@@ -66,6 +67,7 @@ public class StatusLeftHome extends AsyncTask<Void, Void, StatusBean> {
             MyApi.Builder builder = new MyApi.Builder(AndroidHttp.newCompatibleTransport(),
                     new AndroidJsonFactory(), null);
 
+            builder.setApplicationName(context.getString(R.string.app_name).replace(" ","-"));
             myApiService = builder.build();
         }
 

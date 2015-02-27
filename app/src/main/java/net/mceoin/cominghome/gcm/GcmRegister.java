@@ -21,6 +21,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -50,7 +51,7 @@ public class GcmRegister {
     public static final String PROPERTY_REG_ID_NONE = "none";
     protected static final String PROPERTY_APP_VERSION = "appVersion";
 
-    public void register(Context context) {
+    public void register(@NonNull Context context) {
 
         if (debug) Log.d(TAG, "register()");
         mContext = context;
@@ -74,7 +75,7 @@ public class GcmRegister {
      * Check the device to make sure it has the Google Play Services APK. If
      * it doesn't, return false.
      */
-    private boolean checkPlayServices(Context context) {
+    private boolean checkPlayServices(@NonNull Context context) {
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(context);
         return resultCode == ConnectionResult.SUCCESS;
     }
@@ -87,7 +88,7 @@ public class GcmRegister {
      * @return registration ID, or empty string if there is no existing
      * registration ID.
      */
-    private String getRegistrationId(Context context) {
+    private String getRegistrationId(@NonNull Context context) {
         String registrationId = mPrefs.getString(PROPERTY_REG_ID, "");
         if (registrationId.isEmpty()) {
             if (debug) Log.d(TAG, "Registration not found.");
@@ -108,7 +109,7 @@ public class GcmRegister {
     /**
      * @return Application's version code from the {@code PackageManager}.
      */
-    private static int getAppVersion(Context context) {
+    private static int getAppVersion(@NonNull Context context) {
         try {
             PackageInfo packageInfo = context.getPackageManager()
                     .getPackageInfo(context.getPackageName(), 0);
@@ -162,7 +163,7 @@ public class GcmRegister {
      * @param context application's context.
      * @param regId   registration ID
      */
-    private void storeRegistrationId(Context context, String regId) {
+    private void storeRegistrationId(@NonNull Context context, String regId) {
         int appVersion = getAppVersion(context);
         if (debug) Log.d(TAG, "Saving regId on app version " + appVersion);
         SharedPreferences.Editor editor = mPrefs.edit();

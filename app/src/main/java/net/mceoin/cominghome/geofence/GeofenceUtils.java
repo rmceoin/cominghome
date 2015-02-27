@@ -25,23 +25,23 @@ public final class GeofenceUtils {
 //    public enum REMOVE_TYPE {INTENT, LIST}
 
     // Used to track what type of request is in process
-    public enum REQUEST_TYPE {ADD, REMOVE}
+//    public enum REQUEST_TYPE {ADD, REMOVE}
 
     // Intent actions
-    public static final String ACTION_CONNECTION_ERROR =
-            "com.example.android.geofence.ACTION_CONNECTION_ERROR";
+//    public static final String ACTION_CONNECTION_ERROR =
+//            "com.example.android.geofence.ACTION_CONNECTION_ERROR";
 
 //    public static final String ACTION_CONNECTION_SUCCESS =
 //            "com.example.android.geofence.ACTION_CONNECTION_SUCCESS";
 
-    public static final String ACTION_GEOFENCES_ADDED =
-            "com.example.android.geofence.ACTION_GEOFENCES_ADDED";
+//    public static final String ACTION_GEOFENCES_ADDED =
+//            "com.example.android.geofence.ACTION_GEOFENCES_ADDED";
 
 //    public static final String ACTION_GEOFENCES_REMOVED =
 //            "com.example.android.geofence.ACTION_GEOFENCES_DELETED";
 
-    public static final String ACTION_GEOFENCE_ERROR =
-            "com.example.android.geofence.ACTION_GEOFENCES_ERROR";
+//    public static final String ACTION_GEOFENCE_ERROR =
+//            "com.example.android.geofence.ACTION_GEOFENCES_ERROR";
 
 //    public static final String ACTION_GEOFENCE_TRANSITION =
 //            "com.example.android.geofence.ACTION_GEOFENCE_TRANSITION";
@@ -50,21 +50,21 @@ public final class GeofenceUtils {
 //                    "com.example.android.geofence.ACTION_GEOFENCE_TRANSITION_ERROR";
 
     // The Intent category used by all Location Services sample apps
-    public static final String CATEGORY_LOCATION_SERVICES =
-                    "com.example.android.geofence.CATEGORY_LOCATION_SERVICES";
+//    public static final String CATEGORY_LOCATION_SERVICES =
+//                    "com.example.android.geofence.CATEGORY_LOCATION_SERVICES";
 
     // Keys for extended data in Intents
 //    public static final String EXTRA_CONNECTION_CODE =
 //                    "com.example.android.EXTRA_CONNECTION_CODE";
 
-    public static final String EXTRA_CONNECTION_ERROR_CODE =
-            "com.example.android.geofence.EXTRA_CONNECTION_ERROR_CODE";
+//    public static final String EXTRA_CONNECTION_ERROR_CODE =
+//            "com.example.android.geofence.EXTRA_CONNECTION_ERROR_CODE";
 
 //    public static final String EXTRA_CONNECTION_ERROR_MESSAGE =
 //            "com.example.android.geofence.EXTRA_CONNECTION_ERROR_MESSAGE";
 
-    public static final String EXTRA_GEOFENCE_STATUS =
-            "com.example.android.geofence.EXTRA_GEOFENCE_STATUS";
+//    public static final String EXTRA_GEOFENCE_STATUS =
+//            "com.example.android.geofence.EXTRA_GEOFENCE_STATUS";
 
     /*
      * Keys for flattened geofences stored in SharedPreferences
@@ -109,11 +109,11 @@ public final class GeofenceUtils {
      * Define a request code to send to Google Play services
      * This code is returned in Activity.onActivityResult
      */
-    public final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
+//    public final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 
 //    // A string of length 0, used to clear out input fields
 //    public static final String EMPTY_STRING = new String();
 
-    public static final CharSequence GEOFENCE_ID_DELIMITER = ",";
+//    public static final CharSequence GEOFENCE_ID_DELIMITER = ",";
 
 }

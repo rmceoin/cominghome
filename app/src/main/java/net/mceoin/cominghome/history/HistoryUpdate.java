@@ -19,6 +19,7 @@ package net.mceoin.cominghome.history;
 import android.content.ContentValues;
 import android.content.Context;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 /**
@@ -29,19 +30,18 @@ public class HistoryUpdate {
     public static final String TAG = HistoryUpdate.class.getSimpleName();
     public static final boolean debug = false;
 
-    public static void add(Context context, String entry)
-    {
+    public static void add(@NonNull Context context, @NonNull String entry) {
         Uri mUri;
 
-        if (debug) Log.d(TAG,"updateHistory("+entry+")");
+        if (debug) Log.d(TAG, "updateHistory(" + entry + ")");
         ContentValues values = new ContentValues();
         values.put(HistoryValues.History.ENTRY, entry);
         values.put(HistoryValues.History.CREATED_DATE, System.currentTimeMillis());
 
         mUri = HistoryValues.History.CONTENT_URI;
-        Uri uri=context.getContentResolver().insert(mUri, values);
+        Uri uri = context.getContentResolver().insert(mUri, values);
 
-        if (debug) Log.d(TAG,"updateHistory: inserted uri="+uri);
+        if (debug) Log.d(TAG, "updateHistory: inserted uri=" + uri);
     }
 
 }

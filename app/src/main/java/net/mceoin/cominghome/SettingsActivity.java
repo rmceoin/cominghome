@@ -21,6 +21,7 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -83,7 +84,7 @@ public class SettingsActivity extends ActionBarActivity {
         }
     }
 
-    public static void forgetNest(Context context) {
+    public static void forgetNest(@NonNull Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString(OAuthFlowApp.PREF_ACCESS_TOKEN, "");
