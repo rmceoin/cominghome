@@ -12,6 +12,9 @@ android {
         versionName "1.1.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+    packagingOptions {
+        exclude 'LICENSE.txt'
+    }
 }
 
 dependencies {
@@ -28,9 +31,11 @@ dependencies {
     compile 'org.codepond:wizardroid:1.2.0'
     compile project(path: ':api', configuration: 'android-endpoints')
 
+    compile 'com.google.code.findbugs:jsr305:2.0.1'
+
     // App's dependencies, including test
     compile 'com.android.support:support-annotations:21.0.3'
 
-//    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.0'
-//    androidTestCompile 'com.android.support.test:testing-support-lib:0.1'
+    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.0'
+    androidTestCompile 'com.android.support.test:testing-support-lib:0.1'
 }
