@@ -42,7 +42,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         mActivity = getActivity();
     }
 
-    public void testConnectToNest() {
+    public void testMain_ConnectToNest() {
 
         onView(withId(R.id.buttonConnectNest)).check(matches(withText(mActivity.getString(R.string.connect_nest))));
 
