@@ -7,8 +7,15 @@ import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.action.ViewActions.closeSoftKeyboard;
 import static android.support.test.espresso.action.ViewActions.typeText;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.matcher.ViewMatchers.assertThat;
+
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
+import static android.support.test.espresso.Espresso.pressBack;
+import static android.support.test.espresso.matcher.ViewMatchers.isEnabled;
+import static android.support.test.espresso.matcher.ViewMatchers.isClickable;
+
+import static org.hamcrest.Matchers.not;
 
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.ApplicationTestCase;
@@ -21,9 +28,9 @@ import android.test.suitebuilder.annotation.LargeTest;
  * o Animator Duration Scale
  */
 @LargeTest
-public class ApplicationTest extends ActivityInstrumentationTestCase2<MainActivity> {
+public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActivity> {
 
-    public ApplicationTest() {
+    public MainActivityTest() {
         super(MainActivity.class);
     }
 
@@ -38,6 +45,16 @@ public class ApplicationTest extends ActivityInstrumentationTestCase2<MainActivi
         
         onView(withId(R.id.buttonConnectNest)).check(matches(withText(STRING_CONNECT_TO_NEST)));
 
-        onView(withId(R.id.buttonSetAtHome)).perform(click());
+        onView(withId(R.id.buttonConnectNest)).perform(click());
+
+        // moves forward to OAuthFlowApp activity
+        onView(withId(R.id.btn_use_pincode)).check(matches(withText(("Go"))));
+        onView(withId(R.id.btn_use_pincode)).check(matches(not(isEnabled())));
+        
+        // Going back to the previous activity
+        pressBack();
+
+        onView(withId(R.id.buttonConnectNest)).check(matches(withText(STRING_CONNECT_TO_NEST)));
+
     }
 }
