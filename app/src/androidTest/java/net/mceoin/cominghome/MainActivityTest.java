@@ -30,6 +30,8 @@ import android.test.suitebuilder.annotation.LargeTest;
 @LargeTest
 public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActivity> {
 
+    MainActivity mActivity;
+
     public MainActivityTest() {
         super(MainActivity.class);
     }
@@ -37,13 +39,12 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        getActivity();
+        mActivity = getActivity();
     }
 
     public void testConnectToNest() {
-        final String STRING_CONNECT_TO_NEST = "Connect to Nest";
-        
-        onView(withId(R.id.buttonConnectNest)).check(matches(withText(STRING_CONNECT_TO_NEST)));
+
+        onView(withId(R.id.buttonConnectNest)).check(matches(withText(mActivity.getString(R.string.connect_nest))));
 
         onView(withId(R.id.buttonConnectNest)).perform(click());
 
@@ -54,7 +55,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         // Going back to the previous activity
         pressBack();
 
-        onView(withId(R.id.buttonConnectNest)).check(matches(withText(STRING_CONNECT_TO_NEST)));
+        onView(withId(R.id.buttonConnectNest)).check(matches(withText(mActivity.getString(R.string.connect_nest))));
 
     }
 }
