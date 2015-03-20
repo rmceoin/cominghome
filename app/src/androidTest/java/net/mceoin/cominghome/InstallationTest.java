@@ -20,11 +20,8 @@ public class InstallationTest extends ActivityInstrumentationTestCase2<MainActiv
         mActivity = getActivity();
     }
 
-    public void testInstallation_Preconditions() {
-        assertNotNull("mActivity is null", mActivity);
-    }
-    
     public void testInstallation_Id() throws Exception {
+        assertNotNull("mActivity is null", mActivity);
         Context context = mActivity.getApplicationContext();
         assertNotNull("context is null", context);
         String id = Installation.id(context);
