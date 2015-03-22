@@ -24,15 +24,14 @@ import android.util.Log;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 
-import net.mceoin.cominghome.R;
-import net.mceoin.cominghome.gcm.GcmRegister;
-import net.mceoin.cominghome.history.HistoryUpdate;
 import net.mceoin.cominghome.Installation;
 import net.mceoin.cominghome.MainActivity;
 import net.mceoin.cominghome.NestUtils;
 import net.mceoin.cominghome.PrefsFragment;
 import net.mceoin.cominghome.api.myApi.MyApi;
 import net.mceoin.cominghome.api.myApi.model.StatusBean;
+import net.mceoin.cominghome.gcm.GcmRegister;
+import net.mceoin.cominghome.history.HistoryUpdate;
 import net.mceoin.cominghome.oauth.OAuthFlowApp;
 
 import java.io.IOException;
@@ -67,7 +66,8 @@ public class StatusArrivedHome extends AsyncTask<Void, Void, StatusBean> {
             MyApi.Builder builder = new MyApi.Builder(AndroidHttp.newCompatibleTransport(),
                     new AndroidJsonFactory(), null);
 
-            builder.setApplicationName(context.getString(R.string.app_name).replace(" ","-"));
+            // This name gets used as part of the HTTP User-Agent
+            builder.setApplicationName(CloudUtil.getApplicationName(context));
             myApiService = builder.build();
         }
 
@@ -83,8 +83,8 @@ public class StatusArrivedHome extends AsyncTask<Void, Void, StatusBean> {
             Log.w(TAG, "missing regid");
             return null;
         }
-        int retry=0;
-        while (retry<3) {
+        int retry = 0;
+        while (retry < 3) {
 
             try {
                 return myApiService.arrivedHome(InstallationId, access_token, structure_id, tell_nest, false, "-", regid).execute();
@@ -97,10 +97,10 @@ public class StatusArrivedHome extends AsyncTask<Void, Void, StatusBean> {
             }
             try {
                 Random randomGenerator = new Random();
-                int seconds = (retry*60) + randomGenerator.nextInt(15);
+                int seconds = (retry * 60) + randomGenerator.nextInt(15);
                 if (debug) Log.d(TAG,
-                        "retry in "+seconds+" seconds");
-                Thread.sleep(seconds*1000);
+                        "retry in " + seconds + " seconds");
+                Thread.sleep(seconds * 1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -127,7 +127,11 @@ public class StatusArrivedHome extends AsyncTask<Void, Void, StatusBean> {
                         HistoryUpdate.add(context, "Backend updated: Nest already home");
                     }
                 } else {
-                    HistoryUpdate.add(context, "Backend updated: Nest errored: " + result.getMessage());
+                    if (result.getMessage().contains("Unauthorized")) {
+                        NestUtils.lostAuthorization(context);
+                    } else {
+                        HistoryUpdate.add(context, "Backend updated: Nest errored: " + result.getMessage());
+                    }
                 }
             } else {
                 HistoryUpdate.add(context, "Backend errored: no result");
