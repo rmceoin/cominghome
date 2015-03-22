@@ -37,10 +37,10 @@ import net.mceoin.cominghome.history.HistoryUpdate;
 import net.mceoin.cominghome.oauth.OAuthFlowApp;
 import net.mceoin.cominghome.structures.StructuresUpdate;
 
-import org.apache.http.HttpStatus;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.HttpURLConnection;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -57,6 +57,13 @@ public class NestUtils {
 
     public static final String GOT_INFO = "net.mceoin.cominghome.NetUtils.GotInfo";
     public static final String LOST_AUTH = "net.mceoin.cominghome.NetUtils.LostAuth";
+
+    /**
+     * Temporary redirect.
+     * Not used very often HTTP response code, apparently.  It's not specified
+     * as part of the normal {@link java.net.HttpURLConnection} package.
+     */
+    static final int HTTP_TEMPORARY_REDIRECT = 307;
 
     public static void getInfo(@NonNull final Context context, @NonNull final String access_token,
                                final String redirectLocation) {
@@ -195,21 +202,9 @@ public class NestUtils {
 
                     Context context = AppController.getInstance().getApplicationContext();
 
-                    if (error.networkResponse.statusCode == HttpStatus.SC_UNAUTHORIZED) {
-                        // We must have been de-authorized at the Nest web site
-                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-                        SharedPreferences.Editor pref = prefs.edit();
-                        pref.putString(OAuthFlowApp.PREF_ACCESS_TOKEN, "");
-                        pref.putString(MainActivity.PREFS_STRUCTURE_ID, "");
-                        pref.putString(MainActivity.PREFS_STRUCTURE_NAME, "");
-                        pref.putString(MainActivity.PREFS_LAST_AWAY_STATUS, "");
-                        pref.apply();
-
-                        HistoryUpdate.add(context, "Lost our Nest authorization");
-
-                        Intent intent = new Intent(LOST_AUTH);
-                        LocalBroadcastManager.getInstance(AppController.getInstance().getApplicationContext()).sendBroadcast(intent);
-                    } else if (error.networkResponse.statusCode == HttpStatus.SC_TEMPORARY_REDIRECT) {
+                    if (error.networkResponse.statusCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                        lostAuthorization(context);
+                    } else if (error.networkResponse.statusCode == HTTP_TEMPORARY_REDIRECT) {
                         if ((redirectLocation == null) && error.networkResponse.headers.containsKey("Location")) {
                             String location = error.networkResponse.headers.get("Location");
                             getInfo(context, access_token, location);
@@ -225,6 +220,27 @@ public class NestUtils {
             }
         });
         AppController.getInstance().addToRequestQueue(updateStatusReq, tag_update_status);
+    }
+
+    /**
+     * Called when we've detected that our Nest authorization has been revoked.
+     * Removes any stored Nest preferences.
+     *
+     * @param context Context of application
+     */
+    public static void lostAuthorization(Context context) {
+        // We must have been de-authorized at the Nest web site
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor pref = prefs.edit();
+        pref.putString(OAuthFlowApp.PREF_ACCESS_TOKEN, "");
+        pref.putString(MainActivity.PREFS_STRUCTURE_ID, "");
+        pref.putString(MainActivity.PREFS_STRUCTURE_NAME, "");
+        pref.putString(MainActivity.PREFS_LAST_AWAY_STATUS, "");
+        pref.apply();
+        HistoryUpdate.add(context, context.getString(R.string.lost_auth));
+
+        Intent intent = new Intent(LOST_AUTH);
+        LocalBroadcastManager.getInstance(AppController.getInstance().getApplicationContext()).sendBroadcast(intent);
     }
 
     /**

@@ -28,7 +28,6 @@ import net.mceoin.cominghome.Installation;
 import net.mceoin.cominghome.MainActivity;
 import net.mceoin.cominghome.NestUtils;
 import net.mceoin.cominghome.PrefsFragment;
-import net.mceoin.cominghome.R;
 import net.mceoin.cominghome.api.myApi.MyApi;
 import net.mceoin.cominghome.api.myApi.model.StatusBean;
 import net.mceoin.cominghome.gcm.GcmRegister;
@@ -67,7 +66,7 @@ public class StatusLeftHome extends AsyncTask<Void, Void, StatusBean> {
             MyApi.Builder builder = new MyApi.Builder(AndroidHttp.newCompatibleTransport(),
                     new AndroidJsonFactory(), null);
 
-            builder.setApplicationName(context.getString(R.string.app_name).replace(" ","-"));
+            builder.setApplicationName(CloudUtil.getApplicationName(context));
             myApiService = builder.build();
         }
 
@@ -129,7 +128,11 @@ public class StatusLeftHome extends AsyncTask<Void, Void, StatusBean> {
                     }
                 }
             } else {
-                HistoryUpdate.add(context, "Backend updated: Nest errored: " + result.getMessage());
+                if (result.getMessage().contains("Unauthorized")) {
+                    NestUtils.lostAuthorization(context);
+                } else {
+                    HistoryUpdate.add(context, "Backend updated: Nest errored: " + result.getMessage());
+                }
             }
         } else {
             HistoryUpdate.add(context, "Backend updated");
