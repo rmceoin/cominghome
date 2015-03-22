@@ -55,7 +55,13 @@ public class NestUtils {
     public static final String TAG = NestUtils.class.getSimpleName();
     public static final boolean debug = false;
 
+    /**
+     * Broadcast intent name to indicate structure info has been collected/updated.
+     */
     public static final String GOT_INFO = "net.mceoin.cominghome.NetUtils.GotInfo";
+    /**
+     * Broadcast intent name to indicate that Nest authorization has been lost.
+     */
     public static final String LOST_AUTH = "net.mceoin.cominghome.NetUtils.LostAuth";
 
     /**
@@ -65,6 +71,14 @@ public class NestUtils {
      */
     static final int HTTP_TEMPORARY_REDIRECT = 307;
 
+    /**
+     * Make a Structures API call to Nest to collect what structures are available and
+     * their current status.
+     *
+     * @param context Context of application
+     * @param access_token Nest Access Token
+     * @param redirectLocation If a recursive call, then where to perform the retry
+     */
     public static void getInfo(@NonNull final Context context, @NonNull final String access_token,
                                final String redirectLocation) {
         if (debug) Log.d(TAG, "getInfo()");
