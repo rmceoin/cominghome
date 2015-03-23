@@ -121,7 +121,7 @@ public class StatusArrivedHome extends AsyncTask<Void, Void, StatusBean> {
             if (result != null) {
                 if (result.getNestSuccess()) {
                     if (result.getNestUpdated()) {
-                        NestUtils.sendNotification(context, "Home");
+                        NestUtils.sendNotificationTransition(context, "Home");
                         HistoryUpdate.add(context, "Backend updated: Nest Home");
                     } else {
                         HistoryUpdate.add(context, "Backend updated: Nest already home");
