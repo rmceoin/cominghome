@@ -118,7 +118,7 @@ public class StatusLeftHome extends AsyncTask<Void, Void, StatusBean> {
         if (tell_nest) {
             if (result.getNestSuccess()) {
                 if (result.getNestUpdated()) {
-                    NestUtils.sendNotification(context, "Away");
+                    NestUtils.sendNotificationTransition(context, "Away");
                     HistoryUpdate.add(context, "Backend updated: Nest Away");
                 } else {
                     if (result.getOthersAtHome()) {

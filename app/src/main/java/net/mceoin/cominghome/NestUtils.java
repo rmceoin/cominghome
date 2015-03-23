@@ -238,7 +238,7 @@ public class NestUtils {
 
     /**
      * Called when we've detected that our Nest authorization has been revoked.
-     * Removes any stored Nest preferences.
+     * Removes any stored Nest preferences, updates the history and notifies the user.
      *
      * @param context Context of application
      */
@@ -255,16 +255,31 @@ public class NestUtils {
 
         Intent intent = new Intent(LOST_AUTH);
         LocalBroadcastManager.getInstance(AppController.getInstance().getApplicationContext()).sendBroadcast(intent);
+
+        sendNotification(context, context.getString(R.string.lost_auth));
     }
 
     /**
-     * Posts a notification in the notification bar when a transition is detected.
-     * If the user clicks the notification, control goes to the main Activity.
+     * Formats a title using the transitionType and feeds it to {@link #sendNotification}
      *
+     * @param context Context of application
      * @param transitionType The type of transition that occurred.
      */
-    public static void sendNotification(@NonNull Context context, @NonNull String transitionType) {
+    public static void sendNotificationTransition(@NonNull Context context, @NonNull String transitionType) {
 
+        String title = context.getString(R.string.nest_transition_notification_title,
+                transitionType);
+        sendNotification(context, title);
+    }
+
+    /**
+     * Posts a notification in the notification bar with the specified title.
+     * If the user clicks the notification, control goes to the main Activity.
+     *
+     * @param context Context of application
+     * @param title Title of the notification
+     */
+    public static void sendNotification(@NonNull Context context, @NonNull String title) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         boolean notifications = prefs.getBoolean(MainActivity.PREFS_NOTIFICATIONS, true);
 
@@ -295,9 +310,7 @@ public class NestUtils {
 
         // Set the notification contents
         builder.setSmallIcon(R.drawable.home)
-                .setContentTitle(
-                        context.getString(R.string.nest_transition_notification_title,
-                                transitionType))
+                .setContentTitle(title)
                 .setContentText(context.getString(R.string.nest_transition_notification_text))
                 .setContentIntent(notificationPendingIntent);
 
