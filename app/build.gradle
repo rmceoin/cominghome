@@ -1,23 +1,26 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 21
+    compileSdkVersion 22
     buildToolsVersion "21.1.2"
 
     defaultConfig {
         applicationId "net.mceoin.cominghome"
         minSdkVersion 15
-        targetSdkVersion 21
-        versionCode 11
-        versionName "1.1.1"
+        targetSdkVersion 22
+        versionCode 12
+        versionName "1.1.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    packagingOptions {
+        exclude 'LICENSE.txt'
     }
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
-    compile 'com.android.support:appcompat-v7:21.0.3'
+    compile 'com.android.support:appcompat-v7:22.0.0'
 
     compile 'com.google.android.gms:play-services:6.5.87'
     // Handy mirror of Volley
@@ -28,9 +31,11 @@ dependencies {
     compile 'org.codepond:wizardroid:1.2.0'
     compile project(path: ':api', configuration: 'android-endpoints')
 
+    compile 'com.google.code.findbugs:jsr305:2.0.1'
+
     // App's dependencies, including test
     compile 'com.android.support:support-annotations:21.0.3'
 
-//    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.0'
-//    androidTestCompile 'com.android.support.test:testing-support-lib:0.1'
+    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.0'
+    androidTestCompile 'com.android.support.test:testing-support-lib:0.1'
 }
