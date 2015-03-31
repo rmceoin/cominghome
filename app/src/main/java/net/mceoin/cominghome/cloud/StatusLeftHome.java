@@ -37,6 +37,11 @@ import net.mceoin.cominghome.oauth.OAuthFlowApp;
 import java.io.IOException;
 import java.util.Random;
 
+/**
+ * Informs the backend via Endpoints that the status is now away.  If appropriate, the backend will
+ * set Nest to "away".  Multiple attempts are made.  After the last retry, no further
+ * attempts are made.
+ */
 public class StatusLeftHome extends AsyncTask<Void, Void, StatusBean> {
     private static final String TAG = StatusLeftHome.class.getSimpleName();
     private static final boolean debug = false;
