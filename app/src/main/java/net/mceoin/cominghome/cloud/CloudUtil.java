@@ -16,9 +16,13 @@
 package net.mceoin.cominghome.cloud;
 
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
+
+import net.mceoin.cominghome.R;
 
 /**
  * Cloud utility functions
@@ -65,5 +69,24 @@ public class CloudUtil {
             result += "m";
         }
         return result;
+    }
+
+    /**
+     * Get our application name along with version code.  Useful for when making an HTTP call
+     * as a UserAgent.
+     *
+     * @param context Context of application
+     * @return String in the format of {AppName}/{VersionCode}
+     */
+    public static String getApplicationName(Context context) {
+        String name = context.getString(R.string.app_name).replace(" ","-");
+        int version;
+        try {
+            PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            version = pInfo.versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            version = 1;
+        }
+        return name + "/" + version;
     }
 }

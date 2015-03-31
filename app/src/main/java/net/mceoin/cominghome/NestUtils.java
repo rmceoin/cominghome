@@ -37,10 +37,10 @@ import net.mceoin.cominghome.history.HistoryUpdate;
 import net.mceoin.cominghome.oauth.OAuthFlowApp;
 import net.mceoin.cominghome.structures.StructuresUpdate;
 
-import org.apache.http.HttpStatus;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.HttpURLConnection;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -55,9 +55,30 @@ public class NestUtils {
     public static final String TAG = NestUtils.class.getSimpleName();
     public static final boolean debug = false;
 
+    /**
+     * Broadcast intent name to indicate structure info has been collected/updated.
+     */
     public static final String GOT_INFO = "net.mceoin.cominghome.NetUtils.GotInfo";
+    /**
+     * Broadcast intent name to indicate that Nest authorization has been lost.
+     */
     public static final String LOST_AUTH = "net.mceoin.cominghome.NetUtils.LostAuth";
 
+    /**
+     * Temporary redirect.
+     * Not used very often HTTP response code, apparently.  It's not specified
+     * as part of the normal {@link java.net.HttpURLConnection} package.
+     */
+    static final int HTTP_TEMPORARY_REDIRECT = 307;
+
+    /**
+     * Make a Structures API call to Nest to collect what structures are available and
+     * their current status.
+     *
+     * @param context Context of application
+     * @param access_token Nest Access Token
+     * @param redirectLocation If a recursive call, then where to perform the retry
+     */
     public static void getInfo(@NonNull final Context context, @NonNull final String access_token,
                                final String redirectLocation) {
         if (debug) Log.d(TAG, "getInfo()");
@@ -195,21 +216,9 @@ public class NestUtils {
 
                     Context context = AppController.getInstance().getApplicationContext();
 
-                    if (error.networkResponse.statusCode == HttpStatus.SC_UNAUTHORIZED) {
-                        // We must have been de-authorized at the Nest web site
-                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-                        SharedPreferences.Editor pref = prefs.edit();
-                        pref.putString(OAuthFlowApp.PREF_ACCESS_TOKEN, "");
-                        pref.putString(MainActivity.PREFS_STRUCTURE_ID, "");
-                        pref.putString(MainActivity.PREFS_STRUCTURE_NAME, "");
-                        pref.putString(MainActivity.PREFS_LAST_AWAY_STATUS, "");
-                        pref.apply();
-
-                        HistoryUpdate.add(context, "Lost our Nest authorization");
-
-                        Intent intent = new Intent(LOST_AUTH);
-                        LocalBroadcastManager.getInstance(AppController.getInstance().getApplicationContext()).sendBroadcast(intent);
-                    } else if (error.networkResponse.statusCode == HttpStatus.SC_TEMPORARY_REDIRECT) {
+                    if (error.networkResponse.statusCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                        lostAuthorization(context);
+                    } else if (error.networkResponse.statusCode == HTTP_TEMPORARY_REDIRECT) {
                         if ((redirectLocation == null) && error.networkResponse.headers.containsKey("Location")) {
                             String location = error.networkResponse.headers.get("Location");
                             getInfo(context, access_token, location);
@@ -228,13 +237,49 @@ public class NestUtils {
     }
 
     /**
-     * Posts a notification in the notification bar when a transition is detected.
-     * If the user clicks the notification, control goes to the main Activity.
+     * Called when we've detected that our Nest authorization has been revoked.
+     * Removes any stored Nest preferences, updates the history and notifies the user.
      *
+     * @param context Context of application
+     */
+    public static void lostAuthorization(Context context) {
+        // We must have been de-authorized at the Nest web site
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor pref = prefs.edit();
+        pref.putString(OAuthFlowApp.PREF_ACCESS_TOKEN, "");
+        pref.putString(MainActivity.PREFS_STRUCTURE_ID, "");
+        pref.putString(MainActivity.PREFS_STRUCTURE_NAME, "");
+        pref.putString(MainActivity.PREFS_LAST_AWAY_STATUS, "");
+        pref.apply();
+        HistoryUpdate.add(context, context.getString(R.string.lost_auth));
+
+        Intent intent = new Intent(LOST_AUTH);
+        LocalBroadcastManager.getInstance(AppController.getInstance().getApplicationContext()).sendBroadcast(intent);
+
+        sendNotification(context, context.getString(R.string.lost_auth));
+    }
+
+    /**
+     * Formats a title using the transitionType and feeds it to {@link #sendNotification}
+     *
+     * @param context Context of application
      * @param transitionType The type of transition that occurred.
      */
-    public static void sendNotification(@NonNull Context context, @NonNull String transitionType) {
+    public static void sendNotificationTransition(@NonNull Context context, @NonNull String transitionType) {
 
+        String title = context.getString(R.string.nest_transition_notification_title,
+                transitionType);
+        sendNotification(context, title);
+    }
+
+    /**
+     * Posts a notification in the notification bar with the specified title.
+     * If the user clicks the notification, control goes to the main Activity.
+     *
+     * @param context Context of application
+     * @param title Title of the notification
+     */
+    public static void sendNotification(@NonNull Context context, @NonNull String title) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         boolean notifications = prefs.getBoolean(MainActivity.PREFS_NOTIFICATIONS, true);
 
@@ -265,9 +310,7 @@ public class NestUtils {
 
         // Set the notification contents
         builder.setSmallIcon(R.drawable.home)
-                .setContentTitle(
-                        context.getString(R.string.nest_transition_notification_title,
-                                transitionType))
+                .setContentTitle(title)
                 .setContentText(context.getString(R.string.nest_transition_notification_text))
                 .setContentIntent(notificationPendingIntent);
 

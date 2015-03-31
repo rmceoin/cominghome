@@ -25,6 +25,7 @@ dependencies {
   compile 'com.google.appengine:appengine-endpoints-deps:1.9.17'
   compile 'javax.servlet:servlet-api:2.5'
   compile 'org.json:json:20140107'
+  compile 'com.google.code.findbugs:jsr305:2.0.1'
 }
 
 appengine {
