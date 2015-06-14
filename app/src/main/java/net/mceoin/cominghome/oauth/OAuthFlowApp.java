@@ -35,25 +35,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import net.mceoin.cominghome.R;
+import net.mceoin.cominghome.history.HistoryUpdate;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.StatusLine;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
+import java.net.URL;
+import java.net.URLEncoder;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class OAuthFlowApp extends Activity {
     public final String TAG = getClass().getName();
@@ -120,7 +112,7 @@ public class OAuthFlowApp extends Activity {
 
     }
 
-    private  void usePincode() {
+    private void usePincode() {
         EditText editPincode = (EditText) findViewById(R.id.editPincode);
         String pincode = editPincode.getText().toString();
         if (debug) Log.d(TAG, "pincode=" + pincode);
@@ -139,10 +131,10 @@ public class OAuthFlowApp extends Activity {
 
         protected void onPostExecute(Double result) {
             if (!access_token.isEmpty()) {
-                Toast.makeText(getApplicationContext(), "Success!", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), getString(R.string.oauth_success), Toast.LENGTH_LONG).show();
                 finish();
             } else {
-                Toast.makeText(getApplicationContext(), "Failed", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), getString(R.string.oauth_failed), Toast.LENGTH_LONG).show();
             }
         }
 
@@ -153,55 +145,82 @@ public class OAuthFlowApp extends Activity {
         public void postData(String pincode) {
             StringBuilder builder = new StringBuilder();
 
-            // Create a new HttpClient and Post Header
-            HttpClient httpclient = new DefaultHttpClient();
-            String url = "https://api.home.nest.com/oauth2/access_token";
-            HttpPost httppost = new HttpPost(url);
+            String nestAccessToken = "https://api.home.nest.com/oauth2/access_token";
 
             try {
-                // Add your data
-                List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-                nameValuePairs.add(new BasicNameValuePair("code", pincode));
-                nameValuePairs.add(new BasicNameValuePair("client_id", Constants.CLIENT_ID));
-                nameValuePairs.add(new BasicNameValuePair("client_secret", Constants.CLIENT_SECRET));
-                nameValuePairs.add(new BasicNameValuePair("grant_type", "authorization_code"));
-                httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+                String urlParameters = "code=" + URLEncoder.encode(pincode, "UTF-8") +
+                        "&client_id=" + URLEncoder.encode(Constants.CLIENT_ID, "UTF-8") +
+                        "&client_secret=" + URLEncoder.encode(Constants.CLIENT_SECRET, "UTF-8") +
+                        "&grant_type=" + URLEncoder.encode("authorization_code", "UTF-8");
 
-                // Execute HTTP Post Request
-                HttpResponse response = httpclient.execute(httppost);
-                StatusLine statusLine = response.getStatusLine();
-                int statusCode = statusLine.getStatusCode();
-                if (debug) Log.d(TAG, "statusCode=" + statusCode);
-                if (statusCode == 200) {
-                    HttpEntity entity = response.getEntity();
-                    InputStream content = entity.getContent();
+                URL url = new URL(nestAccessToken + "?" + urlParameters);
+                HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+                urlConnection.setDoOutput(true);
+                urlConnection.setRequestMethod("POST");
+
+                int httpResult = urlConnection.getResponseCode();
+                if (debug) Log.d(TAG, "httpResult=" + httpResult);
+                if (httpResult == HttpsURLConnection.HTTP_OK) {
+
+                    InputStream content = urlConnection.getInputStream();
                     BufferedReader reader = new BufferedReader(new InputStreamReader(content));
                     String line;
                     while ((line = reader.readLine()) != null) {
                         builder.append(line);
                     }
-                    JSONObject object = new JSONObject(builder.toString());
-                    access_token = object.getString("access_token");
-                    // expires_in = token expires in this number of seconds
-                    // The values I've seen have been 10 years out
-                    long expires_in = object.getLong("expires_in");
-                    long expires_in_hours = expires_in / (60 * 60);
+                    long expires_in = 0;
+                    try {
+                        JSONObject object = new JSONObject(builder.toString());
+                        access_token = object.getString("access_token");
+                        // expires_in = token expires in this number of seconds
+                        // The values I've seen have been 10 years out
+                        expires_in = object.getLong("expires_in");
+                    } catch (Exception e) {
+                        Log.e(TAG, e.getLocalizedMessage());
+                    }
 
                     if (debug) Log.d(TAG, "access_token=" + access_token);
-                    if (debug) Log.d(TAG, "expires_in_hours=" + expires_in_hours);
+                    if (debug) {
+                        long expires_in_hours = expires_in / (60 * 60);
+                        Log.d(TAG, "expires_in_hours=" + expires_in_hours);
+                    }
 
                     Editor pref = prefs.edit();
                     pref.putString(PREF_ACCESS_TOKEN, access_token);
                     pref.putLong(PREF_EXPIRES_IN, expires_in);
                     pref.apply();
-                }
+                } else if (httpResult == HttpsURLConnection.HTTP_BAD_REQUEST) {
+                    // if user types wrong pincode, then Nest returns 400 with this as body:
+                    // {"error":"oauth2_error","error_description":"authorization code not found"}
 
-            } catch (ClientProtocolException e) {
-                Log.e(TAG, e.getLocalizedMessage());
-            } catch (IOException e) {
-                Log.e(TAG, e.getLocalizedMessage());
+                    InputStream content = urlConnection.getErrorStream();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(content));
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        builder.append(line);
+                    }
+                    String error = "";
+                    String error_description;
+
+                    try {
+                        JSONObject object = new JSONObject(builder.toString());
+                        error = object.getString("error");
+                        error_description = object.getString("error_description");
+                    } catch (Exception e) {
+                        error_description = getString(R.string.oauth_missing_error);
+                    }
+                    HistoryUpdate.add(getApplicationContext(), getString(R.string.oauth_connect_issue) +
+                            ": " + error + " - " + error_description);
+
+                } else {
+                    HistoryUpdate.add(getApplicationContext(), getString(R.string.oauth_connect_issue) +
+                            ": Did not get OK during auth: " + httpResult);
+                }
+                urlConnection.disconnect();
             } catch (Exception e) {
                 Log.e(TAG, e.getLocalizedMessage());
+                HistoryUpdate.add(getApplicationContext(), getString(R.string.oauth_connect_issue) +
+                        ": " + e.getLocalizedMessage());
             }
         }
 
