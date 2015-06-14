@@ -45,6 +45,12 @@
     <string name="connection_failed">Connection failed</string>
     <string name="disconnected">Client disconnected</string>
 
+    <string name="oauth_connect_issue">Connect issue</string>
+    <string name="oauth_success">Success!</string>
+    <string name="oauth_failed">Failed. Examine history for details.</string>
+    <string name="oauth_missing_error">Missing error</string>
+
+
     <string name="get_others">Get Others</string>
     <string name="fake_left">Fake Left</string>
     <string name="fake_arrived">Fake Arrived</string>
