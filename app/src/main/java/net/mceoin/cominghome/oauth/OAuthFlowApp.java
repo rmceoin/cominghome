@@ -35,25 +35,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import net.mceoin.cominghome.R;
+import net.mceoin.cominghome.history.HistoryUpdate;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.StatusLine;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
+import java.net.URL;
+import java.net.URLEncoder;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class OAuthFlowApp extends Activity {
     public final String TAG = getClass().getName();
@@ -120,7 +112,7 @@ public class OAuthFlowApp extends Activity {
 
     }
 
-    private  void usePincode() {
+    private void usePincode() {
         EditText editPincode = (EditText) findViewById(R.id.editPincode);
         String pincode = editPincode.getText().toString();
         if (debug) Log.d(TAG, "pincode=" + pincode);
@@ -153,28 +145,24 @@ public class OAuthFlowApp extends Activity {
         public void postData(String pincode) {
             StringBuilder builder = new StringBuilder();
 
-            // Create a new HttpClient and Post Header
-            HttpClient httpclient = new DefaultHttpClient();
-            String url = "https://api.home.nest.com/oauth2/access_token";
-            HttpPost httppost = new HttpPost(url);
+            String nestAccessToken = "https://api.home.nest.com/oauth2/access_token";
 
             try {
-                // Add your data
-                List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-                nameValuePairs.add(new BasicNameValuePair("code", pincode));
-                nameValuePairs.add(new BasicNameValuePair("client_id", Constants.CLIENT_ID));
-                nameValuePairs.add(new BasicNameValuePair("client_secret", Constants.CLIENT_SECRET));
-                nameValuePairs.add(new BasicNameValuePair("grant_type", "authorization_code"));
-                httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+                String urlParameters = "code=" + URLEncoder.encode(pincode, "UTF-8") +
+                    "&client_id=" + URLEncoder.encode(Constants.CLIENT_ID, "UTF-8") +
+                    "&client_secret=" + URLEncoder.encode(Constants.CLIENT_SECRET, "UTF-8") +
+                    "&grant_type=" + URLEncoder.encode("authorization_code", "UTF-8");
 
-                // Execute HTTP Post Request
-                HttpResponse response = httpclient.execute(httppost);
-                StatusLine statusLine = response.getStatusLine();
-                int statusCode = statusLine.getStatusCode();
-                if (debug) Log.d(TAG, "statusCode=" + statusCode);
-                if (statusCode == 200) {
-                    HttpEntity entity = response.getEntity();
-                    InputStream content = entity.getContent();
+                URL url = new URL(nestAccessToken + "?" + urlParameters);
+                HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+                urlConnection.setDoOutput(true);
+                urlConnection.setRequestMethod("POST");
+
+                int httpResult = urlConnection.getResponseCode();
+                if (debug) Log.d(TAG, "httpResult=" + httpResult);
+                if (httpResult == HttpsURLConnection.HTTP_OK) {
+
+                    InputStream content = urlConnection.getInputStream();
                     BufferedReader reader = new BufferedReader(new InputStreamReader(content));
                     String line;
                     while ((line = reader.readLine()) != null) {
@@ -194,14 +182,14 @@ public class OAuthFlowApp extends Activity {
                     pref.putString(PREF_ACCESS_TOKEN, access_token);
                     pref.putLong(PREF_EXPIRES_IN, expires_in);
                     pref.apply();
+                } else {
+                    HistoryUpdate.add(getApplicationContext(),
+                            "Connect issue: Did not get OK during auth: " + httpResult);
                 }
-
-            } catch (ClientProtocolException e) {
-                Log.e(TAG, e.getLocalizedMessage());
-            } catch (IOException e) {
-                Log.e(TAG, e.getLocalizedMessage());
+                urlConnection.disconnect();
             } catch (Exception e) {
                 Log.e(TAG, e.getLocalizedMessage());
+                HistoryUpdate.add(getApplicationContext(), "Connect issue: " + e.getLocalizedMessage());
             }
         }
 
