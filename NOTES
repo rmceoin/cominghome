@@ -16,3 +16,13 @@ adb shell setprop persist.log.tag.Volley ERROR
 
 Got some inspiration from:
 http://antonioleiva.com/material-design-everywhere/
+
+Steps for a new release:
+
+* On develop, bump version and remove alpha
+* git checkout master
+* git merge develop
+* deal with conflicts
+* git commit
+* git tag -a v#.#.#
+* git push origin --tags

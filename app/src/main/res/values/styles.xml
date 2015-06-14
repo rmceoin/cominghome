@@ -6,7 +6,7 @@
         <item name="colorPrimary">@color/material_deep_teal_500</item>
         <item name="colorPrimaryDark">@color/material_blue_grey_800</item>
         <item name="colorAccent">@color/accent_material_light</item>
-        <item name="android:windowNoTitle">true</item>
+        <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
     </style>
 
