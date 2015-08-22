@@ -74,6 +74,7 @@ public class CronServlet extends HttpServlet {
                             if (content == null) {
                                 content = new GcmContent();
                             }
+                            //TODO: need to limit the number to 1000 recipients
                             content.addRegId(gcm_reg_id);
                             log.info("added reg_id: " + gcm_reg_id);
                         }
