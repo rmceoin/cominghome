@@ -3,6 +3,6 @@
     <cron>
         <url>/cron</url>
         <description>Run the cron job</description>
-        <schedule>every day 05:00</schedule>
+        <schedule>every 8 hours</schedule>
     </cron>
 </cronentries>
