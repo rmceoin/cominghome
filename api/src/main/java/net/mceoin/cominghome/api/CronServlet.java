@@ -22,6 +22,16 @@ public class CronServlet extends HttpServlet {
 
     private static final Logger log = Logger.getLogger(CronServlet.class.getName());
 
+    /**
+     * Ping after this many hours
+     */
+    private static final int PING_AFTER = 12;
+
+    /**
+     * Purge status entry after this many hours
+     */
+    private static final int PURGE_AFTER = 48;
+
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
@@ -38,27 +48,47 @@ public class CronServlet extends HttpServlet {
 
         Query findStatusQuery = new Query(StatusEndpointV1.KIND_STATUS);
         findStatusQuery.addSort("date", Query.SortDirection.ASCENDING);
+        GcmContent content = null;
         try {
             PreparedQuery pq = datastore.prepare(findStatusQuery);
             for (Entity result : pq.asIterable(FetchOptions.Builder.withLimit(1000))) {
                 String installation_ID = (String) result.getProperty("installation_id");
                 Date date = (Date) result.getProperty("date");
+                String away_status = (String) result.getProperty("away_status");
+                String gcm_reg_id = (String) result.getProperty("gcm_reg_id");
 
                 Date now = new Date();
                 long delta = (now.getTime() - date.getTime()) / 1000;
                 log.info("installation_id=" + installation_ID + " date=" + date + " delta=" + delta);
 
-                int hoursOld = 48;
-                if (delta > hoursOld * 60 * 60) {
-                    log.info("older than " + hoursOld + " hours: deleting " + result.getKey());
-                    datastore.delete(result.getKey());
-                }
 
+                if (delta > (PURGE_AFTER * 60 * 60)) {
+                    log.info("older than " + PURGE_AFTER + " hours: deleting " + result.getKey());
+                    datastore.delete(result.getKey());
+                } else if ((away_status.equals("home")) && (delta > (PING_AFTER * 60 * 60))) {
+                    log.info("at home and older than " + PING_AFTER + " hours: ping " + result.getKey());
+                    if (!gcm_reg_id.isEmpty()) {
+                        if (gcm_reg_id.length() > 10) {
+                            // basic sanity check on registration_id, make sure it's at least
+                            // 10 characters long
+                            if (content == null) {
+                                content = new GcmContent();
+                            }
+                            content.addRegId(gcm_reg_id);
+                            log.info("added reg_id: " + gcm_reg_id);
+                        }
+                    }
+                }
             }
         } catch (Exception e) {
             log.warning("Error: " + e.getLocalizedMessage());
         }
-
+        if (content != null) {
+            content.createData("check-in", "Still at home?");
+            content.setTime_to_live( 60*60 );   // live for one hour
+            content.setCollapse_key("check-in");
+            Post2GCM.post(content);
+        }
     }
 
     private void purgeOldEvents() {
