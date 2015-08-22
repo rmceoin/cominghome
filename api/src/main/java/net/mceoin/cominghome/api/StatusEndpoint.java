@@ -111,7 +111,7 @@ public class StatusEndpoint {
                     long delta_hours = ((now.getTime() - date.getTime()) / 1000) / (60 * 60);
                     log.info("installation_id=" + installation_ID + " date=" + date + " delta_hours=" + delta_hours);
 
-                    if ((away_status.equals("home")) && (delta_hours < 24)) {
+                    if ((away_status.equals("home")) && (delta_hours < 48)) {
                         //
                         // The other installation is at home and checked in with us in the last 24 hours
                         log.info("found somebody else at home");
