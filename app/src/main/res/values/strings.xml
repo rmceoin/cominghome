@@ -2,7 +2,7 @@
     <string name="app_name">Coming Home</string>
     <string name="app_description">Coming Home works with Nest.  After you connect it with Nest and set your Home location, it will automatically set Nest to away or home.
     Coming Home is also aware of other devices connected to the same Nest.  For example, if two people are using Coming Home and one person leaves home, it will not set Nest to away until both people have left.</string>
-    <string name="app_credits">Copyright 2014 - Randy McEoin</string>
+    <string name="app_credits">Copyright 2015 - Randy McEoin</string>
 
     <string name="connect_nest">Connect to Nest</string>
     <string name="get_nest">Get Nest Info</string>
