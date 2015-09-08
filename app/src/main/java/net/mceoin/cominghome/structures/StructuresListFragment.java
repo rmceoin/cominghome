@@ -64,7 +64,7 @@ public class StructuresListFragment extends ListFragment implements LoaderManage
      * a user has selected a structure.
      */
     public interface OnStructureSelectedListener {
-        public void onStructureSelected(long id);
+        void onStructureSelected(long id);
     }
 
     @Override
