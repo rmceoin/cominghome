@@ -17,15 +17,6 @@
 
 package net.mceoin.cominghome.history;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-
-import net.mceoin.cominghome.PrefsFragment;
-
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -44,6 +35,14 @@ import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
+
+import net.mceoin.cominghome.PrefsFragment;
+
+import java.text.DateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
 public class HistoryProvider extends ContentProvider {
 
@@ -189,7 +188,7 @@ public class HistoryProvider extends ContentProvider {
         }
 
         if (!values.containsKey(HistoryValues.History.CREATED_DATE_STR)) {
-            DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+            DateFormat df = DateFormat.getDateTimeInstance();
             Date today = Calendar.getInstance().getTime();
             String createdDateStr = df.format(today);
             values.put(HistoryValues.History.CREATED_DATE_STR, createdDateStr);
