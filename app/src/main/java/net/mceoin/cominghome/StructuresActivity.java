@@ -19,12 +19,13 @@ import android.content.ContentUris;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
 import net.mceoin.cominghome.structures.StructuresListFragment;
 
-public class StructuresActivity extends ActionBarActivity implements StructuresListFragment.OnStructureSelectedListener {
+public class StructuresActivity extends AppCompatActivity implements StructuresListFragment.OnStructureSelectedListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +36,10 @@ public class StructuresActivity extends ActionBarActivity implements StructuresL
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            ActionBar actionBar = getSupportActionBar();
+            if (actionBar != null) {
+                actionBar.setDisplayHomeAsUpEnabled(true);
+            }
             toolbar.setNavigationIcon(R.drawable.home);
         }
 
