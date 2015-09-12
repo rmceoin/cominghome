@@ -32,6 +32,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -87,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
-    private static final boolean debug = false;
+    private static final boolean debug = true;
 
     private static final String KEY_IN_RESOLUTION = "is_in_resolution";
     public static final String PREFS_INITIAL_WIZARD = "initial_wizard";
@@ -97,6 +98,7 @@ public class MainActivity extends AppCompatActivity implements
     public static final String PREFS_LAST_MAP_LATITUDE = "last_map_latitude";
     public static final String PREFS_LAST_MAP_LONGITUDE = "last_map_longitude";
     public static final String PREFS_NOTIFICATIONS = "notifications";
+    public static final String PREFS_LAST_PERMISSION_REQUEST = "last_permission_request";
 
     /**
      * Request code for auto Google Play Services error resolution.
@@ -272,6 +274,58 @@ public class MainActivity extends AppCompatActivity implements
         GcmRegister gcmRegister = new GcmRegister();
         gcmRegister.register(getApplicationContext());
 
+    }
+
+    private static final int PERMISSIONS_REQUEST_LOCATION = 1;
+
+    private void checkPermissions() {
+        //
+        // This is a stupid hack.  I can't seem to figure out how to use
+        // the pre-defined Manifest.permission.{anything}
+        //
+        final String PERMISSIONS_LOCATION = "android.permission.ACCESS_FINE_LOCATION";
+
+        if (Build.VERSION.SDK_INT < 23) {
+            // if earlier than Marshmellow, then don't bother
+            return;
+        }
+        long lastPermissionRequest = prefs.getLong(PREFS_LAST_PERMISSION_REQUEST, 0);
+        long currentTime = System.currentTimeMillis();
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putLong(PREFS_LAST_PERMISSION_REQUEST, currentTime);
+        editor.apply();
+
+        final long PERMISSION_REQUEST_WAIT = 10 * 60 * 1000;
+        if ((currentTime - lastPermissionRequest) < PERMISSION_REQUEST_WAIT){
+            // don't bother asking for permission if it's been less than the wait time
+            return;
+        }
+
+        if (checkSelfPermission(PERMISSIONS_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            // Should we show an explanation?
+//            if (shouldShowRequestPermissionRationale(PERMISSIONS_LOCATION)) {
+//                // Explain to the user why we need to read the contacts
+//            }
+
+            requestPermissions(new String[]{PERMISSIONS_LOCATION}, PERMISSIONS_REQUEST_LOCATION);
+
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_LOCATION: {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    if (debug) Log.d(TAG, "permission request was allowed");
+
+                } else {
+                    if (debug) Log.d(TAG, "permission request was denied");
+                }
+            }
+        }
     }
 
     private void updateHome(boolean keepOldFence, boolean confirmed) {
@@ -693,6 +747,7 @@ public class MainActivity extends AppCompatActivity implements
         NotificationManager mNotificationManager =
                 (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
         mNotificationManager.cancelAll();
+        checkPermissions();
     }
 
     @Override
