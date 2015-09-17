@@ -76,6 +76,8 @@
     <string name="title_move_at_home">Move At Home</string>
     <string name="msg_move_at_home">Are you sure you want to move your home location?</string>
 
+    <string name="location_permission_missing">Location permission missing</string>
+
     <!-- Preferences strings -->
     <string name="inline_preferences">Settings</string>
 
