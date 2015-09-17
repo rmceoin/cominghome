@@ -47,6 +47,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -289,27 +290,34 @@ public class MainActivity extends AppCompatActivity implements
             // if earlier than Marshmellow, then don't bother
             return;
         }
-        long lastPermissionRequest = prefs.getLong(PREFS_LAST_PERMISSION_REQUEST, 0);
-        long currentTime = System.currentTimeMillis();
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putLong(PREFS_LAST_PERMISSION_REQUEST, currentTime);
-        editor.apply();
-
-        final long PERMISSION_REQUEST_WAIT = 10 * 60 * 1000;
-        if ((currentTime - lastPermissionRequest) < PERMISSION_REQUEST_WAIT){
-            // don't bother asking for permission if it's been less than the wait time
-            return;
-        }
 
         if (checkSelfPermission(PERMISSIONS_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ImageView locationPermission = (ImageView) findViewById(R.id.location_permission);
+            locationPermission.setVisibility(View.VISIBLE);
 
-            // Should we show an explanation?
-//            if (shouldShowRequestPermissionRationale(PERMISSIONS_LOCATION)) {
-//                // Explain to the user why we need to read the contacts
-//            }
+            long lastPermissionRequest = prefs.getLong(PREFS_LAST_PERMISSION_REQUEST, 0);
+            long currentTime = System.currentTimeMillis();
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putLong(PREFS_LAST_PERMISSION_REQUEST, currentTime);
+            editor.apply();
 
+            final long PERMISSION_REQUEST_WAIT = 10 * 60 * 1000;
+            long timeDelta = currentTime - lastPermissionRequest;
+            if (debug) Log.d(TAG, "timeDelta = " + currentTime +
+                    " - " + lastPermissionRequest + " = " + timeDelta);
+            if ((timeDelta) < PERMISSION_REQUEST_WAIT){
+                // don't bother asking for permission if it's been less than the wait time
+                if (debug) Log.d(TAG, "already requested permission recently");
+                return;
+            }
+
+            if (debug) Log.d(TAG, "requesting permission for location");
             requestPermissions(new String[]{PERMISSIONS_LOCATION}, PERMISSIONS_REQUEST_LOCATION);
 
+        } else {
+            if (debug) Log.d(TAG, "we have permission for location");
+            ImageView locationPermission = (ImageView) findViewById(R.id.location_permission);
+            locationPermission.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -320,9 +328,15 @@ public class MainActivity extends AppCompatActivity implements
             case PERMISSIONS_REQUEST_LOCATION: {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     if (debug) Log.d(TAG, "permission request was allowed");
-
+                    ImageView locationPermission = (ImageView) findViewById(R.id.location_permission);
+                    locationPermission.setVisibility(View.INVISIBLE);
+                    if (mGoogleApiClient!=null) {
+                        mGoogleApiClient.reconnect();
+                    }
                 } else {
                     if (debug) Log.d(TAG, "permission request was denied");
+                    ImageView locationPermission = (ImageView) findViewById(R.id.location_permission);
+                    locationPermission.setVisibility(View.VISIBLE);
                 }
             }
         }
