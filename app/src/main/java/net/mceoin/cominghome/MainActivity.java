@@ -36,7 +36,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -298,7 +300,7 @@ public class MainActivity extends AppCompatActivity implements
             return;
         }
 
-        if (checkSelfPermission(PERMISSIONS_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this, PERMISSIONS_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ImageView locationPermission = (ImageView) findViewById(R.id.location_permission);
             locationPermission.setVisibility(View.VISIBLE);
 
@@ -319,7 +321,7 @@ public class MainActivity extends AppCompatActivity implements
             }
 
             if (debug) Log.d(TAG, "requesting permission for location");
-            requestPermissions(new String[]{PERMISSIONS_LOCATION}, PERMISSIONS_REQUEST_LOCATION);
+            ActivityCompat.requestPermissions(this, new String[]{PERMISSIONS_LOCATION}, PERMISSIONS_REQUEST_LOCATION);
 
         } else {
             if (debug) Log.d(TAG, "we have permission for location");
