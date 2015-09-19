@@ -220,6 +220,13 @@ public class MainActivity extends AppCompatActivity implements
         structureNameText = (TextView) findViewById(R.id.structure_name);
         awayStatusText = (TextView) findViewById(R.id.away_status);
 
+        ImageView locationPermission = (ImageView) findViewById(R.id.location_permission);
+        locationPermission.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View arg0) {
+                checkPermissions(true);
+            }
+        });
+
         playServicesConnected();
 
         map = ((MapFragment) getFragmentManager()
@@ -263,7 +270,7 @@ public class MainActivity extends AppCompatActivity implements
         if (toolbar != null) {
             setSupportActionBar(toolbar);
             ActionBar actionBar = getSupportActionBar();
-            if (actionBar!=null) {
+            if (actionBar != null) {
                 actionBar.setDisplayHomeAsUpEnabled(true);
             }
         }
@@ -279,7 +286,7 @@ public class MainActivity extends AppCompatActivity implements
 
     private static final int PERMISSIONS_REQUEST_LOCATION = 1;
 
-    private void checkPermissions() {
+    private void checkPermissions(boolean userInitiated) {
         //
         // This is a stupid hack.  I can't seem to figure out how to use
         // the pre-defined Manifest.permission.{anything}
@@ -305,7 +312,7 @@ public class MainActivity extends AppCompatActivity implements
             long timeDelta = currentTime - lastPermissionRequest;
             if (debug) Log.d(TAG, "timeDelta = " + currentTime +
                     " - " + lastPermissionRequest + " = " + timeDelta);
-            if ((timeDelta) < PERMISSION_REQUEST_WAIT){
+            if (!userInitiated && ((timeDelta) < PERMISSION_REQUEST_WAIT)) {
                 // don't bother asking for permission if it's been less than the wait time
                 if (debug) Log.d(TAG, "already requested permission recently");
                 return;
@@ -323,16 +330,25 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
+                                           @NonNull String permissions[], @NonNull int[] grantResults) {
         switch (requestCode) {
             case PERMISSIONS_REQUEST_LOCATION: {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     if (debug) Log.d(TAG, "permission request was allowed");
                     ImageView locationPermission = (ImageView) findViewById(R.id.location_permission);
                     locationPermission.setVisibility(View.INVISIBLE);
-                    if (mGoogleApiClient!=null) {
-                        mGoogleApiClient.reconnect();
+                    if (mGoogleApiClient != null) {
+                        if (debug) Log.d(TAG, "reconnecting to GoogleApiClient");
+//                        mGoogleApiClient.connect();
                     }
+                    //TODO: figure out a way to trigger Location after acquiring the permission
+                    // without restarting the whole app
+                    Intent intent = getIntent();
+                    overridePendingTransition(0, 0);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                    finish();
+                    overridePendingTransition(0, 0);
+                    startActivity(intent);
                 } else {
                     if (debug) Log.d(TAG, "permission request was denied");
                     ImageView locationPermission = (ImageView) findViewById(R.id.location_permission);
@@ -761,7 +777,7 @@ public class MainActivity extends AppCompatActivity implements
         NotificationManager mNotificationManager =
                 (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
         mNotificationManager.cancelAll();
-        checkPermissions();
+        checkPermissions(false);
     }
 
     @Override
