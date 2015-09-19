@@ -15,6 +15,7 @@
  */
 package net.mceoin.cominghome;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -289,14 +290,11 @@ public class MainActivity extends AppCompatActivity implements
     private static final int PERMISSIONS_REQUEST_LOCATION = 1;
 
     private void checkPermissions(boolean userInitiated) {
-        //
-        // This is a stupid hack.  I can't seem to figure out how to use
-        // the pre-defined Manifest.permission.{anything}
-        //
-        final String PERMISSIONS_LOCATION = "android.permission.ACCESS_FINE_LOCATION";
+
+        final String PERMISSIONS_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
 
         if (Build.VERSION.SDK_INT < 23) {
-            // if earlier than Marshmellow, then don't bother
+            // if earlier than Marshmallow, then don't bother
             return;
         }
 
