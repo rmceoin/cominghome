@@ -15,3 +15,13 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+-dontwarn sun.misc.Unsafe
+-dontwarn org.apache.http.protocol.**
+-dontwarn org.apache.http.**
+-dontwarn android.net.http.AndroidHttpClient
+-dontwarn com.google.api.client.http.apache.**
+-dontwarn com.google.android.gms.internal.**
+-dontwarn com.android.volley.toolbox.**
+
+-dontobfuscate

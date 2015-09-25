@@ -16,6 +16,13 @@ android {
     packagingOptions {
         exclude 'LICENSE.txt'
     }
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
 }
 
 dependencies {
