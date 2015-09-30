@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.0"
+    buildToolsVersion "23.0.1"
 
     defaultConfig {
         applicationId "net.mceoin.cominghome"
@@ -30,7 +30,7 @@ dependencies {
 
     compile 'com.android.support:appcompat-v7:23.0.1'
 
-    compile 'com.google.android.gms:play-services:7.8.0'
+    compile 'com.google.android.gms:play-services:8.1.0'
     // Handy mirror of Volley
     // https://github.com/mcxiaoke/android-volley
     compile 'com.mcxiaoke.volley:library:1.0.19'
