@@ -184,6 +184,10 @@ public class GeofenceRegister implements
         }
     }
 
+    /**
+     * Using the Google API Client, register the geofences
+     *
+     */
     public void addGeofences() {
         if (!mGoogleApiClient.isConnected()) {
             if (debug) Log.d(TAG, "addGeofences: not connected");

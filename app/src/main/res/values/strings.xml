@@ -101,6 +101,8 @@
     <item name="geofence_radius_exit_default" type="integer">400</item>
     <item name="geofence_radius_min_value" type="integer">20</item>
     <item name="geofence_radius_max_value" type="integer">10000</item>
+    <string name="increase_radius">Increase radius</string>
+    <string name="decrease_radius">Decrease radius</string>
 
     <string name="title_same_radius_preference">Same Radius</string>
     <string name="summary_same_radius_preference">Use same radius for both arriving and leaving</string>
