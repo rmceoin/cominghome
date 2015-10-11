@@ -31,7 +31,8 @@
         android:layout_height="wrap_content"
         android:background="@drawable/rect"
         android:elevation="5dp"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        tools:ignore="UnusedAttribute">
 
         <LinearLayout
             android:layout_width="0dp"
