@@ -50,6 +50,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -62,6 +63,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.Circle;
@@ -88,6 +90,7 @@ import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements
+        OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
@@ -132,6 +135,8 @@ public class MainActivity extends AppCompatActivity implements
     TextView structureNameText;
     TextView awayStatusText;
     Button atHomeButton;
+    ImageButton increaseRadiusButton;
+    ImageButton decreaseRadiusButton;
 
     public static String access_token = "";
     public static String structure_id = "";
@@ -232,20 +237,9 @@ public class MainActivity extends AppCompatActivity implements
 
         playServicesConnected();
 
-        map = ((MapFragment) getFragmentManager()
-                .findFragmentById(R.id.map)).getMap();
-
-        if (map != null) {
-            map.setMyLocationEnabled(true);
-            map.getUiSettings().setZoomControlsEnabled(true);
-
-            float lastLatitude = prefs.getFloat(PREFS_LAST_MAP_LATITUDE, 0);
-            float lastLongitude = prefs.getFloat(PREFS_LAST_MAP_LONGITUDE, 0);
-            if ((lastLatitude != 0) && (lastLongitude != 0)) {
-                LatLng current = new LatLng(lastLatitude, lastLongitude);
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(current, 13));
-            }
-        }
+        MapFragment mapFragment = (MapFragment) getFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
 
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                 new IntentFilter(NestUtils.GOT_INFO));
@@ -258,6 +252,20 @@ public class MainActivity extends AppCompatActivity implements
             public void onClick(View arg0) {
                 updateHome(false, false);
                 HistoryUpdate.add(getApplicationContext(), "Updated home");
+            }
+        });
+
+        increaseRadiusButton = (ImageButton) findViewById(R.id.btn_increase_radius);
+        increaseRadiusButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View arg0) {
+                modifyGeofenceRadius(RADIUS_INCREMENT);
+            }
+        });
+
+        decreaseRadiusButton = (ImageButton) findViewById(R.id.btn_decrease_radius);
+        decreaseRadiusButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View arg0) {
+                modifyGeofenceRadius(-RADIUS_INCREMENT);
             }
         });
 
@@ -285,6 +293,75 @@ public class MainActivity extends AppCompatActivity implements
         GcmRegister gcmRegister = new GcmRegister();
         gcmRegister.register(getApplicationContext());
 
+    }
+
+    @Override
+    public void onMapReady(GoogleMap map) {
+
+        if (debug) Log.d(TAG, "map is ready");
+
+        map.setMyLocationEnabled(true);
+        map.getUiSettings().setZoomControlsEnabled(true);
+
+        float lastLatitude = prefs.getFloat(PREFS_LAST_MAP_LATITUDE, 0);
+        float lastLongitude = prefs.getFloat(PREFS_LAST_MAP_LONGITUDE, 0);
+        if ((lastLatitude != 0) && (lastLongitude != 0)) {
+            LatLng current = new LatLng(lastLatitude, lastLongitude);
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(current, 13));
+        }
+
+        this.map = map;
+
+        updateHomeMarker();
+    }
+
+    /**
+     * When using +/- radius buttons on map, increment/decrement by this percentage
+     */
+    final static int RADIUS_INCREMENT = 3;
+
+    final static int RADIUS_MIN = 100;
+    final static int RADIUS_MAX = 10000;
+
+    private void modifyGeofenceRadius(int delta) {
+        if ((map==null) || (homeGeofence==null)) {
+            return;
+        }
+        fenceRadius = augmentRadius(fenceRadius, delta);
+        boolean sameRadius = prefs.getBoolean(PrefsFragment.PREFERENCE_GEOFENCE_SAME_RADIUS, true);
+        if (sameRadius) {
+            fenceRadiusExit = fenceRadius;
+        } else {
+            fenceRadiusExit = augmentRadius(fenceRadiusExit, delta);
+        }
+        saveRadius((int)fenceRadius, (int)fenceRadiusExit);
+        loadFences();
+    }
+
+    /**
+     * Increment or decrement a radius value by a percentage, while ensuring that the new
+     * value does not go below a minimum or above a maximum.
+     *
+     * @param radius original radius
+     * @param percentage to increment or decrement
+     * @return new radius value
+     */
+    private float augmentRadius(float radius, int percentage) {
+        float change = (radius / 100) * percentage;
+        float newRadius = radius + change;
+        if (newRadius > RADIUS_MAX) {
+            newRadius = RADIUS_MAX;
+        } else if (newRadius < RADIUS_MIN) {
+            newRadius = RADIUS_MIN;
+        }
+        return newRadius;
+    }
+
+    private void saveRadius(int radius, int radiusExit) {
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt(PrefsFragment.PREFERENCE_GEOFENCE_RADIUS, radius);
+        editor.putInt(PrefsFragment.PREFERENCE_GEOFENCE_RADIUS_EXIT, radiusExit);
+        editor.apply();
     }
 
     private static final int PERMISSIONS_REQUEST_LOCATION = 1;
@@ -358,6 +435,14 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
+    /**
+     * Update the home geofence API registration and map markers
+     *
+     * @param keepOldFence if true, keep fence where it's at.  Otherwise get the current
+     *                     longitude and latitude and update the fence location.
+     * @param confirmed indicates that the user confirmed the update away from where current
+     *                  home location is set to
+     */
     private void updateHome(boolean keepOldFence, boolean confirmed) {
         if (!keepOldFence) {
             if (!mGoogleApiClient.isConnected()) {
@@ -392,6 +477,16 @@ public class MainActivity extends AppCompatActivity implements
 
     }
 
+    /**
+     *
+     * @param geofenceId A string that identifies which geofence to manipulate.  For our purposes
+     *                   it is always "home".
+     * @param keepOldLatLong If true, just keep the existing position.  Otherwise use
+     *                       LocationServices to get current latitude and longitude.
+     * @param confirmed If true and the updated location is greater than 200 meters away,
+     *                  confirm with user before actually updating.
+     * @return Either null if no update or the SimpleGeofence of the updated location.
+     */
     private SimpleGeofence updateGeofenceLocation(String geofenceId, boolean keepOldLatLong,
                                                   boolean confirmed) {
 
@@ -503,6 +598,16 @@ public class MainActivity extends AppCompatActivity implements
         moveAtHomeDialog.show();
     }
 
+    /**
+     * If we have the map and homeGeofence, then call updateMarker.
+     */
+    private void updateHomeMarker() {
+        if ((map==null) || (homeGeofence==null)) {
+            return;
+        }
+        updateMarker(homeGeofence.getLatitude(), homeGeofence.getLongitude(), FENCE_HOME, false);
+    }
+
     private void updateMarker(double latitude, double longitude, String geofenceId, boolean move) {
         String geofenceExitId = geofenceId + "-exit";
         LatLng current = new LatLng(latitude, longitude);
@@ -561,6 +666,10 @@ public class MainActivity extends AppCompatActivity implements
         if ((move) && (map != null)) map.moveCamera(CameraUpdateFactory.newLatLngZoom(current, 14));
     }
 
+    /**
+     * Use Google services to setup geofences.
+     *
+     */
     private void updateGeofences() {
 
         // Start the request. Fail if there's already a request in progress
