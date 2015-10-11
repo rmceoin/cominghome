@@ -269,6 +269,11 @@ public class MainActivity extends AppCompatActivity implements
             }
         });
 
+        // Hide the buttons until the map is up and running.  If Google Play Services needs
+        // upgrading, the "Update" button is in the upper left
+        increaseRadiusButton.setVisibility(View.INVISIBLE);
+        decreaseRadiusButton.setVisibility(View.INVISIBLE);
+
         // Instantiate a Geofence requester
         mGeofenceRegister = new GeofenceRegister(this);
 
@@ -313,6 +318,9 @@ public class MainActivity extends AppCompatActivity implements
         this.map = map;
 
         updateHomeMarker();
+        increaseRadiusButton.setVisibility(View.VISIBLE);
+        decreaseRadiusButton.setVisibility(View.VISIBLE);
+
     }
 
     /**
