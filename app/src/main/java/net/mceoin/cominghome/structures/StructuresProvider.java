@@ -39,7 +39,6 @@ import android.util.Log;
 import net.mceoin.cominghome.PrefsFragment;
 
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -155,7 +154,7 @@ public class StructuresProvider extends ContentProvider {
         }
 
         if (!values.containsKey(StructuresValues.Structures.CREATED_DATE_STR)) {
-            DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+            DateFormat df = DateFormat.getDateTimeInstance();
             Date today = Calendar.getInstance().getTime();
             String createdDateStr = df.format(today);
             values.put(StructuresValues.Structures.CREATED_DATE_STR, createdDateStr);
@@ -303,7 +302,7 @@ public class StructuresProvider extends ContentProvider {
         sUriMatcher.addURI(StructuresValues.AUTHORITY, "structures", STRUCTURES);
         sUriMatcher.addURI(StructuresValues.AUTHORITY, "structures/#", STRUCTURES_ID);
 
-        sStructuresProjectionMap = new HashMap<String, String>();
+        sStructuresProjectionMap = new HashMap<>();
         sStructuresProjectionMap.put(StructuresValues.Structures._ID, StructuresValues.Structures._ID);
         sStructuresProjectionMap.put(StructuresValues.Structures.STRUCTURE_ID, StructuresValues.Structures.STRUCTURE_ID);
         sStructuresProjectionMap.put(StructuresValues.Structures.NAME, StructuresValues.Structures.NAME);

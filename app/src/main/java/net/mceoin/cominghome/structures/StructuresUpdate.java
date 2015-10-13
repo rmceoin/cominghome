@@ -106,7 +106,7 @@ public class StructuresUpdate {
      */
     public static HashSet<String> getStructureIds(@NonNull Context context) {
 
-        HashSet<String> structure_ids = new HashSet<String>();
+        HashSet<String> structure_ids = new HashSet<>();
 
         Cursor mCursor = context.getContentResolver().query(mUri, mProjectionStructures, null, null, "");
         if (mCursor != null) {

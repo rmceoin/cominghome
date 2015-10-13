@@ -15,6 +15,7 @@
  */
 package net.mceoin.cominghome;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -32,12 +33,16 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -45,6 +50,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -56,6 +63,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.Circle;
@@ -81,7 +89,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MainActivity extends ActionBarActivity implements
+public class MainActivity extends AppCompatActivity implements
+        OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
@@ -96,6 +105,7 @@ public class MainActivity extends ActionBarActivity implements
     public static final String PREFS_LAST_MAP_LATITUDE = "last_map_latitude";
     public static final String PREFS_LAST_MAP_LONGITUDE = "last_map_longitude";
     public static final String PREFS_NOTIFICATIONS = "notifications";
+    public static final String PREFS_LAST_PERMISSION_REQUEST = "last_permission_request";
 
     /**
      * Request code for auto Google Play Services error resolution.
@@ -125,6 +135,8 @@ public class MainActivity extends ActionBarActivity implements
     TextView structureNameText;
     TextView awayStatusText;
     Button atHomeButton;
+    ImageButton increaseRadiusButton;
+    ImageButton decreaseRadiusButton;
 
     public static String access_token = "";
     public static String structure_id = "";
@@ -216,22 +228,18 @@ public class MainActivity extends ActionBarActivity implements
         structureNameText = (TextView) findViewById(R.id.structure_name);
         awayStatusText = (TextView) findViewById(R.id.away_status);
 
+        ImageView locationPermission = (ImageView) findViewById(R.id.location_permission);
+        locationPermission.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View arg0) {
+                checkPermissions(true);
+            }
+        });
+
         playServicesConnected();
 
-        map = ((MapFragment) getFragmentManager()
-                .findFragmentById(R.id.map)).getMap();
-
-        if (map != null) {
-            map.setMyLocationEnabled(true);
-            map.getUiSettings().setZoomControlsEnabled(true);
-
-            float lastLatitude = prefs.getFloat(PREFS_LAST_MAP_LATITUDE, 0);
-            float lastLongitude = prefs.getFloat(PREFS_LAST_MAP_LONGITUDE, 0);
-            if ((lastLatitude != 0) && (lastLongitude != 0)) {
-                LatLng current = new LatLng(lastLatitude, lastLongitude);
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(current, 13));
-            }
-        }
+        MapFragment mapFragment = (MapFragment) getFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
 
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                 new IntentFilter(NestUtils.GOT_INFO));
@@ -247,6 +255,25 @@ public class MainActivity extends ActionBarActivity implements
             }
         });
 
+        increaseRadiusButton = (ImageButton) findViewById(R.id.btn_increase_radius);
+        increaseRadiusButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View arg0) {
+                modifyGeofenceRadius(RADIUS_INCREMENT);
+            }
+        });
+
+        decreaseRadiusButton = (ImageButton) findViewById(R.id.btn_decrease_radius);
+        decreaseRadiusButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View arg0) {
+                modifyGeofenceRadius(-RADIUS_INCREMENT);
+            }
+        });
+
+        // Hide the buttons until the map is up and running.  If Google Play Services needs
+        // upgrading, the "Update" button is in the upper left
+        increaseRadiusButton.setVisibility(View.INVISIBLE);
+        decreaseRadiusButton.setVisibility(View.INVISIBLE);
+
         // Instantiate a Geofence requester
         mGeofenceRegister = new GeofenceRegister(this);
 
@@ -258,7 +285,10 @@ public class MainActivity extends ActionBarActivity implements
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            ActionBar actionBar = getSupportActionBar();
+            if (actionBar != null) {
+                actionBar.setDisplayHomeAsUpEnabled(true);
+            }
         }
         setActionBarIcon(R.drawable.home);
 
@@ -270,6 +300,157 @@ public class MainActivity extends ActionBarActivity implements
 
     }
 
+    @Override
+    public void onMapReady(GoogleMap map) {
+
+        if (debug) Log.d(TAG, "map is ready");
+
+        map.setMyLocationEnabled(true);
+        map.getUiSettings().setZoomControlsEnabled(true);
+
+        float lastLatitude = prefs.getFloat(PREFS_LAST_MAP_LATITUDE, 0);
+        float lastLongitude = prefs.getFloat(PREFS_LAST_MAP_LONGITUDE, 0);
+        if ((lastLatitude != 0) && (lastLongitude != 0)) {
+            LatLng current = new LatLng(lastLatitude, lastLongitude);
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(current, 13));
+        }
+
+        this.map = map;
+
+        updateHomeMarker();
+        increaseRadiusButton.setVisibility(View.VISIBLE);
+        decreaseRadiusButton.setVisibility(View.VISIBLE);
+
+    }
+
+    /**
+     * When using +/- radius buttons on map, increment/decrement by this percentage
+     */
+    final static int RADIUS_INCREMENT = 3;
+
+    final static int RADIUS_MIN = 100;
+    final static int RADIUS_MAX = 10000;
+
+    private void modifyGeofenceRadius(int delta) {
+        if ((map==null) || (homeGeofence==null)) {
+            return;
+        }
+        fenceRadius = augmentRadius(fenceRadius, delta);
+        boolean sameRadius = prefs.getBoolean(PrefsFragment.PREFERENCE_GEOFENCE_SAME_RADIUS, true);
+        if (sameRadius) {
+            fenceRadiusExit = fenceRadius;
+        } else {
+            fenceRadiusExit = augmentRadius(fenceRadiusExit, delta);
+        }
+        saveRadius((int)fenceRadius, (int)fenceRadiusExit);
+        loadFences();
+    }
+
+    /**
+     * Increment or decrement a radius value by a percentage, while ensuring that the new
+     * value does not go below a minimum or above a maximum.
+     *
+     * @param radius original radius
+     * @param percentage to increment or decrement
+     * @return new radius value
+     */
+    private float augmentRadius(float radius, int percentage) {
+        float change = (radius / 100) * percentage;
+        float newRadius = radius + change;
+        if (newRadius > RADIUS_MAX) {
+            newRadius = RADIUS_MAX;
+        } else if (newRadius < RADIUS_MIN) {
+            newRadius = RADIUS_MIN;
+        }
+        return newRadius;
+    }
+
+    private void saveRadius(int radius, int radiusExit) {
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt(PrefsFragment.PREFERENCE_GEOFENCE_RADIUS, radius);
+        editor.putInt(PrefsFragment.PREFERENCE_GEOFENCE_RADIUS_EXIT, radiusExit);
+        editor.apply();
+    }
+
+    private static final int PERMISSIONS_REQUEST_LOCATION = 1;
+
+    private void checkPermissions(boolean userInitiated) {
+
+        final String PERMISSIONS_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
+
+        if (Build.VERSION.SDK_INT < 23) {
+            // if earlier than Marshmallow, then don't bother
+            return;
+        }
+
+        if (ContextCompat.checkSelfPermission(this, PERMISSIONS_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ImageView locationPermission = (ImageView) findViewById(R.id.location_permission);
+            locationPermission.setVisibility(View.VISIBLE);
+
+            long lastPermissionRequest = prefs.getLong(PREFS_LAST_PERMISSION_REQUEST, 0);
+            long currentTime = System.currentTimeMillis();
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putLong(PREFS_LAST_PERMISSION_REQUEST, currentTime);
+            editor.apply();
+
+            final long PERMISSION_REQUEST_WAIT = 10 * 60 * 1000;
+            long timeDelta = currentTime - lastPermissionRequest;
+            if (debug) Log.d(TAG, "timeDelta = " + currentTime +
+                    " - " + lastPermissionRequest + " = " + timeDelta);
+            if (!userInitiated && ((timeDelta) < PERMISSION_REQUEST_WAIT)) {
+                // don't bother asking for permission if it's been less than the wait time
+                if (debug) Log.d(TAG, "already requested permission recently");
+                return;
+            }
+
+            if (debug) Log.d(TAG, "requesting permission for location");
+            ActivityCompat.requestPermissions(this, new String[]{PERMISSIONS_LOCATION}, PERMISSIONS_REQUEST_LOCATION);
+
+        } else {
+            if (debug) Log.d(TAG, "we have permission for location");
+            ImageView locationPermission = (ImageView) findViewById(R.id.location_permission);
+            locationPermission.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String permissions[], @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_LOCATION: {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    if (debug) Log.d(TAG, "permission request was allowed");
+                    ImageView locationPermission = (ImageView) findViewById(R.id.location_permission);
+                    locationPermission.setVisibility(View.INVISIBLE);
+                    if (mGoogleApiClient != null) {
+                        if (debug) Log.d(TAG, "reconnecting to GoogleApiClient");
+//                        mGoogleApiClient.connect();
+                    }
+                    //TODO: figure out a way to trigger Location after acquiring the permission
+                    // without restarting the whole app
+                    Intent intent = getIntent();
+                    overridePendingTransition(0, 0);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                    finish();
+                    overridePendingTransition(0, 0);
+                    startActivity(intent);
+                } else {
+                    if (debug) Log.d(TAG, "permission request was denied");
+                    ImageView locationPermission = (ImageView) findViewById(R.id.location_permission);
+                    locationPermission.setVisibility(View.VISIBLE);
+                }
+            }
+        }
+    }
+
+    /**
+     * Update the home geofence API registration and map markers
+     *
+     * @param keepOldFence if true, keep fence where it's at.  Otherwise get the current
+     *                     longitude and latitude and update the fence location.
+     * @param confirmed indicates that the user confirmed the update away from where current
+     *                  home location is set to
+     */
     private void updateHome(boolean keepOldFence, boolean confirmed) {
         if (!keepOldFence) {
             if (!mGoogleApiClient.isConnected()) {
@@ -304,6 +485,16 @@ public class MainActivity extends ActionBarActivity implements
 
     }
 
+    /**
+     *
+     * @param geofenceId A string that identifies which geofence to manipulate.  For our purposes
+     *                   it is always "home".
+     * @param keepOldLatLong If true, just keep the existing position.  Otherwise use
+     *                       LocationServices to get current latitude and longitude.
+     * @param confirmed If true and the updated location is greater than 200 meters away,
+     *                  confirm with user before actually updating.
+     * @return Either null if no update or the SimpleGeofence of the updated location.
+     */
     private SimpleGeofence updateGeofenceLocation(String geofenceId, boolean keepOldLatLong,
                                                   boolean confirmed) {
 
@@ -415,6 +606,16 @@ public class MainActivity extends ActionBarActivity implements
         moveAtHomeDialog.show();
     }
 
+    /**
+     * If we have the map and homeGeofence, then call updateMarker.
+     */
+    private void updateHomeMarker() {
+        if ((map==null) || (homeGeofence==null)) {
+            return;
+        }
+        updateMarker(homeGeofence.getLatitude(), homeGeofence.getLongitude(), FENCE_HOME, false);
+    }
+
     private void updateMarker(double latitude, double longitude, String geofenceId, boolean move) {
         String geofenceExitId = geofenceId + "-exit";
         LatLng current = new LatLng(latitude, longitude);
@@ -473,6 +674,10 @@ public class MainActivity extends ActionBarActivity implements
         if ((move) && (map != null)) map.moveCamera(CameraUpdateFactory.newLatLngZoom(current, 14));
     }
 
+    /**
+     * Use Google services to setup geofences.
+     *
+     */
     private void updateGeofences() {
 
         // Start the request. Fail if there's already a request in progress
@@ -689,6 +894,7 @@ public class MainActivity extends ActionBarActivity implements
         NotificationManager mNotificationManager =
                 (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
         mNotificationManager.cancelAll();
+        checkPermissions(false);
     }
 
     @Override

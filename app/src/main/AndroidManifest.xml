@@ -24,6 +24,7 @@
     <application
         android:name=".AppController"
         android:allowBackup="true"
+        android:fullBackupContent="@xml/backupscheme"
         android:icon="@drawable/home"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
