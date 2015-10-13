@@ -76,6 +76,8 @@
     <string name="title_move_at_home">Move At Home</string>
     <string name="msg_move_at_home">Are you sure you want to move your home location?</string>
 
+    <string name="location_permission_missing">Location permission missing</string>
+
     <!-- Preferences strings -->
     <string name="inline_preferences">Settings</string>
 
@@ -99,6 +101,8 @@
     <item name="geofence_radius_exit_default" type="integer">400</item>
     <item name="geofence_radius_min_value" type="integer">20</item>
     <item name="geofence_radius_max_value" type="integer">10000</item>
+    <string name="increase_radius">Increase radius</string>
+    <string name="decrease_radius">Decrease radius</string>
 
     <string name="title_same_radius_preference">Same Radius</string>
     <string name="summary_same_radius_preference">Use same radius for both arriving and leaving</string>

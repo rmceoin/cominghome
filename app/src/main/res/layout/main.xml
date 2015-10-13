@@ -31,40 +31,88 @@
         android:layout_height="wrap_content"
         android:background="@drawable/rect"
         android:elevation="5dp"
-        android:orientation="vertical">
+        android:orientation="horizontal"
+        tools:ignore="UnusedAttribute">
 
-        <Button
-            android:id="@+id/buttonConnectNest"
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/rect"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/buttonConnectNest"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/connect_nest" />
+
+            <TextView
+                android:id="@+id/structure_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="@string/name" />
+
+            <TextView
+                android:id="@+id/away_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="@string/away_status" />
+
+            <Button
+                android:id="@+id/buttonSetAtHome"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/at_home"
+                tools:ignore="ButtonStyle" />
+
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/location_permission"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/connect_nest" />
-
-        <TextView
-            android:id="@+id/structure_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:text="@string/name" />
-
-        <TextView
-            android:id="@+id/away_status"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:text="@string/away_status" />
-
-        <Button
-            android:id="@+id/buttonSetAtHome"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/at_home"
-            tools:ignore="ButtonStyle" />
-
+            android:layout_gravity="center"
+            android:contentDescription="@string/location_permission_missing"
+            android:src="@drawable/ic_not_place_black_48dp"
+            android:visibility="gone" />
     </LinearLayout>
 
-    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/map"
-        android:name="com.google.android.gms.maps.MapFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:layout="@android:layout/simple_gallery_item" />
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+        <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.MapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:layout="@android:layout/simple_gallery_item" />
+
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="3dp">
+
+            <ImageButton
+                android:id="@+id/btn_increase_radius"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/increase_radius"
+                android:padding="10dp"
+                android:src="@drawable/ic_control_point_black_36dp" />
+
+            <ImageButton
+                android:id="@+id/btn_decrease_radius"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/decrease_radius"
+                android:padding="10dp"
+                android:src="@drawable/ic_control_point_black_36dp_minus" />
+
+        </LinearLayout>
+    </FrameLayout>
 
 </LinearLayout>

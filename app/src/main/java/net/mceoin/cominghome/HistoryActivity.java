@@ -19,7 +19,8 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,7 +28,7 @@ import android.view.MenuItem;
 import net.mceoin.cominghome.history.HistoryListFragment;
 import net.mceoin.cominghome.history.HistoryValues;
 
-public class HistoryActivity extends ActionBarActivity {
+public class HistoryActivity extends AppCompatActivity {
 
     public static final int MENU_ITEM_DELETE_ALL = Menu.FIRST;
 
@@ -40,7 +41,10 @@ public class HistoryActivity extends ActionBarActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            ActionBar actionBar = getSupportActionBar();
+            if (actionBar != null) {
+                actionBar.setDisplayHomeAsUpEnabled(true);
+            }
             toolbar.setNavigationIcon(R.drawable.home);
         }
 

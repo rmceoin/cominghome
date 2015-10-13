@@ -15,7 +15,7 @@
  */
 package net.mceoin.cominghome;
 
-import android.app.Application;
+import android.support.multidex.MultiDexApplication;
 import android.text.TextUtils;
 
 import com.android.volley.Request;
@@ -26,7 +26,7 @@ import com.android.volley.toolbox.Volley;
  * Snagged from:
  * http://www.androidhive.info/2014/05/android-working-with-volley-library-1/
  */
-public class AppController extends Application {
+public class AppController extends MultiDexApplication {
 
     public static final String TAG = AppController.class.getSimpleName();
 

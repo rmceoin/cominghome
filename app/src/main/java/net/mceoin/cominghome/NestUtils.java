@@ -92,7 +92,7 @@ public class NestUtils {
         }
 
         JsonObjectRequest updateStatusReq = new JsonObjectRequest(Request.Method.GET,
-                url, null,
+                url, (String)null,
                 new Response.Listener<JSONObject>() {
 
                     @Override
