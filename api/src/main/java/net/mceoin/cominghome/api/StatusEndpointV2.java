@@ -94,30 +94,23 @@ public class StatusEndpointV2 extends StatusEndpoint {
 
         if (tell_nest) {
             String nest_away = NestUtil.getNestAwayStatus(access_token);
-            switch (nest_away) {
-                case "away":
-                case "auto-away":
-                    String result = NestUtil.tellNestAwayStatus(access_token, structure_id, "home");
-                    response.setMessage("Nest updated");
-                    if (result.equals("Success")) {
-                        response.setNestSuccess(true);
-                        response.setNestUpdated(true);
-                    } else {
-                        response.setNestSuccess(false);
-                        response.setNestUpdated(false);
-                        response.setMessage(result);
-                    }
-                    break;
-                case "home":
+            if (nest_away.equals("home")) {
+                // if we're already home, don't bother updating Nest
+                response.setNestSuccess(true);
+                response.setNestUpdated(false);
+                response.setMessage("Nest already home");
+            } else {
+                // if we're not at home, update Nest
+                String result = NestUtil.tellNestAwayStatus(access_token, structure_id, "home");
+                response.setMessage("Nest updated");
+                if (result.equals("Success")) {
                     response.setNestSuccess(true);
-                    response.setNestUpdated(false);
-                    response.setMessage("Nest already home");
-                    break;
-                default:
+                    response.setNestUpdated(true);
+                } else {
                     response.setNestSuccess(false);
                     response.setNestUpdated(false);
-                    response.setMessage(nest_away);
-                    break;
+                    response.setMessage(result);
+                }
             }
         } else {
             response.setNestSuccess(true);
@@ -198,29 +191,22 @@ public class StatusEndpointV2 extends StatusEndpoint {
         } else if (tell_nest) {
             String nest_away = NestUtil.getNestAwayStatus(access_token);
 
-            switch (nest_away) {
-                case "home":
-                    String result = NestUtil.tellNestAwayStatus(access_token, structure_id, "away");
-                    response.setMessage("Nest updated");
-                    if (result.equals("Success")) {
-                        response.setNestSuccess(true);
-                        response.setNestUpdated(true);
-                    } else {
-                        response.setNestSuccess(false);
-                        response.setMessage(result);
-                    }
-                    break;
-                case "away":
-                case "auto-away":
+            if (nest_away.equals("away") || nest_away.equals("auto-away")) {
+                // if Nest is already away, don't bother updating
+                response.setNestSuccess(true);
+                response.setNestUpdated(false);
+                response.setMessage("Nest already " + nest_away);
+            } else {
+                // if Nest is not away, then update to away
+                String result = NestUtil.tellNestAwayStatus(access_token, structure_id, "away");
+                response.setMessage("Nest updated");
+                if (result.equals("Success")) {
                     response.setNestSuccess(true);
-                    response.setNestUpdated(false);
-                    response.setMessage("Nest already " + nest_away);
-                    break;
-                default:
+                    response.setNestUpdated(true);
+                } else {
                     response.setNestSuccess(false);
-                    response.setNestUpdated(false);
-                    response.setMessage(nest_away);
-                    break;
+                    response.setMessage(result);
+                }
             }
         } else {
             response.setNestSuccess(true);
