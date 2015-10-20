@@ -32,7 +32,7 @@ import java.util.logging.Logger;
  * Utilities for calling Nest.
  *
  * <ul>
- * <li>{@link #getNestAwayStatus(String)}</li>
+ * <li>{@link #getNestAwayStatus(String, String)}</li>
  * <li>{@link #tellNestAwayStatus(String, String, String)}</li>
  * </ul>
  */
@@ -197,8 +197,15 @@ public class NestUtil {
         }
     }
 
-    public static String getNestAwayStatus(String access_token) {
-        String result = getNestAwayStatusCall(access_token);
+    /**
+     * Get the status of the specified structure.
+     *
+     * @param access_token Token that allows access
+     * @param structure_id ID of desired structure
+     * @return Status.  For example 'home' or 'away'.
+     */
+    public static String getNestAwayStatus(String access_token, String structure_id) {
+        String result = getNestAwayStatusCall(access_token, structure_id);
 
         if ((result.contains("Error:")) && (!result.contains("Unauthorized"))) {
             // Try again if it was an Error but not an Unauthorized
@@ -210,13 +217,13 @@ public class NestUtil {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            result = getNestAwayStatusCall(access_token);
+            result = getNestAwayStatusCall(access_token, structure_id);
         }
 
         return result;
     }
 
-    private static String getNestAwayStatusCall(String access_token) {
+    private static String getNestAwayStatusCall(String access_token, String structure_id) {
 
         String away_status = "";
 
@@ -287,15 +294,43 @@ public class NestUtil {
                 log.info("response=" + builder.toString());
                 JSONObject object = new JSONObject(builder.toString());
 
+                // The response can contain multiple structures.
+                //
+                // { "n3i0tZr6F8YZZk8wZOikSWI7VuRJiC7h3TETUo0s_-CiUIImsMlg":
+                //  {
+                //      "name":"test home",
+                //      "country_code":"US",
+                //      "time_zone":"America/Los_Angeles",
+                //      "away":"home",
+                //      "thermostats":["PGq6O4cTqO7tNpDjWzT1lVoZTWQG0s2y","PGq6O4cTqO5QIcACON2TPVoZTWQG0s2y"],
+                //      "structure_id":"n3i0tZr6F8YZZk8wZOikSWI7VuRJiC7h3TETUo0s_-CiUIImsMlg"},
+                //  "cLLE1o_C0kqB3sXC2jwzrWI7VuRJiC7h3TETUo0s_-CiUIImsMlg":
+                //  {
+                //      "name":"Cabin Retreat",
+                //      "country_code":"US",
+                //      "time_zone":"America/Los_Angeles",
+                //      "away":"away",
+                //      "thermostats":["PGq6O4cTqO7Z17srVrCMU1oZTWQG0s2y"],
+                //      "structure_id":"cLLE1o_C0kqB3sXC2jwzrWI7VuRJiC7h3TETUo0s_-CiUIImsMlg"}
+                // }
                 Iterator keys = object.keys();
                 while (keys.hasNext()) {
                     String key = (String) keys.next();
                     JSONObject structure = object.getJSONObject(key);
 
-                    if (structure.has("away")) {
-                        away_status = structure.getString("away");
+                    if (structure.has("structure_id")) {
+                        if (structure.getString("structure_id").equals(structure_id)) {
+                            if (structure.has("away")) {
+                                away_status = structure.getString("away");
+                            } else {
+                                log.info("missing away");
+                            }
+                        } else {
+                            // after initial debugging, should pull this
+                            log.info("skipping structure_id=" + structure.getString("structure_id"));
+                        }
                     } else {
-                        log.info("missing away");
+                        log.info("missing structure_id");
                     }
                 }
 

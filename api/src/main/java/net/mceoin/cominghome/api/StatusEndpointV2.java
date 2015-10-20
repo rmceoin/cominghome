@@ -93,7 +93,7 @@ public class StatusEndpointV2 extends StatusEndpoint {
         saveStatus(InstallationID, structure_id, "home", Gcm_reg_id);
 
         if (tell_nest) {
-            String nest_away = NestUtil.getNestAwayStatus(access_token);
+            String nest_away = NestUtil.getNestAwayStatus(access_token, structure_id);
             if (nest_away.equals("home")) {
                 // if we're already home, don't bother updating Nest
                 response.setNestSuccess(true);
@@ -189,7 +189,7 @@ public class StatusEndpointV2 extends StatusEndpoint {
             response.setNestUpdated(false);
             response.setMessage("Others still at home");
         } else if (tell_nest) {
-            String nest_away = NestUtil.getNestAwayStatus(access_token);
+            String nest_away = NestUtil.getNestAwayStatus(access_token, structure_id);
 
             if (nest_away.equals("away") || nest_away.equals("auto-away")) {
                 // if Nest is already away, don't bother updating
