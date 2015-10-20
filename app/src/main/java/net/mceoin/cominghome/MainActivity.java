@@ -852,6 +852,8 @@ public class MainActivity extends AppCompatActivity implements
         if (!initialWizardRan) {
             startActivity(new Intent().setClass(getApplicationContext(), InitialWizardActivity.class));
             finish();
+        } else {
+            checkPermissions(false);
         }
 
         structure_id = prefs.getString(PREFS_STRUCTURE_ID, "");
@@ -894,7 +896,6 @@ public class MainActivity extends AppCompatActivity implements
         NotificationManager mNotificationManager =
                 (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
         mNotificationManager.cancelAll();
-        checkPermissions(false);
     }
 
     @Override
