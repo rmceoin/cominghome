@@ -83,7 +83,7 @@ public class StatusEndpointV1 extends StatusEndpoint {
         saveStatus(InstallationID, structure_id, "home");
 
         if (tell_nest) {
-            String nest_away = NestUtil.getNestAwayStatus(access_token);
+            String nest_away = NestUtil.getNestAwayStatus(access_token, structure_id);
             switch (nest_away) {
                 case "away":
                 case "auto-away":
@@ -156,7 +156,7 @@ public class StatusEndpointV1 extends StatusEndpoint {
             response.setNestUpdated(false);
             response.setMessage("Others still at home");
         } else if (tell_nest) {
-            String nest_away = NestUtil.getNestAwayStatus(access_token);
+            String nest_away = NestUtil.getNestAwayStatus(access_token, structure_id);
 
             switch (nest_away) {
                 case "home":
