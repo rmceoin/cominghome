@@ -17,6 +17,7 @@
 package net.mceoin.cominghome.geofence;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -28,6 +29,7 @@ import net.mceoin.cominghome.MainActivity;
 import net.mceoin.cominghome.cloud.StatusArrivedHome;
 import net.mceoin.cominghome.history.HistoryUpdate;
 import net.mceoin.cominghome.oauth.OAuthFlowApp;
+import net.mceoin.cominghome.service.DelayAwayService;
 
 import java.util.List;
 
@@ -37,7 +39,7 @@ import java.util.List;
 public class FenceHandling {
 
     public final static String TAG = FenceHandling.class.getSimpleName();
-    public final static boolean debug = false;
+    public final static boolean debug = true;
 
     private static SharedPreferences prefs;
     private static FenceHandlingAlarm alarm = new FenceHandlingAlarm();
@@ -100,6 +102,8 @@ public class FenceHandling {
             // then come back.
             alarm.SetAlarm(context);
 
+            Intent myIntent = new Intent(context, DelayAwayService.class);
+            context.startService(myIntent);
         } else {
             Log.e(TAG, "missing structure_id");
         }
