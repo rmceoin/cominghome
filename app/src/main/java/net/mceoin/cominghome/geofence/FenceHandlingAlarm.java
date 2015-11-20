@@ -34,7 +34,7 @@ import net.mceoin.cominghome.cloud.StatusLeftHome;
 public class FenceHandlingAlarm extends BroadcastReceiver {
 
     public final static String TAG = FenceHandlingAlarm.class.getSimpleName();
-    public final static boolean debug = false;
+    public final static boolean debug = true;
 
     /**
      * Preference for saving the start time of the alarm.
@@ -51,7 +51,7 @@ public class FenceHandlingAlarm extends BroadcastReceiver {
         if (debug) Log.d(TAG, "onReceive()");
 
         long currentTime = System.currentTimeMillis();
-        long alarmStartTime = getStartTime(context);
+        long alarmStartTime = AlarmTime.getTime(context); // getStartTime(context);
 
         long timeElapsedSeconds = (currentTime - alarmStartTime) / 1000;
         if (debug)
@@ -80,6 +80,7 @@ public class FenceHandlingAlarm extends BroadcastReceiver {
         Intent i = new Intent(context, FenceHandlingAlarm.class);
 
         long alarmStartTime = System.currentTimeMillis();
+        AlarmTime.setTime(context, alarmStartTime);
         saveStartTime(context, alarmStartTime);
 
         PendingIntent pi = PendingIntent.getBroadcast(context, 0, i, 0);

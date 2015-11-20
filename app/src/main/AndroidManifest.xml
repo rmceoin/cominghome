@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="net.mceoin.cominghome" >
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -30,6 +31,7 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name=".MainActivity"
+            android:launchMode="singleTop"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -38,17 +40,21 @@
             </intent-filter>
         </activity>
         <activity android:name=".SettingsActivity"
-            android:parentActivityName=".MainActivity" />
+            android:parentActivityName=".MainActivity"
+            tools:ignore="UnusedAttribute" />
         <activity android:name=".oauth.OAuthFlowApp"
-            android:parentActivityName=".MainActivity" />
+            android:parentActivityName=".MainActivity"
+            tools:ignore="UnusedAttribute" />
         <activity android:name=".HistoryActivity"
-            android:parentActivityName=".MainActivity" >
+            android:parentActivityName=".MainActivity"
+            tools:ignore="UnusedAttribute">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
             </activity>
         <activity android:name=".StructuresActivity"
-            android:parentActivityName=".MainActivity" >
+            android:parentActivityName=".MainActivity"
+            tools:ignore="UnusedAttribute">
             <intent-filter>
                 <action android:name="android.intent.action.PICK"/>
                 <category android:name="android.intent.category.DEFAULT" />
@@ -66,6 +72,10 @@
             android:name=".structures.StructuresProvider"
             android:authorities="net.mceoin.cominghome.structures"
             android:exported="false" />
+
+        <service
+            android:enabled="true"
+            android:name=".service.DelayAwayService"/>
 
         <receiver
             android:name=".geofence.FenceHandlingAlarm"
