@@ -47,9 +47,8 @@ import java.util.Iterator;
 /**
  * Nest utility functions
  * <p/>
- * Some handy info is at:
- * <p/>
- * http://stackoverflow.com/questions/24601798/acquiring-and-changing-basic-data-on-the-nest-thermostat
+ * @see
+ * <a href="http://stackoverflow.com/questions/24601798/acquiring-and-changing-basic-data-on-the-nest-thermostat">http://stackoverflow.com/questions/24601798/acquiring-and-changing-basic-data-on-the-nest-thermostat</a>
  */
 public class NestUtils {
     public static final String TAG = NestUtils.class.getSimpleName();
