@@ -319,8 +319,6 @@ public class NestUtils {
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         // Issue the notification
-        mNotificationManager.notify(0, builder.build());
+        mNotificationManager.notify(MainActivity.NOTIFICATION_NEST_UPDATED, builder.build());
     }
-
-
 }

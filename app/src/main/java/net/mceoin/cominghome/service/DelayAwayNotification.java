@@ -21,6 +21,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationCompat.Builder;
 import android.util.Log;
@@ -28,22 +29,21 @@ import android.util.Log;
 import net.mceoin.cominghome.MainActivity;
 import net.mceoin.cominghome.R;
 
-public class ServiceNotification {
-    private static final boolean debug = true;
-    private static String TAG = "ServiceNotification";
-
-    private static final int NOTIFICATION_ID = 1;
+/**
+ * Handle the notifications for the {@link DelayAwayService}.
+ */
+public class DelayAwayNotification {
+    private static String TAG = "DelayAwayNotification";
+    private static final boolean debug = false;
 
     static NotificationManager mNotifyManager;
     static Builder notificationCompat;
 
-    public static void setNotification(Context context) {
+    public static void startNotification(@NonNull Context context) {
+        if (debug) Log.d(TAG, "startNotification()");
 
-        if (debug) Log.d(TAG, "setNotification()" );
-        // look up the notification manager service
         mNotifyManager = (NotificationManager) context
                 .getSystemService(Context.NOTIFICATION_SERVICE);
-
 
         Intent intent = new Intent(context, MainActivity.class);
         PendingIntent pi = PendingIntent.getActivity(
@@ -70,31 +70,36 @@ public class ServiceNotification {
                 .setOngoing(true)
                 .setProgress(100, 0, false)
                 .addAction(android.R.drawable.ic_menu_close_clear_cancel, context.getString(R.string.cancel), cancelPendingIntent)
-                .addAction(android.R.drawable.ic_menu_send, context.getString(R.string.away_now), awayPendingIntent);
-//                .setContentIntent(pi);
+                .addAction(android.R.drawable.ic_menu_send, context.getString(R.string.away_now), awayPendingIntent)
+                .setContentIntent(pi);
 
-        mNotifyManager.notify(NOTIFICATION_ID, notificationCompat.build());
+        mNotifyManager.notify(MainActivity.NOTIFICATION_DELAY_AWAY, notificationCompat.build());
     }
 
-    public static void clearNotification(Context context) {
+    public static void clearNotification(@NonNull Context context) {
+        if (debug) Log.d(TAG, "clearNotification()");
 
-        if (debug) Log.d(TAG, "clearNotification()" );
-        // look up the notification manager service
         NotificationManager nm = (NotificationManager) context
                 .getSystemService(Context.NOTIFICATION_SERVICE);
-        nm.cancel(NOTIFICATION_ID);
+        nm.cancel(MainActivity.NOTIFICATION_DELAY_AWAY);
     }
 
     /**
      * Update the existing notification progress bar.
      *
-     * @param max Maximum value
+     * @param max      Maximum value
      * @param progress A value between 0 and the max
      */
     public static void updateProgress(int max, int progress) {
-        if (debug) Log.d(TAG, "updateProgress("+max+", "+progress+")" );
-        if (progress > max) { progress = max; }
+        if (debug) Log.d(TAG, "updateProgress(" + max + ", " + progress + ")");
+
+        if (progress > max) {
+            progress = max;
+        }
+        if ((notificationCompat == null) || (mNotifyManager == null)) {
+            return;
+        }
         notificationCompat.setProgress(max, progress, false);
-        mNotifyManager.notify(NOTIFICATION_ID, notificationCompat.build());
+        mNotifyManager.notify(MainActivity.NOTIFICATION_DELAY_AWAY, notificationCompat.build());
     }
 }

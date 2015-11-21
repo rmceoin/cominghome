@@ -26,18 +26,19 @@ import android.content.SharedPreferences;
 import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import net.mceoin.cominghome.PrefsFragment;
 import net.mceoin.cominghome.cloud.StatusLeftHome;
 
 /**
- * Delay for 15 minutes before contacting the backend to set away.
+ * Delay for 15 minutes before contacting the backend to set away status.
  */
 public class DelayAwayService extends Service {
-
-    private static final boolean debug = true;
     private static final String TAG = "DelayAwayService";
+    private static final boolean debug = false;
+
     private static long timeRemaining = 0;
     SharedPreferences mPreferences;
     private CountDownTimer t;
@@ -72,9 +73,12 @@ public class DelayAwayService extends Service {
         mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
     }
 
+    /**
+     * Clear the progress notification and cancel the {@link CountDownTimer}.
+     */
     private void cancelTimer() {
         if (debug) { Log.d(TAG, "cancelTimer"); }
-        ServiceNotification.clearNotification(DelayAwayService.this);
+        DelayAwayNotification.clearNotification(DelayAwayService.this);
         if (t != null) {
             t.cancel();
         }
@@ -102,23 +106,24 @@ public class DelayAwayService extends Service {
     }
 
     /**
-     * Tell the backend that we're now away
+     * <p>Tell the backend that we're now away.</p>
+     * Cancel the timer with {@link #cancelTimer()}, and execute
+     * Google Cloud Endpoint StatusLeftHome.
      */
-    private void triggerBackendAway(Context context) {
+    private void triggerBackendAway(@NonNull Context context) {
         if (debug) { Log.d(TAG, "triggerBackendAway"); }
-        ServiceNotification.clearNotification(DelayAwayService.this);
-        //TODO: tell the backend
-        if (t != null) {
-            t.cancel();
-        }
+        cancelTimer();
         new StatusLeftHome(context).execute();
     }
 
     /**
-     * Start a CountDownTimer() that will trigger an away status
+     * Start a {@link CountDownTimer} that will trigger an away status after
+     * {@link PrefsFragment#PREFERENCE_AWAY_DELAY} minutes.
+     * The {@link CountDownTimer} will have an interval of 30 seconds
+     * in order to update the progress bar in the notification.
      */
     private void startTimer() {
-        ServiceNotification.setNotification(DelayAwayService.this);
+        DelayAwayNotification.startNotification(DelayAwayService.this);
         String timeout = mPreferences.getString(
                 PrefsFragment.PREFERENCE_AWAY_DELAY,
                 PrefsFragment.PREFERENCE_AWAY_DELAY_DEFAULT_VALUE
@@ -141,13 +146,13 @@ public class DelayAwayService extends Service {
         t = new CountDownTimer(timeoutUntilStop, 30000) {
 
             public void onTick(long millisUntilFinished) {
-                // doing nothing.
+                // at each interval tick update the notification progress
                 if (debug) {
                     Log.d(TAG, "tick: " + millisUntilFinished + " this=" + this);
                 }
                 timeRemaining = millisUntilFinished;
                 int timeElapsed = (int)(timeoutUntilStop - timeRemaining);
-                ServiceNotification.updateProgress(
+                DelayAwayNotification.updateProgress(
                         (int) timeoutUntilStop,
                         timeElapsed
                 );
@@ -167,6 +172,4 @@ public class DelayAwayService extends Service {
             Log.d(TAG, "Timer started with: " + timeoutUntilStop);
         }
     }
-
-
 }
