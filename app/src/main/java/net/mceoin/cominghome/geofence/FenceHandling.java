@@ -42,7 +42,6 @@ public class FenceHandling {
     public final static boolean debug = true;
 
     private static SharedPreferences prefs;
-    private static FenceHandlingAlarm alarm = new FenceHandlingAlarm();
 
     public static void process(int transition, List<Geofence> geofences, @NonNull Context context) {
         String fenceEnterId = MainActivity.FENCE_HOME;
@@ -68,15 +67,19 @@ public class FenceHandling {
 
     }
 
+    /**
+     * If there is a known structure_id, then contact the backend to set home status.
+     *
+     * Also tell {@link DelayAwayService} to cancel any timer it might have running.
+     *
+     * @param context Application context
+     */
     public static void arrivedHome(@NonNull Context context) {
         if (debug) Log.d(TAG, "arrived home");
 
         Intent intent = new Intent();
         intent.setAction(DelayAwayService.ACTION_CANCEL_TIMER);
         context.sendBroadcast(intent);
-
-        // make sure there isn't an alarm set from a leftHome event
-        alarm.CancelAlarm(context);
 
         prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String structure_id = prefs.getString(MainActivity.PREFS_STRUCTURE_ID, "");
@@ -94,6 +97,13 @@ public class FenceHandling {
         }
     }
 
+    /**
+     * If there is a known structure_id, then start the DelayAwayService
+     *
+     * @param context Application context
+     *
+     * @see DelayAwayService
+     */
     public static void leftHome(@NonNull Context context) {
         if (debug) Log.d(TAG, "left home");
 
@@ -101,11 +111,6 @@ public class FenceHandling {
         String structure_id = prefs.getString(MainActivity.PREFS_STRUCTURE_ID, "");
 
         if (!structure_id.isEmpty()) {
-            // set an alarm to wait before we tell nest we're home.
-            // sometimes the phone's geolocation will bounce out of an area and
-            // then come back.
-            alarm.SetAlarm(context);
-
             Intent myIntent = new Intent(context, DelayAwayService.class);
             context.startService(myIntent);
         } else {
