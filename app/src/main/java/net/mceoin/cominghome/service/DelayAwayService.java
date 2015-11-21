@@ -31,6 +31,9 @@ import android.util.Log;
 import net.mceoin.cominghome.PrefsFragment;
 import net.mceoin.cominghome.cloud.StatusLeftHome;
 
+/**
+ * Delay for 15 minutes before contacting the backend to set away.
+ */
 public class DelayAwayService extends Service {
 
     private static final boolean debug = true;
