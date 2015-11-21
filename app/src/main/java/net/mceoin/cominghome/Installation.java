@@ -36,8 +36,8 @@ import java.util.UUID;
  * phone/tablet from another.
  */
 public class Installation {
-    public static final String TAG = "Installation";
-    public static final boolean debug = false;
+    private static final String TAG = "Installation";
+    private static final boolean debug = false;
 
     private static String sID = null;
     private static final String INSTALLATION = "INSTALLATION";

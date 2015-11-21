@@ -51,8 +51,8 @@ import java.util.Iterator;
  * <a href="http://stackoverflow.com/questions/24601798/acquiring-and-changing-basic-data-on-the-nest-thermostat">http://stackoverflow.com/questions/24601798/acquiring-and-changing-basic-data-on-the-nest-thermostat</a>
  */
 public class NestUtils {
-    public static final String TAG = NestUtils.class.getSimpleName();
-    public static final boolean debug = false;
+    private static final String TAG = NestUtils.class.getSimpleName();
+    private static final boolean debug = false;
 
     /**
      * Broadcast intent name to indicate structure info has been collected/updated.
