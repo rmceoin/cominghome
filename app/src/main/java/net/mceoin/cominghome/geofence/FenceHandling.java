@@ -71,6 +71,10 @@ public class FenceHandling {
     public static void arrivedHome(@NonNull Context context) {
         if (debug) Log.d(TAG, "arrived home");
 
+        Intent intent = new Intent();
+        intent.setAction(DelayAwayService.ACTION_CANCEL_TIMER);
+        context.sendBroadcast(intent);
+
         // make sure there isn't an alarm set from a leftHome event
         alarm.CancelAlarm(context);
 
