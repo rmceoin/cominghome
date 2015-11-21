@@ -25,6 +25,15 @@
 
         <net.mceoin.cominghome.VNTNumberPickerPreference
             xmlns:vntnumberpickerpreference="http://schemas.android.com/apk/res-auto"
+            android:defaultValue="@integer/away_delay_default"
+            android:key="away_delay"
+            android:title="@string/title_away_delay_preference"
+            vntnumberpickerpreference:summary="@string/summary_away_delay_preference"
+            vntnumberpickerpreference:maxValue="@integer/away_delay_max_value"
+            vntnumberpickerpreference:minValue="@integer/away_delay_min_value" />
+
+        <net.mceoin.cominghome.VNTNumberPickerPreference
+            xmlns:vntnumberpickerpreference="http://schemas.android.com/apk/res-auto"
             android:defaultValue="@integer/geofence_radius_default"
             android:key="geofence_radius"
             android:title="@string/title_geofence_radius_preference"

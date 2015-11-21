@@ -34,7 +34,6 @@ public class PrefsFragment extends PreferenceFragment implements SharedPreferenc
     public static final String PREFERENCE_GEOFENCE_RADIUS_EXIT = "geofence_radius_exit";
 
     public static final String PREFERENCE_AWAY_DELAY = "away_delay";
-    public static final String PREFERENCE_AWAY_DELAY_DEFAULT_VALUE = "15";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

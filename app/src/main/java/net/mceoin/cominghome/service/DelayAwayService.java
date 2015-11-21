@@ -30,6 +30,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import net.mceoin.cominghome.PrefsFragment;
+import net.mceoin.cominghome.R;
 import net.mceoin.cominghome.cloud.StatusLeftHome;
 
 /**
@@ -124,16 +125,10 @@ public class DelayAwayService extends Service {
      */
     private void startTimer() {
         DelayAwayNotification.startNotification(DelayAwayService.this);
-        String timeout = mPreferences.getString(
+        int timeoutMinutes = mPreferences.getInt(
                 PrefsFragment.PREFERENCE_AWAY_DELAY,
-                PrefsFragment.PREFERENCE_AWAY_DELAY_DEFAULT_VALUE
+                getResources().getInteger(R.integer.away_delay_default)
         );
-        int timeoutMinutes = 15; // default to 15
-        try {
-            timeoutMinutes = Integer.valueOf(timeout);
-        } catch (NumberFormatException e) {
-            Log.d(TAG, "why is away_delay busted?");
-        }
         final long timeoutUntilStop = timeoutMinutes * 60000;
 
         if (debug) { Log.d(TAG, "startTimer with timeoutUntilStop=" + timeoutUntilStop); }

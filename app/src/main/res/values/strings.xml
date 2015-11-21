@@ -96,11 +96,17 @@
     <string name="title_notifications_preference">Notifications</string>
     <string name="summary_notifications_preference">After updating Nest, show notification</string>
 
+    <string name="title_away_delay_preference">Away delay</string>
+    <string name="summary_away_delay_preference">minutes after geofence triggers</string>
+    <item name="away_delay_default" type="integer">15</item>
+    <item name="away_delay_min_value" type="integer">5</item>
+    <item name="away_delay_max_value" type="integer">60</item>
+
     <string name="title_geofence_radius_preference">Geofence Radius Arriving</string>
-    <string name="summary_geofence_radius_preference">Meters</string>
+    <string name="summary_geofence_radius_preference">meters</string>
     <item name="geofence_radius_default" type="integer">400</item>
     <string name="title_geofence_radius_exit_preference">Geofence Radius Leaving</string>
-    <string name="summary_geofence_radius_exit_preference">Meters</string>
+    <string name="summary_geofence_radius_exit_preference">meters</string>
     <item name="geofence_radius_exit_default" type="integer">400</item>
     <item name="geofence_radius_min_value" type="integer">20</item>
     <item name="geofence_radius_max_value" type="integer">10000</item>
