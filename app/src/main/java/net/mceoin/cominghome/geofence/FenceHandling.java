@@ -38,8 +38,8 @@ import java.util.List;
  */
 public class FenceHandling {
 
-    public final static String TAG = FenceHandling.class.getSimpleName();
-    public final static boolean debug = true;
+    private static final String TAG = FenceHandling.class.getSimpleName();
+    private static final boolean debug = false;
 
     private static SharedPreferences prefs;
 

@@ -27,8 +27,8 @@ import android.util.Log;
  */
 public class HistoryUpdate {
 
-    public static final String TAG = HistoryUpdate.class.getSimpleName();
-    public static final boolean debug = false;
+    private static final String TAG = HistoryUpdate.class.getSimpleName();
+    private static final boolean debug = false;
 
     public static void add(@NonNull Context context, @NonNull String entry) {
         Uri mUri;

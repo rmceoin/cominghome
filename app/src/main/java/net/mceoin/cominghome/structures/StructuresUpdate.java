@@ -30,8 +30,8 @@ import java.util.HashSet;
  */
 public class StructuresUpdate {
 
-    public static final String TAG = StructuresUpdate.class.getSimpleName();
-    public static final boolean debug = false;
+    private static final String TAG = StructuresUpdate.class.getSimpleName();
+    private static final boolean debug = false;
 
     static Uri mUri = StructuresValues.Structures.CONTENT_URI;
 

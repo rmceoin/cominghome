@@ -48,8 +48,8 @@ import java.net.URLEncoder;
 import javax.net.ssl.HttpsURLConnection;
 
 public class OAuthFlowApp extends Activity {
-    public final String TAG = getClass().getName();
-    public static final boolean debug = false;
+    private final String TAG = getClass().getName();
+    private static final boolean debug = false;
 
     private SharedPreferences prefs;
     public static final String PREF_ACCESS_TOKEN = "access_token";

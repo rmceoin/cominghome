@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
-    private static final boolean debug = true;
+    private static final boolean debug = false;
 
     private static final String KEY_IN_RESOLUTION = "is_in_resolution";
     public static final String PREFS_INITIAL_WIZARD = "initial_wizard";
@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements
     public static final String PREFS_LAST_PERMISSION_REQUEST = "last_permission_request";
 
     /**
-     * Notifcation IDs
+     * Notification IDs
      */
     public static final int NOTIFICATION_NEST_UPDATED = 0;
     public static final int NOTIFICATION_DELAY_AWAY = 1;
