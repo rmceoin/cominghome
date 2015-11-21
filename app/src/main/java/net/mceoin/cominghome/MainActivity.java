@@ -108,6 +108,12 @@ public class MainActivity extends AppCompatActivity implements
     public static final String PREFS_LAST_PERMISSION_REQUEST = "last_permission_request";
 
     /**
+     * Notifcation IDs
+     */
+    public static final int NOTIFICATION_NEST_UPDATED = 0;
+    public static final int NOTIFICATION_DELAY_AWAY = 1;
+
+    /**
      * Request code for auto Google Play Services error resolution.
      */
     protected static final int REQUEST_CODE_RESOLUTION = 1;
@@ -897,7 +903,7 @@ public class MainActivity extends AppCompatActivity implements
         }
         NotificationManager mNotificationManager =
                 (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
-        mNotificationManager.cancelAll();
+        mNotificationManager.cancel(NOTIFICATION_NEST_UPDATED);
     }
 
     @Override

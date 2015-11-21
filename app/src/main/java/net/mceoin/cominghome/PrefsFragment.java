@@ -22,7 +22,7 @@ import android.preference.PreferenceFragment;
 public class PrefsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     public final static String TAG = PrefsFragment.class.getSimpleName();
-    public final static boolean debug = true;
+    public final static boolean debug = false;
 
     public static final String key_tell_nest_on_arrival_home = "tell_nest_on_arrival_home";
     public static final String key_tell_nest_on_leaving_home = "tell_nest_on_leaving_home";
