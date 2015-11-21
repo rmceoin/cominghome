@@ -848,6 +848,8 @@ public class MainActivity extends AppCompatActivity implements
     protected void onResume() {
         super.onResume();
 
+        if (debug) Log.d(TAG, "onResume()");
+
         boolean initialWizardRan = prefs.getBoolean(PREFS_INITIAL_WIZARD, false);
         if (!initialWizardRan) {
             startActivity(new Intent().setClass(getApplicationContext(), InitialWizardActivity.class));

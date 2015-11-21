@@ -51,16 +51,14 @@ public class ServiceNotification {
                 PendingIntent.FLAG_UPDATE_CURRENT
         );
 
-        Intent cancelIntent = new Intent(context, MainActivity.class);
-        cancelIntent.putExtra("foo_bar_extra_key", "foo_bar_extra_value");
-        PendingIntent cancelPendingIntent = PendingIntent.getActivity(
+        Intent cancelIntent = new Intent(DelayAwayService.ACTION_CANCEL_TIMER);
+        PendingIntent cancelPendingIntent = PendingIntent.getBroadcast(
                 context, 0, cancelIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT
         );
 
-        Intent awayIntent = new Intent(context, MainActivity.class);
-        awayIntent.putExtra("foo_bar_extra_key", "foo_bar_extra_value");
-        PendingIntent awayPendingIntent = PendingIntent.getActivity(
+        Intent awayIntent = new Intent(DelayAwayService.ACTION_AWAY);
+        PendingIntent awayPendingIntent = PendingIntent.getBroadcast(
                 context, 0, awayIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT
         );
@@ -71,9 +69,9 @@ public class ServiceNotification {
                 .setSmallIcon(R.drawable.home).setOngoing(true)
                 .setOngoing(true)
                 .setProgress(100, 0, false)
-                .addAction(android.R.drawable.ic_menu_close_clear_cancel, "Cancel", cancelPendingIntent)
-                .addAction(android.R.drawable.ic_menu_send, "Away Now", awayPendingIntent)
-                .setContentIntent(pi);
+                .addAction(android.R.drawable.ic_menu_close_clear_cancel, context.getString(R.string.cancel), cancelPendingIntent)
+                .addAction(android.R.drawable.ic_menu_send, context.getString(R.string.away_now), awayPendingIntent);
+//                .setContentIntent(pi);
 
         mNotifyManager.notify(NOTIFICATION_ID, notificationCompat.build());
     }

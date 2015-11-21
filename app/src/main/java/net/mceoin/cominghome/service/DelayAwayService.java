@@ -29,6 +29,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import net.mceoin.cominghome.PrefsFragment;
+import net.mceoin.cominghome.cloud.StatusLeftHome;
 
 public class DelayAwayService extends Service {
 
@@ -40,23 +41,40 @@ public class DelayAwayService extends Service {
     private BroadcastReceiver mIntentReceiver;
 
     public static final String ACTION_START_TIMER = "net.mceoin.cominghome.action.START_TIMER";
+    public static final String ACTION_CANCEL_TIMER = "net.mceoin.cominghome.action.CANCEL_TIMER";
+    public static final String ACTION_AWAY = "net.mceoin.cominghome.action.AWAY";
 
     @Override
     public void onCreate() {
         if (debug) { Log.d(TAG, "onCreate"); }
         mIntentReceiver = new BroadcastReceiver() {
             public void onReceive(Context context, Intent intent) {
+                if (debug) { Log.d(TAG, "onReceive"); }
                 if (intent.getAction().equals(ACTION_START_TIMER)) {
                     startTimer();
+                } else if (intent.getAction().equals(ACTION_CANCEL_TIMER)) {
+                    cancelTimer();
+                } else if (intent.getAction().equals(ACTION_AWAY)) {
+                    triggerBackendAway(context);
                 }
             }
         };
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_START_TIMER);
+        filter.addAction(ACTION_CANCEL_TIMER);
+        filter.addAction(ACTION_AWAY);
         registerReceiver(mIntentReceiver, filter);
 
         mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+    }
+
+    private void cancelTimer() {
+        if (debug) { Log.d(TAG, "cancelTimer"); }
+        ServiceNotification.clearNotification(DelayAwayService.this);
+        if (t != null) {
+            t.cancel();
+        }
     }
 
     @Override
@@ -72,10 +90,7 @@ public class DelayAwayService extends Service {
     public void onDestroy() {
         if (debug) { Log.d(TAG, "onDestroy"); }
         unregisterReceiver(mIntentReceiver);
-        ServiceNotification.clearNotification(DelayAwayService.this);
-        if (t != null) {
-            t.cancel();
-        }
+        cancelTimer();
     }
 
     @Override
@@ -86,13 +101,14 @@ public class DelayAwayService extends Service {
     /**
      * Tell the backend that we're now away
      */
-    private void triggerBackendAway() {
+    private void triggerBackendAway(Context context) {
         if (debug) { Log.d(TAG, "triggerBackendAway"); }
         ServiceNotification.clearNotification(DelayAwayService.this);
         //TODO: tell the backend
         if (t != null) {
             t.cancel();
         }
+        new StatusLeftHome(context).execute();
     }
 
     /**
@@ -138,7 +154,7 @@ public class DelayAwayService extends Service {
                 if (debug) {
                     Log.d(TAG, "onFinish()");
                 }
-                triggerBackendAway();
+                triggerBackendAway(getApplicationContext());
                 timeRemaining = 0;
             }
         };
