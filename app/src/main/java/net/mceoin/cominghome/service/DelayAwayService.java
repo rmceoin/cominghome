@@ -32,13 +32,14 @@ import android.util.Log;
 import net.mceoin.cominghome.PrefsFragment;
 import net.mceoin.cominghome.R;
 import net.mceoin.cominghome.cloud.StatusLeftHome;
+import net.mceoin.cominghome.geofence.FenceHandling;
 
 /**
  * Delay for 15 minutes before contacting the backend to set away status.
  */
 public class DelayAwayService extends Service {
     private static final String TAG = "DelayAwayService";
-    private static final boolean debug = false;
+    private static final boolean debug = true;
 
     private static long timeRemaining = 0;
     SharedPreferences mPreferences;
@@ -114,7 +115,7 @@ public class DelayAwayService extends Service {
     private void triggerBackendAway(@NonNull Context context) {
         if (debug) { Log.d(TAG, "triggerBackendAway"); }
         cancelTimer();
-        new StatusLeftHome(context).execute();
+        FenceHandling.executeLeftHome(context);
     }
 
     /**
