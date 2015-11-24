@@ -19,14 +19,17 @@ package net.mceoin.cominghome.geofence;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.google.android.gms.location.Geofence;
 
 import net.mceoin.cominghome.MainActivity;
 import net.mceoin.cominghome.cloud.StatusArrivedHome;
+import net.mceoin.cominghome.cloud.StatusLeftHome;
 import net.mceoin.cominghome.history.HistoryUpdate;
 import net.mceoin.cominghome.oauth.OAuthFlowApp;
 import net.mceoin.cominghome.service.DelayAwayService;
@@ -39,9 +42,11 @@ import java.util.List;
 public class FenceHandling {
 
     private static final String TAG = FenceHandling.class.getSimpleName();
-    private static final boolean debug = false;
+    private static final boolean debug = true;
 
     private static SharedPreferences prefs;
+    private static AsyncTask statusArrivedHome = null;
+    private static AsyncTask statusLeftHome = null;
 
     public static void process(int transition, List<Geofence> geofences, @NonNull Context context) {
         String fenceEnterId = MainActivity.FENCE_HOME;
@@ -69,7 +74,7 @@ public class FenceHandling {
 
     /**
      * If there is a known structure_id, then contact the backend to set home status.
-     *
+     * <p/>
      * Also tell {@link DelayAwayService} to cancel any timer it might have running.
      *
      * @param context Application context
@@ -87,21 +92,22 @@ public class FenceHandling {
 
         if (!access_token.isEmpty()) {
             if (!structure_id.isEmpty()) {
-                new StatusArrivedHome(context).execute();
+                cancelIfNotFinished(statusArrivedHome);
+                cancelIfNotFinished(statusLeftHome);
+                statusArrivedHome = new StatusArrivedHome(context).execute();
             } else {
                 if (debug) Log.d(TAG, "arrived home, but no structure_id");
             }
-
         } else {
             Log.e(TAG, "no access_token");
         }
     }
 
     /**
-     * If there is a known structure_id, then start the DelayAwayService
+     * If there is a known structure_id, then start the DelayAwayService, which will
+     * eventually call {@link #executeLeftHome(Context)}
      *
      * @param context Application context
-     *
      * @see DelayAwayService
      */
     public static void leftHome(@NonNull Context context) {
@@ -111,10 +117,30 @@ public class FenceHandling {
         String structure_id = prefs.getString(MainActivity.PREFS_STRUCTURE_ID, "");
 
         if (!structure_id.isEmpty()) {
+            cancelIfNotFinished(statusArrivedHome);
+            cancelIfNotFinished(statusLeftHome);
             Intent myIntent = new Intent(context, DelayAwayService.class);
             context.startService(myIntent);
         } else {
             Log.e(TAG, "missing structure_id");
+        }
+    }
+
+    public static void executeLeftHome(@NonNull Context context) {
+        cancelIfNotFinished(statusArrivedHome);
+        cancelIfNotFinished(statusLeftHome);
+        statusLeftHome = new StatusLeftHome(context).execute();
+    }
+
+    /**
+     * If the provided AsyncTask is not finished, then cancel it.
+     *
+     * @param asyncTask AsyncTask to cancel if needed.
+     */
+    private static void cancelIfNotFinished(@Nullable AsyncTask asyncTask) {
+        if ((asyncTask != null) && (asyncTask.getStatus() != AsyncTask.Status.FINISHED)) {
+            if (debug) Log.d(TAG, "cancelled previous task: " + asyncTask.getClass().getName());
+            asyncTask.cancel(true);
         }
     }
 }
