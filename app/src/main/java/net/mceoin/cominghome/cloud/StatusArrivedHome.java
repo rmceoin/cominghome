@@ -19,6 +19,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.google.api.client.extensions.android.http.AndroidHttp;
@@ -39,7 +40,7 @@ import java.util.Random;
 
 public class StatusArrivedHome extends AsyncTask<Void, Void, StatusBean> {
     private static final String TAG = StatusArrivedHome.class.getSimpleName();
-    private static final boolean debug = false;
+    private static final boolean debug = true;
 
     private static MyApi myApiService = null;
     private Context context;
@@ -83,21 +84,22 @@ public class StatusArrivedHome extends AsyncTask<Void, Void, StatusBean> {
             Log.w(TAG, "missing regid");
             return null;
         }
+        String lastExceptionMessage=null;
         int retry = 0;
-        while (retry < 3) {
-
+        while (retry < 15) {
             try {
                 return myApiService.arrivedHome(InstallationId, access_token, structure_id, tell_nest, false, "-", regid).execute();
             } catch (IOException e) {
                 Log.w(TAG, "IOException: " + e.getLocalizedMessage());
                 String networkStatus = CloudUtil.getNetworkStatus(context);
-                HistoryUpdate.add(context, "Backend error: " + e.getLocalizedMessage() + " " +
-                        networkStatus);
-
+                lastExceptionMessage = e.getLocalizedMessage() + " " + networkStatus;
             }
+            if (isCancelled()) return null;
             try {
                 Random randomGenerator = new Random();
                 int seconds = (retry * 60) + randomGenerator.nextInt(15);
+                int maxSeconds = 15 * 60;
+                if (seconds > maxSeconds) seconds = maxSeconds;
                 if (debug) Log.d(TAG,
                         "retry in " + seconds + " seconds");
                 Thread.sleep(seconds * 1000);
@@ -105,14 +107,15 @@ public class StatusArrivedHome extends AsyncTask<Void, Void, StatusBean> {
                 e.printStackTrace();
             }
             retry++;
+            if (isCancelled()) return null;
         }
-        HistoryUpdate.add(context, "Unable to connect to Backend");
+        HistoryUpdate.add(context, "Unable to connect to Backend: " + lastExceptionMessage);
         return null;
     }
 
     @Override
-    protected void onPostExecute(StatusBean result) {
-        if (debug) Log.d(TAG, "got result: " + result.getMessage());
+    protected void onPostExecute(@Nullable StatusBean result) {
+        if (debug && (result != null)) Log.d(TAG, "got result: " + result.getMessage());
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         tell_nest = prefs.getBoolean(PrefsFragment.key_tell_nest_on_arrival_home, true);
