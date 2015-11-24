@@ -122,7 +122,7 @@ public class StatusLeftHome extends AsyncTask<Void, Void, StatusBean> {
         if (debug && (result != null)) Log.d(TAG, "got result: " + result.getMessage());
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        tell_nest = prefs.getBoolean(PrefsFragment.key_tell_nest_on_arrival_home, true);
+        tell_nest = prefs.getBoolean(PrefsFragment.key_tell_nest_on_leaving_home, true);
 
         if (tell_nest) {
             if (result != null) {
