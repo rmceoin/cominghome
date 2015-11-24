@@ -19,6 +19,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.google.api.client.extensions.android.http.AndroidHttp;
@@ -44,7 +45,7 @@ import java.util.Random;
  */
 public class StatusLeftHome extends AsyncTask<Void, Void, StatusBean> {
     private static final String TAG = StatusLeftHome.class.getSimpleName();
-    private static final boolean debug = false;
+    private static final boolean debug = true;
 
     private static MyApi myApiService = null;
     private Context context;
@@ -87,20 +88,22 @@ public class StatusLeftHome extends AsyncTask<Void, Void, StatusBean> {
             Log.w(TAG, "missing regid");
             return null;
         }
+        String lastExceptionMessage=null;
         int retry = 0;
-
-        while (retry < 4) {
+        while (retry < 15) {
             try {
                 return myApiService.leftHome(InstallationId, access_token, structure_id, tell_nest, false, "-", regid).execute();
             } catch (IOException e) {
                 Log.w(TAG, "IOException: " + e.getLocalizedMessage());
                 String networkStatus = CloudUtil.getNetworkStatus(context);
-                HistoryUpdate.add(context, "Backend error: " + e.getLocalizedMessage() + " " +
-                        networkStatus);
+                lastExceptionMessage = e.getLocalizedMessage() + " " + networkStatus;
             }
+            if (isCancelled()) return null;
             try {
                 Random randomGenerator = new Random();
                 int seconds = (retry * 90) + randomGenerator.nextInt(15);
+                int maxSeconds = 15 * 60;
+                if (seconds > maxSeconds) seconds = maxSeconds;
                 if (debug) Log.d(TAG,
                         "retry in " + seconds + " seconds");
                 Thread.sleep(seconds * 1000);
@@ -108,39 +111,42 @@ public class StatusLeftHome extends AsyncTask<Void, Void, StatusBean> {
                 e.printStackTrace();
             }
             retry++;
+            if (isCancelled()) return null;
         }
-        HistoryUpdate.add(context, "Unable to connect to Backend");
+        HistoryUpdate.add(context, "Unable to connect to Backend: " + lastExceptionMessage);
         return null;
     }
 
     @Override
-    protected void onPostExecute(StatusBean result) {
-        if (debug) Log.d(TAG, "got result: " + result.getMessage());
+    protected void onPostExecute(@Nullable StatusBean result) {
+        if (debug && (result != null)) Log.d(TAG, "got result: " + result.getMessage());
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         tell_nest = prefs.getBoolean(PrefsFragment.key_tell_nest_on_arrival_home, true);
 
         if (tell_nest) {
-            if (result.getNestSuccess()) {
-                if (result.getNestUpdated()) {
-                    NestUtils.sendNotificationTransition(context, "Away");
-                    HistoryUpdate.add(context, "Backend updated: Nest Away");
-                } else {
-                    if (result.getOthersAtHome()) {
-                        HistoryUpdate.add(context, "Backend updated: Nest not updated: Others at home");
+            if (result != null) {
+                if (result.getNestSuccess()) {
+                    if (result.getNestUpdated()) {
+                        NestUtils.sendNotificationTransition(context, "Away");
+                        HistoryUpdate.add(context, "Backend updated: Nest Away");
                     } else {
-                        HistoryUpdate.add(context, "Backend updated: Nest already away");
+                        if (result.getOthersAtHome()) {
+                            HistoryUpdate.add(context, "Backend updated: Nest not updated: Others at home");
+                        } else {
+                            HistoryUpdate.add(context, "Backend updated: Nest already away");
+                        }
+                    }
+                } else {
+                    if (result.getMessage().contains("Unauthorized")) {
+                        NestUtils.lostAuthorization(context);
+                    } else {
+                        HistoryUpdate.add(context, "Backend updated: Nest errored: " + result.getMessage());
                     }
                 }
             } else {
-                if (result.getMessage().contains("Unauthorized")) {
-                    NestUtils.lostAuthorization(context);
-                } else {
-                    HistoryUpdate.add(context, "Backend updated: Nest errored: " + result.getMessage());
-                }
+                HistoryUpdate.add(context, "Backend updated");
             }
-        } else {
-            HistoryUpdate.add(context, "Backend updated");
         }
     }
 }
