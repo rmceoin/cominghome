@@ -6,7 +6,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.google.appengine:gradle-appengine-plugin:1.9.26'
+        classpath 'com.google.appengine:gradle-appengine-plugin:1.9.28'
         classpath 'org.codehaus.groovy:groovy-all:2.4.5'
     }
 }
@@ -20,9 +20,9 @@ apply plugin: 'war'
 apply plugin: 'appengine'
 
 dependencies {
-  appengineSdk 'com.google.appengine:appengine-java-sdk:1.9.27'
-  compile 'com.google.appengine:appengine-endpoints:1.9.27'
-  compile 'com.google.appengine:appengine-endpoints-deps:1.9.27'
+  appengineSdk 'com.google.appengine:appengine-java-sdk:1.9.28'
+  compile 'com.google.appengine:appengine-endpoints:1.9.28'
+  compile 'com.google.appengine:appengine-endpoints-deps:1.9.28'
   compile 'javax.servlet:servlet-api:2.5'
   compile 'org.json:json:20140107'
   compile 'com.google.code.findbugs:jsr305:3.0.1'
