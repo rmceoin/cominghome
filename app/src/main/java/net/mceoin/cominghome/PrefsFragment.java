@@ -35,6 +35,9 @@ public class PrefsFragment extends PreferenceFragment implements SharedPreferenc
 
     public static final String PREFERENCE_AWAY_DELAY = "away_delay";
 
+    public static final String PREFERENCE_USE_HOME_WIFI = "use_home_wifi";
+    public static final String PREFERENCE_HOME_WIFI_SSID = "home_wifi_ssid";
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
