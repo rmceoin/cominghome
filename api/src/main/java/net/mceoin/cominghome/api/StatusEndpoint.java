@@ -38,15 +38,15 @@ public class StatusEndpoint {
     public static final String KIND_STATUS = "Status";
 
     protected void logEvent(String installation_id, String structure_id, String event_msg) {
-        Date date = new Date();
-        Entity event = new Entity(KIND_EVENT);
-        event.setProperty("installation_id", installation_id);
-        event.setProperty("date", date);
-        event.setProperty("structure_id", structure_id);
-        event.setProperty("msg", event_msg);
-
-        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-        datastore.put(event);
+//        Date date = new Date();
+//        Entity event = new Entity(KIND_EVENT);
+//        event.setProperty("installation_id", installation_id);
+//        event.setProperty("date", date);
+//        event.setProperty("structure_id", structure_id);
+//        event.setProperty("msg", event_msg);
+//
+//        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+//        datastore.put(event);
     }
 
     protected void saveStatus(String installation_id, String structure_id, String away_status) {
