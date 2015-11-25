@@ -90,7 +90,7 @@ public class StatusLeftHome extends AsyncTask<Void, Void, StatusBean> {
             Log.w(TAG, "missing regid");
             return null;
         }
-        String lastExceptionMessage=null;
+        String lastExceptionMessage = null;
         int retry = 0;
         while (retry < 15) {
             try {
@@ -115,7 +115,8 @@ public class StatusLeftHome extends AsyncTask<Void, Void, StatusBean> {
                         "retry in " + seconds + " seconds");
                 Thread.sleep(seconds * 1000);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                if (debug) Log.d(TAG, "interrupted");
+                return null;
             }
             retry++;
             if (isCancelled()) return null;
@@ -128,7 +129,10 @@ public class StatusLeftHome extends AsyncTask<Void, Void, StatusBean> {
     protected void onPostExecute(@Nullable StatusBean result) {
         if (debug && (result != null)) Log.d(TAG, "got result: " + result.getMessage());
 
-        //TODO: need to figure out when execution was cancelled and not post a History
+        if ((result == null) && isCancelled()) {
+            if (debug) Log.d(TAG, "onPostExecute: was cancelled");
+            return;
+        }
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         tell_nest = prefs.getBoolean(PrefsFragment.key_tell_nest_on_leaving_home, true);

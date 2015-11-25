@@ -104,7 +104,8 @@ public class StatusArrivedHome extends AsyncTask<Void, Void, StatusBean> {
                         "retry in " + seconds + " seconds");
                 Thread.sleep(seconds * 1000);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                if (debug) Log.d(TAG, "interrupted");
+                return null;
             }
             retry++;
             if (isCancelled()) return null;
@@ -116,6 +117,11 @@ public class StatusArrivedHome extends AsyncTask<Void, Void, StatusBean> {
     @Override
     protected void onPostExecute(@Nullable StatusBean result) {
         if (debug && (result != null)) Log.d(TAG, "got result: " + result.getMessage());
+
+        if ((result == null) && isCancelled()) {
+            if (debug) Log.d(TAG, "onPostExecute: was cancelled");
+            return;
+        }
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         tell_nest = prefs.getBoolean(PrefsFragment.key_tell_nest_on_arrival_home, true);
