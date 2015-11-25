@@ -34,6 +34,7 @@ public class PrefsFragment extends PreferenceFragment implements SharedPreferenc
     public static final String PREFERENCE_GEOFENCE_RADIUS_EXIT = "geofence_radius_exit";
 
     public static final String PREFERENCE_AWAY_DELAY = "away_delay";
+    public static final String PREFERENCE_SHOW_AWAY_DELAY_NOTIFICATION = "show_away_delay_notification";
 
     public static final String PREFERENCE_USE_HOME_WIFI = "use_home_wifi";
     public static final String PREFERENCE_HOME_WIFI_SSID = "home_wifi_ssid";

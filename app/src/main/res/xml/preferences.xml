@@ -23,6 +23,12 @@
             android:summary="@string/summary_notifications_preference"
             android:defaultValue="true"/>
 
+        <CheckBoxPreference
+            android:key="show_away_delay_notification"
+            android:title="@string/title_show_away_delay_notification_preference"
+            android:summary="@string/summary_show_away_delay_notification_preference"
+            android:defaultValue="false"/>
+
         <net.mceoin.cominghome.VNTNumberPickerPreference
             xmlns:vntnumberpickerpreference="http://schemas.android.com/apk/res-auto"
             android:defaultValue="@integer/away_delay_default"

@@ -31,7 +31,6 @@ import android.util.Log;
 
 import net.mceoin.cominghome.PrefsFragment;
 import net.mceoin.cominghome.R;
-import net.mceoin.cominghome.cloud.StatusLeftHome;
 import net.mceoin.cominghome.geofence.FenceHandling;
 
 /**
@@ -39,7 +38,7 @@ import net.mceoin.cominghome.geofence.FenceHandling;
  */
 public class DelayAwayService extends Service {
     private static final String TAG = "DelayAwayService";
-    private static final boolean debug = true;
+    private static final boolean debug = false;
 
     private static long timeRemaining = 0;
     SharedPreferences mPreferences;
@@ -52,10 +51,14 @@ public class DelayAwayService extends Service {
 
     @Override
     public void onCreate() {
-        if (debug) { Log.d(TAG, "onCreate"); }
+        if (debug) {
+            Log.d(TAG, "onCreate");
+        }
         mIntentReceiver = new BroadcastReceiver() {
             public void onReceive(Context context, Intent intent) {
-                if (debug) { Log.d(TAG, "onReceive"); }
+                if (debug) {
+                    Log.d(TAG, "onReceive");
+                }
                 if (intent.getAction().equals(ACTION_START_TIMER)) {
                     startTimer();
                 } else if (intent.getAction().equals(ACTION_CANCEL_TIMER)) {
@@ -79,7 +82,9 @@ public class DelayAwayService extends Service {
      * Clear the progress notification and cancel the {@link CountDownTimer}.
      */
     private void cancelTimer() {
-        if (debug) { Log.d(TAG, "cancelTimer"); }
+        if (debug) {
+            Log.d(TAG, "cancelTimer");
+        }
         DelayAwayNotification.clearNotification(DelayAwayService.this);
         if (t != null) {
             t.cancel();
@@ -88,7 +93,9 @@ public class DelayAwayService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (debug) { Log.d(TAG, "Received start id " + startId + ": " + intent + ": " + this); }
+        if (debug) {
+            Log.d(TAG, "Received start id " + startId + ": " + intent + ": " + this);
+        }
         startTimer();
         // We want this service to continue running until it is explicitly
         // stopped, so return sticky.
@@ -97,7 +104,9 @@ public class DelayAwayService extends Service {
 
     @Override
     public void onDestroy() {
-        if (debug) { Log.d(TAG, "onDestroy"); }
+        if (debug) {
+            Log.d(TAG, "onDestroy");
+        }
         unregisterReceiver(mIntentReceiver);
         cancelTimer();
     }
@@ -113,7 +122,9 @@ public class DelayAwayService extends Service {
      * Google Cloud Endpoint StatusLeftHome.
      */
     private void triggerBackendAway(@NonNull Context context) {
-        if (debug) { Log.d(TAG, "triggerBackendAway"); }
+        if (debug) {
+            Log.d(TAG, "triggerBackendAway");
+        }
         cancelTimer();
         FenceHandling.executeLeftHome(context);
     }
@@ -132,7 +143,9 @@ public class DelayAwayService extends Service {
         );
         final long timeoutUntilStop = timeoutMinutes * 60000;
 
-        if (debug) { Log.d(TAG, "startTimer with timeoutUntilStop=" + timeoutUntilStop); }
+        if (debug) {
+            Log.d(TAG, "startTimer with timeoutUntilStop=" + timeoutUntilStop);
+        }
 
         if (t != null) {
             // if there was a previous timer, make sure it's cancelled
@@ -147,8 +160,9 @@ public class DelayAwayService extends Service {
                     Log.d(TAG, "tick: " + millisUntilFinished + " this=" + this);
                 }
                 timeRemaining = millisUntilFinished;
-                int timeElapsed = (int)(timeoutUntilStop - timeRemaining);
+                int timeElapsed = (int) (timeoutUntilStop - timeRemaining);
                 DelayAwayNotification.updateProgress(
+                        getApplicationContext(),
                         (int) timeoutUntilStop,
                         timeElapsed
                 );

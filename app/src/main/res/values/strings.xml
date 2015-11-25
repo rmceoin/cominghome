@@ -98,6 +98,9 @@
     <string name="title_notifications_preference">Notifications</string>
     <string name="summary_notifications_preference">After updating Nest, show notification</string>
 
+    <string name="title_show_away_delay_notification_preference">Away Delay Notification</string>
+    <string name="summary_show_away_delay_notification_preference">Show away delay progress notification</string>
+
     <string name="title_away_delay_preference">Away delay</string>
     <string name="summary_away_delay_preference">minutes after geofence triggers</string>
     <item name="away_delay_default" type="integer">15</item>
