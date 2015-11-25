@@ -33,7 +33,7 @@ import net.mceoin.cominghome.PrefsFragment;
  */
 public class WiFiUtils {
     private static final String TAG = WiFiUtils.class.getSimpleName();
-    private static final boolean debug = true;
+    private static final boolean debug = false;
 
     /**
      * Get the current Wi-Fi SSID.
