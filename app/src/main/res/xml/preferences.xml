@@ -57,6 +57,12 @@
             vntnumberpickerpreference:minValue="@integer/geofence_radius_min_value" 
             android:enabled="false" />
 
+        <CheckBoxPreference
+            android:key="use_home_wifi"
+            android:title="@string/title_home_wifi_preference"
+            android:summary="@string/summary_home_wifi_preference"
+            android:defaultValue="true"/>
+
     </PreferenceCategory>
 
 </PreferenceScreen>

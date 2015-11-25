@@ -29,9 +29,11 @@ import net.mceoin.cominghome.Installation;
 import net.mceoin.cominghome.MainActivity;
 import net.mceoin.cominghome.NestUtils;
 import net.mceoin.cominghome.PrefsFragment;
+import net.mceoin.cominghome.R;
 import net.mceoin.cominghome.api.myApi.MyApi;
 import net.mceoin.cominghome.api.myApi.model.StatusBean;
 import net.mceoin.cominghome.gcm.GcmRegister;
+import net.mceoin.cominghome.geofence.WiFiUtils;
 import net.mceoin.cominghome.history.HistoryUpdate;
 import net.mceoin.cominghome.oauth.OAuthFlowApp;
 
@@ -92,6 +94,11 @@ public class StatusLeftHome extends AsyncTask<Void, Void, StatusBean> {
         int retry = 0;
         while (retry < 15) {
             try {
+                if (WiFiUtils.isCurrentSsidSameAsStored(context)) {
+                    if (debug) Log.d(TAG, "we're associated with home SSID, aborting");
+                    HistoryUpdate.add(context, context.getString(R.string.back_on_home_wifi));
+                    return null;
+                }
                 return myApiService.leftHome(InstallationId, access_token, structure_id, tell_nest, false, "-", regid).execute();
             } catch (IOException e) {
                 Log.w(TAG, "IOException: " + e.getLocalizedMessage());
@@ -120,6 +127,8 @@ public class StatusLeftHome extends AsyncTask<Void, Void, StatusBean> {
     @Override
     protected void onPostExecute(@Nullable StatusBean result) {
         if (debug && (result != null)) Log.d(TAG, "got result: " + result.getMessage());
+
+        //TODO: need to figure out when execution was cancelled and not post a History
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         tell_nest = prefs.getBoolean(PrefsFragment.key_tell_nest_on_leaving_home, true);

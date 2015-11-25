@@ -63,6 +63,8 @@
     <string name="delay_until_away">Delay until setting away</string>
     <string name="cancel">Cancel</string>
     <string name="away_now">Away now</string>
+    <string name="still_on_home_wifi">Still on home WiFi</string>
+    <string name="back_on_home_wifi">Back on home WiFi</string>
 
     <string name="nest_transition_notification_title">
         Nest set to %1$s
@@ -115,6 +117,9 @@
 
     <string name="title_same_radius_preference">Same Radius</string>
     <string name="summary_same_radius_preference">Use same radius for both arriving and leaving</string>
+
+    <string name="title_home_wifi_preference">Home WiFi</string>
+    <string name="summary_home_wifi_preference">Use home WiFi to confirm geofence leaving</string>
 
     <!-- Initial Wizard -->
     <string name="step1_description">Coming Home works with your Nest Thermostat to automatically set the status to home or away.\n

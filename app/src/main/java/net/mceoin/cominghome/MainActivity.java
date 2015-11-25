@@ -77,6 +77,7 @@ import net.mceoin.cominghome.geofence.FenceHandling;
 import net.mceoin.cominghome.geofence.GeofenceRegister;
 import net.mceoin.cominghome.geofence.SimpleGeofence;
 import net.mceoin.cominghome.geofence.SimpleGeofenceStore;
+import net.mceoin.cominghome.geofence.WiFiUtils;
 import net.mceoin.cominghome.history.HistoryUpdate;
 import net.mceoin.cominghome.oauth.OAuthFlowApp;
 import net.mceoin.cominghome.structures.StructuresBean;
@@ -95,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
-    private static final boolean debug = false;
+    private static final boolean debug = true;
 
     private static final String KEY_IN_RESOLUTION = "is_in_resolution";
     public static final String PREFS_INITIAL_WIZARD = "initial_wizard";
@@ -140,6 +141,7 @@ public class MainActivity extends AppCompatActivity implements
     Button connectButton;
     TextView structureNameText;
     TextView awayStatusText;
+    TextView homeWifiSsidText;
     Button atHomeButton;
     ImageButton increaseRadiusButton;
     ImageButton decreaseRadiusButton;
@@ -233,6 +235,7 @@ public class MainActivity extends AppCompatActivity implements
 
         structureNameText = (TextView) findViewById(R.id.structure_name);
         awayStatusText = (TextView) findViewById(R.id.away_status);
+        homeWifiSsidText = (TextView) findViewById(R.id.home_wifi_ssid);
 
         ImageView locationPermission = (ImageView) findViewById(R.id.location_permission);
         locationPermission.setOnClickListener(new View.OnClickListener() {
@@ -587,6 +590,12 @@ public class MainActivity extends AppCompatActivity implements
 
         updateMarker(latitude, longitude, geofenceId, !keepOldLatLong);
 
+        String home_wifi_ssid = WiFiUtils.saveCurrentSsid(getApplicationContext());
+        if (home_wifi_ssid == null) {
+            home_wifi_ssid = "";
+        }
+        homeWifiSsidText.setText(home_wifi_ssid);
+
         return newFence;
     }
 
@@ -867,9 +876,11 @@ public class MainActivity extends AppCompatActivity implements
         structure_id = prefs.getString(PREFS_STRUCTURE_ID, "");
         structure_name = prefs.getString(PREFS_STRUCTURE_NAME, "");
         away_status = prefs.getString(PREFS_LAST_AWAY_STATUS, "");
+        String home_wifi_ssid = prefs.getString(PrefsFragment.PREFERENCE_HOME_WIFI_SSID, "");
 
         structureNameText.setText(structure_name);
         awayStatusText.setText(away_status);
+        homeWifiSsidText.setText(home_wifi_ssid);
 
         float previousFenceRadius = fenceRadius;
         float previousFenceRadiusExit = fenceRadiusExit;
