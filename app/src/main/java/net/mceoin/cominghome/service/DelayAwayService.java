@@ -32,15 +32,18 @@ import android.util.Log;
 import net.mceoin.cominghome.PrefsFragment;
 import net.mceoin.cominghome.R;
 import net.mceoin.cominghome.geofence.FenceHandling;
+import net.mceoin.cominghome.geofence.WiFiUtils;
+import net.mceoin.cominghome.history.HistoryUpdate;
 
 /**
  * Delay for 15 minutes before contacting the backend to set away status.
  */
 public class DelayAwayService extends Service {
     private static final String TAG = "DelayAwayService";
-    private static final boolean debug = false;
+    private static final boolean debug = true;
 
     private static long timeRemaining = 0;
+    private static boolean sawHomeWiFi = false;
     SharedPreferences mPreferences;
     private CountDownTimer t;
     private BroadcastReceiver mIntentReceiver;
@@ -161,18 +164,51 @@ public class DelayAwayService extends Service {
                 }
                 timeRemaining = millisUntilFinished;
                 int timeElapsed = (int) (timeoutUntilStop - timeRemaining);
-                DelayAwayNotification.updateProgress(
-                        getApplicationContext(),
-                        (int) timeoutUntilStop,
-                        timeElapsed
-                );
+
+                if (!sawHomeWiFi) {
+                    if (WiFiUtils.isCurrentSsidSameAsStored(getApplicationContext())) {
+                        //
+                        // we have not seen the home wifi yet, but we do now
+                        //
+                        sawHomeWiFi = true;
+                        DelayAwayNotification.clearNotification(getApplicationContext());
+                        HistoryUpdate.add(getApplicationContext(), getString(R.string.back_at_home_wifi));
+
+                        //
+                        // can't directly cancel the timer from within the timer
+                        // so we send a broadcast to ourselves
+                        //
+                        Intent intent = new Intent();
+                        intent.setAction(DelayAwayService.ACTION_CANCEL_TIMER);
+                        getApplicationContext().sendBroadcast(intent);
+
+                    } else {
+                        DelayAwayNotification.updateProgress(
+                                getApplicationContext(),
+                                (int) timeoutUntilStop,
+                                timeElapsed
+                        );
+                    }
+                }
             }
 
             public void onFinish() {
                 if (debug) {
                     Log.d(TAG, "onFinish()");
                 }
-                triggerBackendAway(getApplicationContext());
+                if (!sawHomeWiFi && WiFiUtils.isCurrentSsidSameAsStored(getApplicationContext())) {
+                    //
+                    // one more check for home wifi if we haven't already seen it
+                    //
+                    sawHomeWiFi = true;
+                    HistoryUpdate.add(getApplicationContext(), getString(R.string.back_at_home_wifi));
+                }
+                if (sawHomeWiFi) {
+                    DelayAwayNotification.clearNotification(getApplicationContext());
+                    cancelTimer();
+                } else {
+                    triggerBackendAway(getApplicationContext());
+                }
                 timeRemaining = 0;
             }
         };

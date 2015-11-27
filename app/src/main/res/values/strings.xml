@@ -65,6 +65,7 @@
     <string name="away_now">Away now</string>
     <string name="still_on_home_wifi">Still on home WiFi</string>
     <string name="back_on_home_wifi">Back on home WiFi</string>
+    <string name="back_at_home_wifi">Back at home WiFi</string>
 
     <string name="nest_transition_notification_title">
         Nest set to %1$s
