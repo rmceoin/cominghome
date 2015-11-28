@@ -23,27 +23,39 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.location.Location;
+import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
+
+import net.mceoin.cominghome.LocationUtils;
+import net.mceoin.cominghome.MainActivity;
 import net.mceoin.cominghome.PrefsFragment;
 import net.mceoin.cominghome.R;
 import net.mceoin.cominghome.geofence.FenceHandling;
+import net.mceoin.cominghome.geofence.SimpleGeofence;
+import net.mceoin.cominghome.geofence.SimpleGeofenceStore;
 import net.mceoin.cominghome.geofence.WiFiUtils;
 import net.mceoin.cominghome.history.HistoryUpdate;
 
 /**
  * Delay for 15 minutes before contacting the backend to set away status.
  */
-public class DelayAwayService extends Service {
+public class DelayAwayService extends Service implements GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener {
     private static final String TAG = "DelayAwayService";
     private static final boolean debug = true;
 
     private static long timeRemaining = 0;
     private static boolean sawHomeWiFi = false;
+    private static boolean sawHomeLocation = false;
     SharedPreferences mPreferences;
     private CountDownTimer t;
     private BroadcastReceiver mIntentReceiver;
@@ -51,6 +63,11 @@ public class DelayAwayService extends Service {
     public static final String ACTION_START_TIMER = "net.mceoin.cominghome.action.START_TIMER";
     public static final String ACTION_CANCEL_TIMER = "net.mceoin.cominghome.action.CANCEL_TIMER";
     public static final String ACTION_AWAY = "net.mceoin.cominghome.action.AWAY";
+
+    /**
+     * Provides the entry point to Google Play services.
+     */
+    protected GoogleApiClient mGoogleApiClient;
 
     @Override
     public void onCreate() {
@@ -79,6 +96,8 @@ public class DelayAwayService extends Service {
         registerReceiver(mIntentReceiver, filter);
 
         mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        buildGoogleApiClient();
     }
 
     /**
@@ -99,6 +118,9 @@ public class DelayAwayService extends Service {
         if (debug) {
             Log.d(TAG, "Received start id " + startId + ": " + intent + ": " + this);
         }
+        sawHomeWiFi = false;
+        sawHomeLocation = false;
+        mGoogleApiClient.connect();
         startTimer();
         // We want this service to continue running until it is explicitly
         // stopped, so return sticky.
@@ -182,6 +204,18 @@ public class DelayAwayService extends Service {
                         intent.setAction(DelayAwayService.ACTION_CANCEL_TIMER);
                         getApplicationContext().sendBroadcast(intent);
 
+                    } else if (atHome()) {
+                        sawHomeLocation = true;
+                        if (debug) {
+                            Log.d(TAG, "we're at home!");
+                        }
+                        DelayAwayNotification.clearNotification(getApplicationContext());
+                        HistoryUpdate.add(getApplicationContext(), getString(R.string.still_at_home_location));
+
+                        Intent intent = new Intent();
+                        intent.setAction(DelayAwayService.ACTION_CANCEL_TIMER);
+                        getApplicationContext().sendBroadcast(intent);
+
                     } else {
                         DelayAwayNotification.updateProgress(
                                 getApplicationContext(),
@@ -203,7 +237,11 @@ public class DelayAwayService extends Service {
                     sawHomeWiFi = true;
                     HistoryUpdate.add(getApplicationContext(), getString(R.string.back_at_home_wifi));
                 }
-                if (sawHomeWiFi) {
+                if (!sawHomeLocation && atHome()) {
+                    sawHomeLocation = true;
+                    HistoryUpdate.add(getApplicationContext(), getString(R.string.still_at_home_location));
+                }
+                if (sawHomeWiFi || sawHomeLocation) {
                     DelayAwayNotification.clearNotification(getApplicationContext());
                     cancelTimer();
                 } else {
@@ -217,5 +255,79 @@ public class DelayAwayService extends Service {
         if (debug) {
             Log.d(TAG, "Timer started with: " + timeoutUntilStop);
         }
+    }
+
+    /**
+     * Check geolocation to see if within home radius
+     *
+     * @return true if at home
+     */
+    private boolean atHome() {
+        Location mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        if (mCurrentLocation == null) {
+            return false;
+        }
+        if (debug) Log.d(TAG, mCurrentLocation.toString());
+        double latitude = mCurrentLocation.getLatitude();
+        double longitude = mCurrentLocation.getLongitude();
+
+        SimpleGeofenceStore mGeofenceStorage;
+        mGeofenceStorage = new SimpleGeofenceStore(getApplicationContext());
+        SimpleGeofence geofence = mGeofenceStorage.getGeofence(MainActivity.FENCE_HOME);
+
+        float distFromHome = LocationUtils.distFrom(latitude, longitude, geofence.getLatitude(),
+                geofence.getLongitude());
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        int fenceRadius = prefs.getInt(PrefsFragment.PREFERENCE_GEOFENCE_RADIUS,
+                getResources().getInteger(R.integer.geofence_radius_default));
+
+        if (debug) Log.d(TAG, "distFromHome=" + distFromHome);
+        return distFromHome < fenceRadius;
+    }
+
+    /**
+     * Builds a GoogleApiClient. Uses the addApi() method to request the LocationServices API.
+     */
+    protected synchronized void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        if (debug) {
+            Log.d(TAG, "onConnected()");
+        }
+
+        if (!sawHomeLocation && atHome()) {
+            sawHomeLocation = true;
+            DelayAwayNotification.clearNotification(getApplicationContext());
+            HistoryUpdate.add(getApplicationContext(), getString(R.string.still_at_home_location));
+            if (t != null) {
+                t.cancel();
+            }
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        if (debug) {
+            Log.d(TAG, "onConnectionSuspended()");
+        }
+        if (t != null) {
+            mGoogleApiClient.connect();
+        }
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        if (debug) {
+            Log.d(TAG, "onConnectionFailed()");
+        }
+
     }
 }
