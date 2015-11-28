@@ -51,8 +51,9 @@ import net.mceoin.cominghome.history.HistoryUpdate;
 public class DelayAwayService extends Service implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
     private static final String TAG = "DelayAwayService";
-    private static final boolean debug = true;
+    private static final boolean debug = false;
 
+    private static boolean inDelay = false;
     private static long timeRemaining = 0;
     private static boolean sawHomeWiFi = false;
     private static boolean sawHomeLocation = false;
@@ -107,10 +108,12 @@ public class DelayAwayService extends Service implements GoogleApiClient.Connect
         if (debug) {
             Log.d(TAG, "cancelTimer");
         }
+        inDelay = false;
         DelayAwayNotification.clearNotification(DelayAwayService.this);
         if (t != null) {
             t.cancel();
         }
+        mGoogleApiClient.disconnect();
     }
 
     @Override
@@ -118,6 +121,7 @@ public class DelayAwayService extends Service implements GoogleApiClient.Connect
         if (debug) {
             Log.d(TAG, "Received start id " + startId + ": " + intent + ": " + this);
         }
+        inDelay = true;
         sawHomeWiFi = false;
         sawHomeLocation = false;
         mGoogleApiClient.connect();
@@ -303,13 +307,10 @@ public class DelayAwayService extends Service implements GoogleApiClient.Connect
             Log.d(TAG, "onConnected()");
         }
 
-        if (!sawHomeLocation && atHome()) {
+        if (inDelay && !sawHomeLocation && atHome()) {
             sawHomeLocation = true;
-            DelayAwayNotification.clearNotification(getApplicationContext());
             HistoryUpdate.add(getApplicationContext(), getString(R.string.still_at_home_location));
-            if (t != null) {
-                t.cancel();
-            }
+            cancelTimer();
         }
     }
 
