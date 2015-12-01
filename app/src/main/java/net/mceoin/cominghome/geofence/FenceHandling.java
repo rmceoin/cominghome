@@ -28,7 +28,6 @@ import android.util.Log;
 import com.google.android.gms.location.Geofence;
 
 import net.mceoin.cominghome.MainActivity;
-import net.mceoin.cominghome.R;
 import net.mceoin.cominghome.cloud.StatusArrivedHome;
 import net.mceoin.cominghome.cloud.StatusLeftHome;
 import net.mceoin.cominghome.history.HistoryUpdate;
@@ -116,12 +115,6 @@ public class FenceHandling {
 
         cancelIfNotFinished(statusArrivedHome);
         cancelIfNotFinished(statusLeftHome);
-
-        if (WiFiUtils.isCurrentSsidSameAsStored(context)) {
-            if (debug) Log.d(TAG, "we're associated with home SSID, aborting");
-            HistoryUpdate.add(context, context.getString(R.string.still_on_home_wifi));
-            return;
-        }
 
         prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String structure_id = prefs.getString(MainActivity.PREFS_STRUCTURE_ID, "");

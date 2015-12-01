@@ -51,9 +51,9 @@ import net.mceoin.cominghome.history.HistoryUpdate;
 public class DelayAwayService extends Service implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
     private static final String TAG = "DelayAwayService";
-    private static final boolean debug = false;
+    private static final boolean debug = true;
 
-    private static boolean inDelay = false;
+    private static int tickCount;
     private static long timeRemaining = 0;
     private static boolean sawHomeWiFi = false;
     private static boolean sawHomeLocation = false;
@@ -108,7 +108,6 @@ public class DelayAwayService extends Service implements GoogleApiClient.Connect
         if (debug) {
             Log.d(TAG, "cancelTimer");
         }
-        inDelay = false;
         DelayAwayNotification.clearNotification(DelayAwayService.this);
         if (t != null) {
             t.cancel();
@@ -121,7 +120,7 @@ public class DelayAwayService extends Service implements GoogleApiClient.Connect
         if (debug) {
             Log.d(TAG, "Received start id " + startId + ": " + intent + ": " + this);
         }
-        inDelay = true;
+        tickCount = 0;
         sawHomeWiFi = false;
         sawHomeLocation = false;
         mGoogleApiClient.connect();
@@ -165,7 +164,6 @@ public class DelayAwayService extends Service implements GoogleApiClient.Connect
      * in order to update the progress bar in the notification.
      */
     private void startTimer() {
-        DelayAwayNotification.startNotification(DelayAwayService.this);
         int timeoutMinutes = mPreferences.getInt(
                 PrefsFragment.PREFERENCE_AWAY_DELAY,
                 getResources().getInteger(R.integer.away_delay_default)
@@ -188,10 +186,27 @@ public class DelayAwayService extends Service implements GoogleApiClient.Connect
                 if (debug) {
                     Log.d(TAG, "tick: " + millisUntilFinished + " this=" + this);
                 }
+                tickCount++;
                 timeRemaining = millisUntilFinished;
                 int timeElapsed = (int) (timeoutUntilStop - timeRemaining);
 
-                if (!sawHomeWiFi) {
+                if (tickCount == 1) {
+                    //
+                    // kill time for the first 30 seconds after a geofence away trigger
+                    //
+                    return;
+                }
+                if (tickCount == 2) {
+                    //
+                    // let the user know we're watching for the next 30 seconds
+                    //
+                    DelayAwayNotification.startNotification(DelayAwayService.this);
+                    return;
+                }
+                //
+                // 60 seconds should have elapsed by now, so start checking WiFi and location
+                //
+                if (!sawHomeWiFi && !sawHomeLocation) {
                     if (WiFiUtils.isCurrentSsidSameAsStored(getApplicationContext())) {
                         //
                         // we have not seen the home wifi yet, but we do now
@@ -305,12 +320,6 @@ public class DelayAwayService extends Service implements GoogleApiClient.Connect
     public void onConnected(Bundle bundle) {
         if (debug) {
             Log.d(TAG, "onConnected()");
-        }
-
-        if (inDelay && !sawHomeLocation && atHome()) {
-            sawHomeLocation = true;
-            HistoryUpdate.add(getApplicationContext(), getString(R.string.still_at_home_location));
-            cancelTimer();
         }
     }
 
