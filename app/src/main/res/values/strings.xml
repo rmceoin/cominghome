@@ -22,7 +22,7 @@
     </string>
     <string name="geofence_transition_exited">Exited</string>
     <string name="geofence_transition_invalid_type">
-        Geofence transition error. Invalid type %1$d in geofences %2$s
+        Geofence transition error. Invalid type %1$d in geofences
     </string>
     <string name="geofence_transition_notification_text">
         Click notification to return to app
