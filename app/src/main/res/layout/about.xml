@@ -48,4 +48,12 @@
         android:textSize="16sp"
         tools:text="1.x.x" />
 
+    <TextView
+        android:id="@+id/about_installation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="16sp"
+        tools:text="123456a8-cf3d-123e-b2f4-6fb9b1234567" />
+
 </LinearLayout>

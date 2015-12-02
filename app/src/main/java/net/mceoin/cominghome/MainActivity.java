@@ -819,6 +819,8 @@ public class MainActivity extends AppCompatActivity implements
         }
         TextView versionView = (TextView) messageView.findViewById(R.id.about_version);
         versionView.setText(version);
+        TextView installationView = (TextView) messageView.findViewById(R.id.about_installation);
+        installationView.setText(Installation.id(this));
 
         // When linking text, force to always use default color. This works
         // around a pressed color state bug.
