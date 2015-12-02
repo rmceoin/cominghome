@@ -19,6 +19,7 @@ package net.mceoin.cominghome.geofence;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.Location;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -34,6 +35,7 @@ import net.mceoin.cominghome.history.HistoryUpdate;
 import net.mceoin.cominghome.oauth.OAuthFlowApp;
 import net.mceoin.cominghome.service.DelayAwayService;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
 /**
@@ -48,7 +50,8 @@ public class FenceHandling {
     private static AsyncTask statusArrivedHome = null;
     private static AsyncTask statusLeftHome = null;
 
-    public static void process(int transition, List<Geofence> geofences, @NonNull Context context) {
+    public static void process(int transition, List<Geofence> geofences,
+                               Location triggeringLocation, @NonNull Context context) {
         String fenceEnterId = MainActivity.FENCE_HOME;
         String fenceExitId = fenceEnterId + "-Exit";
 
@@ -57,11 +60,13 @@ public class FenceHandling {
                     geofence.getRequestId().equals(fenceExitId)) {
                 switch (transition) {
                     case Geofence.GEOFENCE_TRANSITION_ENTER:
-                        HistoryUpdate.add(context, "Geofence arrived home");
+                        HistoryUpdate.add(context, "Geofence arrived home " +
+                                locationToLatLon(triggeringLocation));
                         arrivedHome(context);
                         break;
                     case Geofence.GEOFENCE_TRANSITION_EXIT:
-                        HistoryUpdate.add(context, "Geofence left home");
+                        HistoryUpdate.add(context, "Geofence left home " +
+                                locationToLatLon(triggeringLocation));
                         leftHome(context);
                         break;
                     default:
@@ -72,6 +77,13 @@ public class FenceHandling {
 
     }
 
+    public static String locationToLatLon(Location location) {
+        if (location == null) {
+            return "";
+        }
+        DecimalFormat df = new DecimalFormat("##.#######");
+        return df.format(location.getLatitude()) + "," + df.format(location.getLongitude());
+    }
     /**
      * If there is a known structure_id, then contact the backend to set home status.
      * <p/>

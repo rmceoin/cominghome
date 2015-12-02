@@ -88,7 +88,8 @@ public class GeofenceTransitionsIntentService extends IntentService {
             );
 
             if (debug) Log.d(TAG, geofenceTransitionDetails);
-            FenceHandling.process(geofenceTransition, triggeringGeofences, getApplicationContext());
+            FenceHandling.process(geofenceTransition, triggeringGeofences,
+                    geofencingEvent.getTriggeringLocation(), getApplicationContext());
 
         } else {
             // Log the error.
