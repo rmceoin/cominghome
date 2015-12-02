@@ -190,21 +190,20 @@ public class DelayAwayService extends Service implements GoogleApiClient.Connect
                 timeRemaining = millisUntilFinished;
                 int timeElapsed = (int) (timeoutUntilStop - timeRemaining);
 
-                if (tickCount == 1) {
+                if (tickCount == 4) {
                     //
-                    // kill time for the first 30 seconds after a geofence away trigger
-                    //
-                    return;
-                }
-                if (tickCount == 2) {
-                    //
-                    // let the user know we're watching for the next 30 seconds
+                    // let the user know we're watching after 120 seconds
                     //
                     DelayAwayNotification.startNotification(DelayAwayService.this);
+                }
+                if (tickCount < 5) {
+                    //
+                    // kill time for the first 120 seconds after a geofence away trigger
+                    //
                     return;
                 }
                 //
-                // 60 seconds should have elapsed by now, so start checking WiFi and location
+                // 2:30 minutes should have elapsed by now, so start checking WiFi and location
                 //
                 if (!sawHomeWiFi && !sawHomeLocation) {
                     if (WiFiUtils.isCurrentSsidSameAsStored(getApplicationContext())) {
