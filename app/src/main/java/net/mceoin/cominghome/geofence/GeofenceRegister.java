@@ -155,7 +155,7 @@ public class GeofenceRegister implements
     public void populateGeofenceList() {
 
         mGeofenceList.clear();
-        final int NOTIFICATION_RESPONSIVENESS = 30 * 1000;  // 30 seconds
+        final int NOTIFICATION_RESPONSIVENESS = 60 * 1000;  // 60 seconds
 
         SimpleGeofence homeGeofence = mGeofenceStorage.getGeofence(MainActivity.FENCE_HOME);
         if (homeGeofence != null) {
