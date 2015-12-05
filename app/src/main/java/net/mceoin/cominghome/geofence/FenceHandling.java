@@ -123,7 +123,10 @@ public class FenceHandling {
      * @see DelayAwayService
      */
     public static void leftHome(@NonNull Context context) {
-        if (debug) Log.d(TAG, "left home");
+        if (debug) {
+            Log.d(TAG, "left home");
+            HistoryUpdate.add(context, "leftHome()");
+        }
 
         cancelIfNotFinished(statusArrivedHome);
         cancelIfNotFinished(statusLeftHome);
