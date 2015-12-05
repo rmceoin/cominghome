@@ -58,7 +58,7 @@ public class DelayAwayService extends Service implements GoogleApiClient.Connect
     private static boolean sawHomeWiFi = false;
     private static boolean sawHomeLocation = false;
     SharedPreferences mPreferences;
-    private CountDownTimer t;
+    private CountDownTimer countDownTimer;
     private BroadcastReceiver mIntentReceiver;
 
     public static final String ACTION_START_TIMER = "net.mceoin.cominghome.action.START_TIMER";
@@ -111,8 +111,8 @@ public class DelayAwayService extends Service implements GoogleApiClient.Connect
             HistoryUpdate.add(getApplicationContext(), "cancelTimer()");
         }
         DelayAwayNotification.clearNotification(DelayAwayService.this);
-        if (t != null) {
-            t.cancel();
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
         }
         mGoogleApiClient.disconnect();
     }
@@ -178,12 +178,12 @@ public class DelayAwayService extends Service implements GoogleApiClient.Connect
             HistoryUpdate.add(getApplicationContext(), "startTimer()");
         }
 
-        if (t != null) {
+        if (countDownTimer != null) {
             // if there was a previous timer, make sure it's cancelled
-            t.cancel();
+            countDownTimer.cancel();
         }
 
-        t = new CountDownTimer(timeoutUntilStop, 30000) {
+        countDownTimer = new CountDownTimer(timeoutUntilStop, 30000) {
 
             public void onTick(long millisUntilFinished) {
                 // at each interval tick update the notification progress
@@ -272,7 +272,7 @@ public class DelayAwayService extends Service implements GoogleApiClient.Connect
                 timeRemaining = 0;
             }
         };
-        t.start();
+        countDownTimer.start();
         timeRemaining = timeoutUntilStop;
         if (debug) {
             Log.d(TAG, "Timer started with: " + timeoutUntilStop);
@@ -331,7 +331,7 @@ public class DelayAwayService extends Service implements GoogleApiClient.Connect
         if (debug) {
             Log.d(TAG, "onConnectionSuspended()");
         }
-        if (t != null) {
+        if (countDownTimer != null) {
             mGoogleApiClient.connect();
         }
     }
