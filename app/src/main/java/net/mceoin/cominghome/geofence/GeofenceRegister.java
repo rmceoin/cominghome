@@ -155,6 +155,7 @@ public class GeofenceRegister implements
     public void populateGeofenceList() {
 
         mGeofenceList.clear();
+        final int NOTIFICATION_RESPONSIVENESS = 30 * 1000;  // 30 seconds
 
         SimpleGeofence homeGeofence = mGeofenceStorage.getGeofence(MainActivity.FENCE_HOME);
         if (homeGeofence != null) {
@@ -174,6 +175,8 @@ public class GeofenceRegister implements
                             // removed after this period of time.
                     .setExpirationDuration(Geofence.NEVER_EXPIRE)
 
+                    .setNotificationResponsiveness(NOTIFICATION_RESPONSIVENESS)
+
                             // Set the transition types of interest. Alerts are only generated for these
                             // transition. We track entry and exit transitions in this sample.
                     .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER |
@@ -186,7 +189,6 @@ public class GeofenceRegister implements
 
     /**
      * Using the Google API Client, register the geofences
-     *
      */
     public void addGeofences() {
         if (!mGoogleApiClient.isConnected()) {

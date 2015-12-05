@@ -81,6 +81,7 @@ public class DelayAwayService extends Service implements GoogleApiClient.Connect
                     Log.d(TAG, "onReceive");
                 }
                 if (intent.getAction().equals(ACTION_START_TIMER)) {
+                    if (debug) HistoryUpdate.add(context, "onReceive: ACTION_START_TIMER");
                     startTimer();
                 } else if (intent.getAction().equals(ACTION_CANCEL_TIMER)) {
                     cancelTimer();
@@ -107,6 +108,7 @@ public class DelayAwayService extends Service implements GoogleApiClient.Connect
     private void cancelTimer() {
         if (debug) {
             Log.d(TAG, "cancelTimer");
+            HistoryUpdate.add(getApplicationContext(), "cancelTimer()");
         }
         DelayAwayNotification.clearNotification(DelayAwayService.this);
         if (t != null) {
@@ -119,6 +121,7 @@ public class DelayAwayService extends Service implements GoogleApiClient.Connect
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (debug) {
             Log.d(TAG, "Received start id " + startId + ": " + intent + ": " + this);
+            HistoryUpdate.add(getApplicationContext(), "onStartCommand()");
         }
         tickCount = 0;
         sawHomeWiFi = false;
@@ -172,6 +175,7 @@ public class DelayAwayService extends Service implements GoogleApiClient.Connect
 
         if (debug) {
             Log.d(TAG, "startTimer with timeoutUntilStop=" + timeoutUntilStop);
+            HistoryUpdate.add(getApplicationContext(), "startTimer()");
         }
 
         if (t != null) {
