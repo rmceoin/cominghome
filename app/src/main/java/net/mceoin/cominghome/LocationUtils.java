@@ -15,6 +15,13 @@
  */
 package net.mceoin.cominghome;
 
+import android.content.Context;
+import android.location.Location;
+import android.support.annotation.NonNull;
+
+import net.mceoin.cominghome.geofence.SimpleGeofence;
+import net.mceoin.cominghome.geofence.SimpleGeofenceStore;
+
 public class LocationUtils {
 
     /**
@@ -41,11 +48,26 @@ public class LocationUtils {
         return (float) (dist * meterConversion);
     }
 
-/*
-    public static float distFrom(Location location1, Location location2) {
-        return distFrom(location1.getLatitude(), location1.getLongitude(),
-                location2.getLatitude(), location2.getLongitude());
-    }
-*/
+    /**
+     * Calculate the distance from home in meters.
+     *
+     * @param context  Application context
+     * @param location Location to compare to home location
+     * @return Distance in meters
+     */
+    public static float distFromHome(@NonNull Context context, @NonNull Location location) {
+        double latitude = location.getLatitude();
+        double longitude = location.getLongitude();
 
+        SimpleGeofenceStore mGeofenceStorage;
+        mGeofenceStorage = new SimpleGeofenceStore(context);
+        SimpleGeofence geofence = mGeofenceStorage.getGeofence(MainActivity.FENCE_HOME);
+
+        if (geofence == null) {
+            return -1;
+        }
+
+        return LocationUtils.distFrom(latitude, longitude, geofence.getLatitude(),
+                geofence.getLongitude());
+    }
 }
