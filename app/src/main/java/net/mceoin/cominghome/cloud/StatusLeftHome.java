@@ -66,6 +66,9 @@ public class StatusLeftHome extends AsyncTask<Void, Void, StatusBean> {
         InstallationId = Installation.id(context);
         tell_nest = prefs.getBoolean(PrefsFragment.key_tell_nest_on_leaving_home, true);
         regid = prefs.getString(GcmRegister.PROPERTY_REG_ID, GcmRegister.PROPERTY_REG_ID_NONE);
+        if (debug) {
+            HistoryUpdate.add(context, "StatusLeftHome");
+        }
     }
 
     @Override
