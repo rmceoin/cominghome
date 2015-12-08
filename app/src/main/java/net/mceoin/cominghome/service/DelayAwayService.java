@@ -53,6 +53,7 @@ public class DelayAwayService extends Service implements GoogleApiClient.Connect
     private static final String TAG = "DelayAwayService";
     private static final boolean debug = true;
 
+    private int ourStartId;
     private static int tickCount;
     private static long timeRemaining = 0;
     private static boolean sawHomeWiFi = false;
@@ -84,7 +85,8 @@ public class DelayAwayService extends Service implements GoogleApiClient.Connect
                     if (debug) HistoryUpdate.add(context, "onReceive: ACTION_START_TIMER");
                     startTimer();
                 } else if (intent.getAction().equals(ACTION_CANCEL_TIMER)) {
-                    cancelTimer();
+                    if (debug) HistoryUpdate.add(context, "onReceive: ACTION_CANCEL_TIMER");
+                    cancelTimer(false);
                 } else if (intent.getAction().equals(ACTION_AWAY)) {
                     triggerBackendAway(context);
                 }
@@ -104,8 +106,10 @@ public class DelayAwayService extends Service implements GoogleApiClient.Connect
 
     /**
      * Clear the progress notification and cancel the {@link CountDownTimer}.
+     *
+     * @param inDestroy Is this being called from {@link #onDestroy()}
      */
-    private void cancelTimer() {
+    private void cancelTimer(boolean inDestroy) {
         if (debug) {
             Log.d(TAG, "cancelTimer");
             HistoryUpdate.add(getApplicationContext(), "cancelTimer()");
@@ -115,6 +119,14 @@ public class DelayAwayService extends Service implements GoogleApiClient.Connect
             countDownTimer.cancel();
         }
         mGoogleApiClient.disconnect();
+        if (!inDestroy) {
+            if (!stopSelfResult(ourStartId)) {
+                Log.i(TAG, "cancelTimer: tried to stopSelf but not current startId");
+                if (debug) {
+                    HistoryUpdate.add(getApplicationContext(), "cancelTimer: tried to stopSelf but not current startId");
+                }
+            }
+        }
     }
 
     @Override
@@ -123,6 +135,7 @@ public class DelayAwayService extends Service implements GoogleApiClient.Connect
             Log.d(TAG, "Received start id " + startId + ": " + intent + ": " + this);
             HistoryUpdate.add(getApplicationContext(), "onStartCommand()");
         }
+        ourStartId = startId;
         tickCount = 0;
         sawHomeWiFi = false;
         sawHomeLocation = false;
@@ -139,7 +152,7 @@ public class DelayAwayService extends Service implements GoogleApiClient.Connect
             Log.d(TAG, "onDestroy");
         }
         unregisterReceiver(mIntentReceiver);
-        cancelTimer();
+        cancelTimer(true);
     }
 
     @Override
@@ -149,14 +162,14 @@ public class DelayAwayService extends Service implements GoogleApiClient.Connect
 
     /**
      * <p>Tell the backend that we're now away.</p>
-     * Cancel the timer with {@link #cancelTimer()}, and execute
+     * Cancel the timer with {@link #cancelTimer(boolean)}, and execute
      * Google Cloud Endpoint StatusLeftHome.
      */
     private void triggerBackendAway(@NonNull Context context) {
         if (debug) {
             Log.d(TAG, "triggerBackendAway");
         }
-        cancelTimer();
+        cancelTimer(false);
         FenceHandling.executeLeftHome(context);
     }
 
@@ -265,7 +278,7 @@ public class DelayAwayService extends Service implements GoogleApiClient.Connect
                 }
                 if (sawHomeWiFi || sawHomeLocation) {
                     DelayAwayNotification.clearNotification(getApplicationContext());
-                    cancelTimer();
+                    cancelTimer(false);
                 } else {
                     triggerBackendAway(getApplicationContext());
                 }
