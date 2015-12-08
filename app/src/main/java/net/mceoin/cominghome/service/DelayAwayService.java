@@ -51,7 +51,7 @@ import net.mceoin.cominghome.history.HistoryUpdate;
 public class DelayAwayService extends Service implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
     private static final String TAG = "DelayAwayService";
-    private static final boolean debug = true;
+    private static final boolean debug = false;
 
     private int ourStartId;
     private static int tickCount;
