@@ -28,6 +28,7 @@ import android.util.Log;
 
 import com.google.android.gms.location.Geofence;
 
+import net.mceoin.cominghome.LocationUtils;
 import net.mceoin.cominghome.MainActivity;
 import net.mceoin.cominghome.cloud.StatusArrivedHome;
 import net.mceoin.cominghome.cloud.StatusLeftHome;
@@ -58,15 +59,18 @@ public class FenceHandling {
         for (Geofence geofence : geofences) {
             if (geofence.getRequestId().equals(fenceEnterId) ||
                     geofence.getRequestId().equals(fenceExitId)) {
+                int distance = (int) LocationUtils.distFromHome(context, triggeringLocation);
                 switch (transition) {
                     case Geofence.GEOFENCE_TRANSITION_ENTER:
                         HistoryUpdate.add(context, "Geofence arrived home " +
-                                locationToLatLon(triggeringLocation));
+                                locationToLatLon(triggeringLocation) + " (" +
+                                distance + ")");
                         arrivedHome(context);
                         break;
                     case Geofence.GEOFENCE_TRANSITION_EXIT:
                         HistoryUpdate.add(context, "Geofence left home " +
-                                locationToLatLon(triggeringLocation));
+                                locationToLatLon(triggeringLocation) + " (" +
+                                distance + ")");
                         leftHome(context);
                         break;
                     default:
