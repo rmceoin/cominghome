@@ -67,7 +67,7 @@ public class StatusLeftHome extends AsyncTask<Void, Void, StatusBean> {
         tell_nest = prefs.getBoolean(PrefsFragment.key_tell_nest_on_leaving_home, true);
         regid = prefs.getString(GcmRegister.PROPERTY_REG_ID, GcmRegister.PROPERTY_REG_ID_NONE);
         if (debug) {
-            HistoryUpdate.add(context, "StatusLeftHome");
+            HistoryUpdate.add(context, "StatusLeftHome " + android.os.Process.getThreadPriority(android.os.Process.myTid()));
         }
     }
 
@@ -102,6 +102,9 @@ public class StatusLeftHome extends AsyncTask<Void, Void, StatusBean> {
                     HistoryUpdate.add(context, context.getString(R.string.back_on_home_wifi));
                     return null;
                 }
+                if (debug) {
+                    HistoryUpdate.add(context, "Calling API leftHome() " + android.os.Process.getThreadPriority(android.os.Process.myTid()));
+                }
                 return myApiService.leftHome(InstallationId, access_token, structure_id, tell_nest, false, "-", regid).execute();
             } catch (IOException e) {
                 Log.w(TAG, "IOException: " + e.getLocalizedMessage());
@@ -114,8 +117,10 @@ public class StatusLeftHome extends AsyncTask<Void, Void, StatusBean> {
                 int seconds = (retry * 90) + randomGenerator.nextInt(15);
                 int maxSeconds = 15 * 60;
                 if (seconds > maxSeconds) seconds = maxSeconds;
-                if (debug) Log.d(TAG,
-                        "retry in " + seconds + " seconds");
+                if (debug) {
+                    Log.d(TAG, "retry in " + seconds + " seconds");
+                    HistoryUpdate.add(context, "sleeping " + seconds + " seconds");
+                }
                 Thread.sleep(seconds * 1000);
             } catch (InterruptedException e) {
                 if (debug) Log.d(TAG, "interrupted");
@@ -130,10 +135,14 @@ public class StatusLeftHome extends AsyncTask<Void, Void, StatusBean> {
 
     @Override
     protected void onPostExecute(@Nullable StatusBean result) {
+        if (debug) {
+            HistoryUpdate.add(context, "StatusLeftHome: onPostExecute()");
+        }
         if (debug && (result != null)) Log.d(TAG, "got result: " + result.getMessage());
 
         if ((result == null) && isCancelled()) {
             if (debug) Log.d(TAG, "onPostExecute: was cancelled");
+            HistoryUpdate.add(context, "onPostExecute: was cancelled");
             return;
         }
 
