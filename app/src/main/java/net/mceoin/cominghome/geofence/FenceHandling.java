@@ -140,6 +140,7 @@ public class FenceHandling {
 
         if (!structure_id.isEmpty()) {
             Intent myIntent = new Intent(context, DelayAwayService.class);
+            myIntent.putExtra(DelayAwayService.ACTION_START_TIMER, true);
             context.startService(myIntent);
         } else {
             Log.e(TAG, "missing structure_id");
