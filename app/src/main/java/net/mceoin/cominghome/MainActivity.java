@@ -314,6 +314,10 @@ public class MainActivity extends AppCompatActivity implements
 
         if (debug) Log.d(TAG, "map is ready");
 
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // onResume() will handle the permissions check
+            return;
+        }
         map.setMyLocationEnabled(true);
         map.getUiSettings().setZoomControlsEnabled(true);
 
@@ -341,7 +345,7 @@ public class MainActivity extends AppCompatActivity implements
     final static int RADIUS_MAX = 10000;
 
     private void modifyGeofenceRadius(int delta) {
-        if ((map==null) || (homeGeofence==null)) {
+        if ((map == null) || (homeGeofence == null)) {
             return;
         }
         fenceRadius = augmentRadius(fenceRadius, delta);
@@ -351,7 +355,7 @@ public class MainActivity extends AppCompatActivity implements
         } else {
             fenceRadiusExit = augmentRadius(fenceRadiusExit, delta);
         }
-        saveRadius((int)fenceRadius, (int)fenceRadiusExit);
+        saveRadius((int) fenceRadius, (int) fenceRadiusExit);
         loadFences();
     }
 
@@ -359,7 +363,7 @@ public class MainActivity extends AppCompatActivity implements
      * Increment or decrement a radius value by a percentage, while ensuring that the new
      * value does not go below a minimum or above a maximum.
      *
-     * @param radius original radius
+     * @param radius     original radius
      * @param percentage to increment or decrement
      * @return new radius value
      */
@@ -457,8 +461,8 @@ public class MainActivity extends AppCompatActivity implements
      *
      * @param keepOldFence if true, keep fence where it's at.  Otherwise get the current
      *                     longitude and latitude and update the fence location.
-     * @param confirmed indicates that the user confirmed the update away from where current
-     *                  home location is set to
+     * @param confirmed    indicates that the user confirmed the update away from where current
+     *                     home location is set to
      */
     private void updateHome(boolean keepOldFence, boolean confirmed) {
         if (!keepOldFence) {
@@ -495,13 +499,12 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     /**
-     *
-     * @param geofenceId A string that identifies which geofence to manipulate.  For our purposes
-     *                   it is always "home".
+     * @param geofenceId     A string that identifies which geofence to manipulate.  For our purposes
+     *                       it is always "home".
      * @param keepOldLatLong If true, just keep the existing position.  Otherwise use
      *                       LocationServices to get current latitude and longitude.
-     * @param confirmed If true and the updated location is greater than 200 meters away,
-     *                  confirm with user before actually updating.
+     * @param confirmed      If true and the updated location is greater than 200 meters away,
+     *                       confirm with user before actually updating.
      * @return Either null if no update or the SimpleGeofence of the updated location.
      */
     private SimpleGeofence updateGeofenceLocation(String geofenceId, boolean keepOldLatLong,
@@ -519,6 +522,10 @@ public class MainActivity extends AppCompatActivity implements
             longitude = oldFence.getLongitude();
         } else {
             if ((!mGoogleApiClient.isConnected())) {
+                return null;
+            }
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // onResume() handles requestion permission as needed
                 return null;
             }
             mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
@@ -625,7 +632,7 @@ public class MainActivity extends AppCompatActivity implements
      * If we have the map and homeGeofence, then call updateMarker.
      */
     private void updateHomeMarker() {
-        if ((map==null) || (homeGeofence==null)) {
+        if ((map == null) || (homeGeofence == null)) {
             return;
         }
         updateMarker(homeGeofence.getLatitude(), homeGeofence.getLongitude(), FENCE_HOME, false);
@@ -691,7 +698,6 @@ public class MainActivity extends AppCompatActivity implements
 
     /**
      * Use Google services to setup geofences.
-     *
      */
     private void updateGeofences() {
 
@@ -1011,6 +1017,10 @@ public class MainActivity extends AppCompatActivity implements
             if (debug) Log.d(TAG, "cameraPosition lat=" + cameraPosition.target.latitude +
                     " long=" + cameraPosition.target.longitude + " distFrom0=" + distFrom0);
             if (distFrom0 < 10000) {
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    // onResume() will handle requesting permission
+                    return;
+                }
                 mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
                 if (mCurrentLocation == null) {
                     return;
