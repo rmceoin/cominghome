@@ -18,7 +18,6 @@ package net.mceoin.cominghome;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -38,7 +37,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
@@ -56,7 +54,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.LocationServices;
@@ -175,29 +173,6 @@ public class MainActivity extends AppCompatActivity implements
     private GeofenceRegister mGeofenceRegister;
 
     private Toolbar toolbar;
-
-    public static class ErrorDialogFragment extends DialogFragment {
-        // Global field to contain the error dialog
-        private Dialog mDialog;
-
-        // Default constructor. Sets the dialog field to null
-        public ErrorDialogFragment() {
-            super();
-            mDialog = null;
-        }
-
-        // Set the dialog to display
-        public void setDialog(Dialog dialog) {
-            mDialog = dialog;
-        }
-
-        // Return a Dialog to the DialogFragment.
-        @Override
-        @NonNull
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            return mDialog;
-        }
-    }
 
     /**
      * Called when the activity is starting. Restores the activity state.
@@ -1054,12 +1029,13 @@ public class MainActivity extends AppCompatActivity implements
      * available.
      */
     @Override
-    public void onConnectionFailed(ConnectionResult result) {
+    public void onConnectionFailed(@NonNull ConnectionResult result) {
         Log.i(TAG, "GoogleApiClient connection failed: " + result.toString());
         if (!result.hasResolution()) {
             // Show a localized error dialog.
-            GooglePlayServicesUtil.getErrorDialog(
-                    result.getErrorCode(), this, 0, new OnCancelListener() {
+            GoogleApiAvailability api = GoogleApiAvailability.getInstance();
+            api.getErrorDialog(
+                    this, result.getErrorCode(), 0, new OnCancelListener() {
                         @Override
                         public void onCancel(DialogInterface dialog) {
                             retryConnecting();
@@ -1091,8 +1067,8 @@ public class MainActivity extends AppCompatActivity implements
     private boolean playServicesConnected() {
 
         // Check that Google Play services is available
-        int resultCode =
-                GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        GoogleApiAvailability api = GoogleApiAvailability.getInstance();
+        int resultCode = api.isGooglePlayServicesAvailable(this);
 
         // If Google Play services is available
         if (ConnectionResult.SUCCESS == resultCode) {
@@ -1105,7 +1081,7 @@ public class MainActivity extends AppCompatActivity implements
                     e.printStackTrace();
                 }
                 Log.d(TAG, "Google Play services available: client " +
-                        GooglePlayServicesUtil.GOOGLE_PLAY_SERVICES_VERSION_CODE + " package " + v);
+                        GoogleApiAvailability.GOOGLE_PLAY_SERVICES_VERSION_CODE + " package " + v);
             }
             return true;
 
@@ -1113,11 +1089,9 @@ public class MainActivity extends AppCompatActivity implements
         } else {
 
             // Display an error dialog
-            Dialog dialog = GooglePlayServicesUtil.getErrorDialog(resultCode, this, 0);
-            if (dialog != null) {
-                ErrorDialogFragment errorFragment = new ErrorDialogFragment();
-                errorFragment.setDialog(dialog);
-                errorFragment.show(getSupportFragmentManager(), TAG);
+            if (api.isUserResolvableError(resultCode)) {
+                api.getErrorDialog(this, resultCode,
+                        REQUEST_CODE_RESOLUTION).show();
             }
             return false;
         }
