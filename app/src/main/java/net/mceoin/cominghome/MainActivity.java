@@ -801,7 +801,19 @@ public class MainActivity extends AppCompatActivity implements
         TextView versionView = (TextView) messageView.findViewById(R.id.about_version);
         versionView.setText(version);
         TextView installationView = (TextView) messageView.findViewById(R.id.about_installation);
-        installationView.setText(Installation.id(this));
+        String id = Installation.id(this);
+        int lastDash = id.lastIndexOf("-");
+        if (lastDash == -1) {
+            // Didn't find a dash, so don't bother with the id
+            id = "";
+        } else {
+            // lop off the portion of the id after the last dash.
+            // we're displaying a portion of the installation id just to help with
+            // troubleshooting, but don't want folks to accidentally expose the full id
+            // which by itself could be used to forge away/home to the backend.
+            id = id.substring(0, lastDash);
+        }
+        installationView.setText(id);
 
         // When linking text, force to always use default color. This works
         // around a pressed color state bug.
