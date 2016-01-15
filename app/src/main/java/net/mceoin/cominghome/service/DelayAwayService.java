@@ -17,18 +17,22 @@
  */
 package net.mceoin.cominghome.service;
 
+import android.Manifest;
 import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -51,7 +55,7 @@ import net.mceoin.cominghome.history.HistoryUpdate;
 public class DelayAwayService extends Service implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
     private static final String TAG = "DelayAwayService";
-    private static final boolean debug = false;
+    private static final boolean debug = true;
 
     private static int tickCount;
     private static long timeRemaining = 0;
@@ -295,6 +299,9 @@ public class DelayAwayService extends Service implements GoogleApiClient.Connect
      * @return true if at home
      */
     private boolean atHome() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return false;
+        }
         Location mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         if (mCurrentLocation == null) {
             return false;
@@ -347,7 +354,7 @@ public class DelayAwayService extends Service implements GoogleApiClient.Connect
     }
 
     @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         if (debug) {
             Log.d(TAG, "onConnectionFailed()");
         }
