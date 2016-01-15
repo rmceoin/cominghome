@@ -45,7 +45,7 @@ import java.util.List;
 public class FenceHandling {
 
     private static final String TAG = FenceHandling.class.getSimpleName();
-    private static final boolean debug = false;
+    private static final boolean debug = true;
 
     private static SharedPreferences prefs;
     private static AsyncTask statusArrivedHome = null;

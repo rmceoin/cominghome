@@ -47,7 +47,7 @@ import java.util.Random;
  */
 public class StatusLeftHome extends AsyncTask<Void, Void, StatusBean> {
     private static final String TAG = StatusLeftHome.class.getSimpleName();
-    private static final boolean debug = false;
+    private static final boolean debug = true;
 
     private static MyApi myApiService = null;
     private Context context;
@@ -110,8 +110,16 @@ public class StatusLeftHome extends AsyncTask<Void, Void, StatusBean> {
                 Log.w(TAG, "IOException: " + e.getLocalizedMessage());
                 String networkStatus = CloudUtil.getNetworkStatus(context);
                 lastExceptionMessage = e.getLocalizedMessage() + " " + networkStatus;
+                if (debug) {
+                    HistoryUpdate.add(context, "IOException: " + lastExceptionMessage);
+                }
             }
-            if (isCancelled()) return null;
+            if (isCancelled()) {
+                if (debug) {
+                    HistoryUpdate.add(context, "cancelled");
+                }
+                return null;
+            }
             try {
                 Random randomGenerator = new Random();
                 int seconds = (retry * 90) + randomGenerator.nextInt(15);
