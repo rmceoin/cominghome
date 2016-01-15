@@ -78,9 +78,6 @@
             android:enabled="true"
             android:name=".service.DelayAwayService"/>
 
-        <receiver
-            android:name=".geofence.FenceHandlingAlarm"
-            android:process=":remote" />
         <receiver android:name=".BootCompletedReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
