@@ -9,7 +9,7 @@ android {
         minSdkVersion 15
         targetSdkVersion 23
         versionCode 23
-        versionName "1.1.9-beta"
+        versionName "1.1.9-alpha"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
