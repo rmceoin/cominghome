@@ -30,8 +30,9 @@ import com.google.android.gms.location.Geofence;
 
 import net.mceoin.cominghome.LocationUtils;
 import net.mceoin.cominghome.MainActivity;
+import net.mceoin.cominghome.PrefsFragment;
 import net.mceoin.cominghome.cloud.StatusArrivedHome;
-import net.mceoin.cominghome.cloud.StatusLeftHome;
+import net.mceoin.cominghome.gcm.GcmLeftHome;
 import net.mceoin.cominghome.history.HistoryUpdate;
 import net.mceoin.cominghome.oauth.OAuthFlowApp;
 import net.mceoin.cominghome.service.DelayAwayService;
@@ -60,17 +61,21 @@ public class FenceHandling {
             if (geofence.getRequestId().equals(fenceEnterId) ||
                     geofence.getRequestId().equals(fenceExitId)) {
                 int distance = (int) LocationUtils.distFromHome(context, triggeringLocation);
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+                boolean showLocation = prefs.getBoolean(PrefsFragment.PREFERENCE_HISTORY_SHOW_LOCATION, false);
+                String locationString = "";
+                if (showLocation) {
+                    locationString = locationToLatLon(triggeringLocation);
+                }
                 switch (transition) {
                     case Geofence.GEOFENCE_TRANSITION_ENTER:
                         HistoryUpdate.add(context, "Geofence arrived home " +
-                                locationToLatLon(triggeringLocation) + " (" +
-                                distance + ")");
+                                locationString + " (" + distance + ")");
                         arrivedHome(context);
                         break;
                     case Geofence.GEOFENCE_TRANSITION_EXIT:
                         HistoryUpdate.add(context, "Geofence left home " +
-                                locationToLatLon(triggeringLocation) + " (" +
-                                distance + ")");
+                                locationString + " (" + distance + ")");
                         leftHome(context);
                         break;
                     default:
@@ -110,6 +115,7 @@ public class FenceHandling {
             if (!structure_id.isEmpty()) {
                 cancelIfNotFinished(statusArrivedHome);
                 cancelIfNotFinished(statusLeftHome);
+                GcmLeftHome.cancelAllTasks(context);
                 statusArrivedHome = new StatusArrivedHome(context).execute();
             } else {
                 if (debug) Log.d(TAG, "arrived home, but no structure_id");
@@ -149,8 +155,9 @@ public class FenceHandling {
 
     public static void executeLeftHome(@NonNull Context context) {
         cancelIfNotFinished(statusArrivedHome);
-        cancelIfNotFinished(statusLeftHome);
-        statusLeftHome = new StatusLeftHome(context).execute();
+//        cancelIfNotFinished(statusLeftHome);
+//        statusLeftHome = new StatusLeftHome(context).execute();
+        GcmLeftHome.scheduleOneOff(context);
     }
 
     /**

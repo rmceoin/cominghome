@@ -98,6 +98,12 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
+        <service android:exported="true" android:name=".gcm.GcmLeftHome" android:permission="com.google.android.gms.permission.BIND_NETWORK_TASK_SERVICE">
+            <intent-filter>
+                <action android:name="com.google.android.gms.gcm.ACTION_TASK_READY">
+                </action></intent-filter>
+        </service>
+
         <service android:name=".geofence.GeofenceTransitionsIntentService"
             android:exported="false" />
         <meta-data
