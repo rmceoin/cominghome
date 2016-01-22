@@ -20,7 +20,6 @@ package net.mceoin.cominghome.service;
 import android.Manifest;
 import android.app.Service;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -150,6 +149,7 @@ public class DelayAwayService extends Service implements GoogleApiClient.Connect
     @Override
     public void onDestroy() {
         if (debug) {
+            HistoryUpdate.add(getApplicationContext(), "onDestroy()");
             Log.d(TAG, "onDestroy");
         }
         unregisterReceiver(mIntentReceiver);
@@ -162,9 +162,10 @@ public class DelayAwayService extends Service implements GoogleApiClient.Connect
     }
 
     /**
-     * <p>Tell the backend that we're now away.</p>
-     * Cancel the timer with {@link #cancelTimer()}, and execute
-     * Google Cloud Endpoint StatusLeftHome.
+     * Tell the backend that we're now away.
+     * <p/>
+     * Cancel the timer with {@link #cancelTimer()}, and
+     * call {@link FenceHandling#executeLeftHome(Context)}
      */
     private void triggerBackendAway(@NonNull Context context) {
         if (debug) {
@@ -265,6 +266,7 @@ public class DelayAwayService extends Service implements GoogleApiClient.Connect
             public void onFinish() {
                 if (debug) {
                     Log.d(TAG, "onFinish()");
+                    HistoryUpdate.add(getApplicationContext(), "DelayAwayService: onFinish()");
                 }
                 if (!sawHomeWiFi && WiFiUtils.isCurrentSsidSameAsStored(getApplicationContext())) {
                     //
