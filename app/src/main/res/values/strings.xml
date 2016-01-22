@@ -9,6 +9,7 @@
     <string name="name">Name</string>
     <string name="away_status">Away Status</string>
     <string name="at_home">At Home</string>
+    <string name="away">Away</string>
 
     <string name="lost_auth">Lost our Nest authorization</string>
 
