@@ -17,8 +17,8 @@ package net.mceoin.cominghome.gcm;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.google.android.gms.gcm.GcmNetworkManager;
@@ -33,7 +33,6 @@ import net.mceoin.cominghome.Installation;
 import net.mceoin.cominghome.MainActivity;
 import net.mceoin.cominghome.NestUtils;
 import net.mceoin.cominghome.PrefsFragment;
-import net.mceoin.cominghome.R;
 import net.mceoin.cominghome.api.myApi.MyApi;
 import net.mceoin.cominghome.api.myApi.model.StatusBean;
 import net.mceoin.cominghome.cloud.CloudUtil;
@@ -102,18 +101,40 @@ public class GcmLeftHome extends GcmTaskService {
     }
 
     /**
+     * Try the network call.
+     *
+     * @return true if successfully reached backend
+     */
+    public static boolean trialRun(Context context) {
+        GcmLeftHome gcmLeftHome = new GcmLeftHome();
+        return gcmLeftHome.tryApiCall(context) == GcmNetworkManager.RESULT_SUCCESS;
+    }
+
+    /**
      * Uses the generated Google Cloud Endpoint {@link MyApi} to try to contact the
      * backend over the network.
      *
      * @param taskParams Parameters provided by {@link GcmNetworkManager}
      * @return {@link GcmNetworkManager#RESULT_FAILURE},
-     *      {@link GcmNetworkManager#RESULT_RESCHEDULE}, or
-     *      {@link GcmNetworkManager#RESULT_FAILURE} based on the outcome of the network call.
+     * {@link GcmNetworkManager#RESULT_RESCHEDULE}, or
+     * {@link GcmNetworkManager#RESULT_FAILURE} based on the outcome of the network call.
      */
     @Override
     public int onRunTask(TaskParams taskParams) {
         if (debug) Log.d(TAG, "onRunTask()");
         Context context = getApplicationContext();
+        return tryApiCall(context);
+    }
+
+    /**
+     * Try calling the {@link MyApi} Google Cloud Endpoint network call.
+     *
+     * @param context Application context
+     * @return {@link GcmNetworkManager#RESULT_FAILURE},
+     * {@link GcmNetworkManager#RESULT_RESCHEDULE}, or
+     * {@link GcmNetworkManager#RESULT_FAILURE} based on the outcome of the network call.
+     */
+    public int tryApiCall(@NonNull Context context) {
         MyApi.Builder builder = new MyApi.Builder(AndroidHttp.newCompatibleTransport(),
                 new AndroidJsonFactory(), null);
 
@@ -169,7 +190,9 @@ public class GcmLeftHome extends GcmTaskService {
     }
 
     private void handleResult(Context context, StatusBean result, boolean tell_nest) {
-        if (debug) { Log.d(TAG, "handleResult()"); }
+        if (debug) {
+            Log.d(TAG, "handleResult()");
+        }
 
         if (tell_nest) {
             if (result != null) {

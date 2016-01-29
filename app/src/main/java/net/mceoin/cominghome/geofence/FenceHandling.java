@@ -31,7 +31,9 @@ import com.google.android.gms.location.Geofence;
 import net.mceoin.cominghome.LocationUtils;
 import net.mceoin.cominghome.MainActivity;
 import net.mceoin.cominghome.PrefsFragment;
+import net.mceoin.cominghome.cloud.CloudUtil;
 import net.mceoin.cominghome.cloud.StatusArrivedHome;
+import net.mceoin.cominghome.cloud.StatusLeftHome;
 import net.mceoin.cominghome.gcm.GcmLeftHome;
 import net.mceoin.cominghome.history.HistoryUpdate;
 import net.mceoin.cominghome.oauth.OAuthFlowApp;
@@ -51,6 +53,8 @@ public class FenceHandling {
     private static SharedPreferences prefs;
     private static AsyncTask statusArrivedHome = null;
     private static AsyncTask statusLeftHome = null;
+
+    private static FenceHandlingAlarm alarm = new FenceHandlingAlarm();
 
     public static void process(int transition, List<Geofence> geofences,
                                Location triggeringLocation, @NonNull Context context) {
@@ -107,6 +111,8 @@ public class FenceHandling {
         intent.setAction(DelayAwayService.ACTION_CANCEL_TIMER);
         context.sendBroadcast(intent);
 
+        alarm.CancelAlarm(context);
+
         prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String structure_id = prefs.getString(MainActivity.PREFS_STRUCTURE_ID, "");
         String access_token = prefs.getString(OAuthFlowApp.PREF_ACCESS_TOKEN, "");
@@ -145,9 +151,11 @@ public class FenceHandling {
         String structure_id = prefs.getString(MainActivity.PREFS_STRUCTURE_ID, "");
 
         if (!structure_id.isEmpty()) {
-            Intent myIntent = new Intent(context, DelayAwayService.class);
-            myIntent.putExtra(DelayAwayService.ACTION_START_TIMER, true);
-            context.startService(myIntent);
+//            Intent myIntent = new Intent(context, DelayAwayService.class);
+//            myIntent.putExtra(DelayAwayService.ACTION_START_TIMER, true);
+//            context.startService(myIntent);
+
+            alarm.SetAlarm(context, true);
         } else {
             Log.e(TAG, "missing structure_id");
         }
@@ -155,9 +163,18 @@ public class FenceHandling {
 
     public static void executeLeftHome(@NonNull Context context) {
         cancelIfNotFinished(statusArrivedHome);
-//        cancelIfNotFinished(statusLeftHome);
-//        statusLeftHome = new StatusLeftHome(context).execute();
-        GcmLeftHome.scheduleOneOff(context);
+        cancelIfNotFinished(statusLeftHome);
+        if (CloudUtil.isNetworkConnected(context)) {
+//            statusLeftHome = new StatusLeftHome(context).execute();
+            // TODO: need to create an AsyncTask to call GcmLeftHome.tryApiCall()
+            GcmLeftHome.scheduleOneOff(context);
+        } else {
+            if (debug) {
+                Log.d(TAG, "no network, defer to Gcm");
+                HistoryUpdate.add(context, "no network, defer to Gcm");
+            }
+            GcmLeftHome.scheduleOneOff(context);
+        }
     }
 
     /**
