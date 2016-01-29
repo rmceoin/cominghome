@@ -72,6 +72,20 @@ public class CloudUtil {
     }
 
     /**
+     * Check if network is connected using
+     * {@link ConnectivityManager#getActiveNetworkInfo()}
+     *
+     * @param context Application context
+     * @return true if connected, false if not
+     */
+    public static boolean isNetworkConnected(@NonNull Context context) {
+        ConnectivityManager connMgr = (ConnectivityManager)
+                context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeInfo = connMgr.getActiveNetworkInfo();
+        return (activeInfo != null && activeInfo.isConnected());
+    }
+    /**
      * Get our application name along with version code.  Useful for when making an HTTP call
      * as a UserAgent.
      *
