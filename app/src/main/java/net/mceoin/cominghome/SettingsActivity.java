@@ -64,6 +64,24 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+
+        //
+        // Disable the Forget Nest menu item if we do not have an access_token
+        //
+        MenuItem item = menu.findItem(R.id.forget_nest);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        String access_token = prefs.getString(OAuthFlowApp.PREF_ACCESS_TOKEN, "");
+
+        if (access_token.length() > 0) {
+            item.setEnabled(true);
+        } else {
+            item.setEnabled(false);
+        }
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
@@ -95,7 +113,7 @@ public class SettingsActivity extends AppCompatActivity {
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString(OAuthFlowApp.PREF_ACCESS_TOKEN, "");
         editor.apply();
-        if (access_token.length()>0) {
+        if (access_token.length() > 0) {
             new NestDeauth(context).execute(access_token);
         }
     }
