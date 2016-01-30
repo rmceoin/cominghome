@@ -30,6 +30,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import net.mceoin.cominghome.nest.NestDeauth;
 import net.mceoin.cominghome.oauth.OAuthFlowApp;
 
 public class SettingsActivity extends AppCompatActivity {
@@ -90,8 +91,12 @@ public class SettingsActivity extends AppCompatActivity {
 
     public static void forgetNest(@NonNull Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        String access_token = prefs.getString(OAuthFlowApp.PREF_ACCESS_TOKEN, "");
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString(OAuthFlowApp.PREF_ACCESS_TOKEN, "");
         editor.apply();
+        if (access_token.length()>0) {
+            new NestDeauth(context).execute(access_token);
+        }
     }
 }
