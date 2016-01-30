@@ -63,7 +63,7 @@ public class FenceHandlingAlarm extends BroadcastReceiver {
         if (debug)
             Log.d(TAG, "extra alarmStartTime=" + alarmStartTime + " timeElapsedSeconds=" + timeElapsedSeconds);
 
-        int minimumMinutes = 4; // TODO: put back to 10
+        int minimumMinutes = 10;
         if (timeElapsedSeconds < (minimumMinutes * 60)) {
             if (debug)
                 Log.d(TAG, "not enough time has passed: (" + timeElapsedSeconds + " = " + currentTime + " - " + alarmStartTime + ")/1000");
@@ -112,8 +112,7 @@ public class FenceHandlingAlarm extends BroadcastReceiver {
         }
 
 //        long timeToWakeup = SystemClock.elapsedRealtime() + (5 * 60 * 1000);
-        //TODO: put back to 15 minutes
-        long timeToWakeup = alarmStartTime + (5 * 60 * 1000);
+        long timeToWakeup = alarmStartTime + (15 * 60 * 1000);
         long interval = AlarmManager.INTERVAL_FIFTEEN_MINUTES;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             //
