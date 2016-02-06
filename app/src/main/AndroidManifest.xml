@@ -78,6 +78,8 @@
             android:enabled="true"
             android:name=".service.DelayAwayService"/>
 
+        <service android:name=".gcm.GcmLeftHomeService" />
+
         <receiver android:name=".BootCompletedReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />

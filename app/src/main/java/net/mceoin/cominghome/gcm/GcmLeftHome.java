@@ -16,6 +16,7 @@
 package net.mceoin.cominghome.gcm;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -91,6 +92,13 @@ public class GcmLeftHome extends GcmTaskService {
                     .setUpdateCurrent(true)
                     .build();
             GcmNetworkManager.getInstance(context).schedule(oneoff);
+
+            Intent myIntent = new Intent(context, GcmLeftHomeService.class);
+            myIntent.putExtra(GcmLeftHomeService.ACTION_START, true);
+            context.startService(myIntent);
+
+            GcmLeftHomeNotification.startNotification(context);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -107,7 +115,14 @@ public class GcmLeftHome extends GcmTaskService {
      */
     public static boolean trialRun(Context context) {
         GcmLeftHome gcmLeftHome = new GcmLeftHome();
-        return gcmLeftHome.tryApiCall(context) == GcmNetworkManager.RESULT_SUCCESS;
+        int result = gcmLeftHome.tryApiCall(context);
+        if (result == GcmNetworkManager.RESULT_SUCCESS) {
+            Intent intent = new Intent();
+            intent.setAction(GcmLeftHomeService.ACTION_CANCEL);
+            context.sendBroadcast(intent);
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -123,7 +138,14 @@ public class GcmLeftHome extends GcmTaskService {
     public int onRunTask(TaskParams taskParams) {
         if (debug) Log.d(TAG, "onRunTask()");
         Context context = getApplicationContext();
-        return tryApiCall(context);
+
+        int result = tryApiCall(context);
+        if (result == GcmNetworkManager.RESULT_SUCCESS) {
+            Intent intent = new Intent();
+            intent.setAction(GcmLeftHomeService.ACTION_CANCEL);
+            context.sendBroadcast(intent);
+        }
+        return result;
     }
 
     /**

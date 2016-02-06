@@ -111,7 +111,7 @@ public class FenceHandling {
         intent.setAction(DelayAwayService.ACTION_CANCEL_TIMER);
         context.sendBroadcast(intent);
 
-        alarm.CancelAlarm(context);
+        alarm.CancelAlarm(context, true);
 
         prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String structure_id = prefs.getString(MainActivity.PREFS_STRUCTURE_ID, "");

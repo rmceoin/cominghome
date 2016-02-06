@@ -37,7 +37,7 @@ import net.mceoin.cominghome.R;
  */
 public class DelayAwayNotification {
     private static String TAG = "DelayAwayNotification";
-    private static final boolean debug = false;
+    private static final boolean debug = true;
 
     static NotificationManager mNotifyManager;
     static Builder notificationCompat;

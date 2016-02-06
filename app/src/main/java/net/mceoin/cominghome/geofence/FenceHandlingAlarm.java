@@ -21,12 +21,17 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import net.mceoin.cominghome.PrefsFragment;
 import net.mceoin.cominghome.R;
 import net.mceoin.cominghome.history.HistoryUpdate;
+import net.mceoin.cominghome.service.DelayAwayNotification;
+import net.mceoin.cominghome.service.DelayAwayService;
 
 /**
  * Wait for about 15 minutes before telling the backend or Nest that we've left home.
@@ -63,7 +68,11 @@ public class FenceHandlingAlarm extends BroadcastReceiver {
         if (debug)
             Log.d(TAG, "extra alarmStartTime=" + alarmStartTime + " timeElapsedSeconds=" + timeElapsedSeconds);
 
-        int minimumMinutes = 10;
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        int timeoutMinutes = prefs.getInt(PrefsFragment.PREFERENCE_AWAY_DELAY,
+                context.getResources().getInteger(R.integer.away_delay_default));
+
+        int minimumMinutes = timeoutMinutes - 1;
         if (timeElapsedSeconds < (minimumMinutes * 60)) {
             if (debug)
                 Log.d(TAG, "not enough time has passed: (" + timeElapsedSeconds + " = " + currentTime + " - " + alarmStartTime + ")/1000");
@@ -84,9 +93,15 @@ public class FenceHandlingAlarm extends BroadcastReceiver {
             // FYI, the alarm will be on the main thread, so don't try network calls directly
             //
             FenceHandling.executeLeftHome(context);
+            //
+            // we cancel the alarm, but not the notification, since FenceHandling will
+            // reuse the same notification ID.
+            //
+            CancelAlarm(context, false);
+            return;
         }
 
-        CancelAlarm(context);
+        CancelAlarm(context, true);
     }
 
     /**
@@ -111,8 +126,11 @@ public class FenceHandlingAlarm extends BroadcastReceiver {
             HistoryUpdate.add(context, "alarmStartTime=" + alarmStartTime);
         }
 
-//        long timeToWakeup = SystemClock.elapsedRealtime() + (5 * 60 * 1000);
-        long timeToWakeup = alarmStartTime + (15 * 60 * 1000);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        int timeoutMinutes = prefs.getInt(PrefsFragment.PREFERENCE_AWAY_DELAY,
+                context.getResources().getInteger(R.integer.away_delay_default));
+
+        long timeToWakeup = alarmStartTime + (timeoutMinutes * 60 * 1000);
         long interval = AlarmManager.INTERVAL_FIFTEEN_MINUTES;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             //
@@ -126,12 +144,19 @@ public class FenceHandlingAlarm extends BroadcastReceiver {
                     timeToWakeup,
                     interval, pi);
         }
+        DelayAwayNotification.startNotification(context);
+
+        Intent myIntent = new Intent(context, DelayAwayService.class);
+        context.startService(myIntent);
     }
 
-    public void CancelAlarm(@NonNull Context context) {
+    public void CancelAlarm(@NonNull Context context, boolean andNotification) {
         Intent intent = new Intent(context, FenceHandlingAlarm.class);
         PendingIntent sender = PendingIntent.getBroadcast(context, 0, intent, 0);
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         alarmManager.cancel(sender);
+        if (andNotification) {
+            DelayAwayNotification.clearNotification(context);
+        }
     }
 }

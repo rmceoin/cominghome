@@ -87,7 +87,7 @@ public class DelayAwayService extends Service implements GoogleApiClient.Connect
                     if (debug) HistoryUpdate.add(context, "onReceive: ACTION_START_TIMER");
                     startTimer();
                 } else if (intent.getAction().equals(ACTION_CANCEL_TIMER)) {
-                    if (debug) HistoryUpdate.add(context, "onReceive: ACTION_CANCEL_TIMER");
+                    if (debug) HistoryUpdate.add(context, "onReceive: ACTION_CANCEL");
                     cancelTimer();
                 } else if (intent.getAction().equals(ACTION_AWAY)) {
                     triggerBackendAway(context);

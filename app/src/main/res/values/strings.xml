@@ -62,6 +62,7 @@
     <string name="forgotten">Forgotten</string>
     <string name="select_structure">Select Structure</string>
     <string name="delay_until_away">Delay until setting away</string>
+    <string name="setting_away">Setting away</string>
     <string name="cancel">Cancel</string>
     <string name="away_now">Away now</string>
     <string name="still_on_home_wifi">Still on home WiFi</string>

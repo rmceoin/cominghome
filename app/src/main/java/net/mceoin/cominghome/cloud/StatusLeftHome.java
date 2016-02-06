@@ -32,6 +32,8 @@ import net.mceoin.cominghome.PrefsFragment;
 import net.mceoin.cominghome.R;
 import net.mceoin.cominghome.api.myApi.MyApi;
 import net.mceoin.cominghome.api.myApi.model.StatusBean;
+import net.mceoin.cominghome.gcm.GcmLeftHome;
+import net.mceoin.cominghome.gcm.GcmLeftHomeNotification;
 import net.mceoin.cominghome.gcm.GcmRegister;
 import net.mceoin.cominghome.geofence.WiFiUtils;
 import net.mceoin.cominghome.history.HistoryUpdate;
@@ -45,7 +47,7 @@ import java.util.Random;
  * set Nest to "away".  Multiple attempts are made.  After the last retry, no further
  * attempts are made.
  */
-public class StatusLeftHome extends AsyncTask<Void, Void, StatusBean> {
+public class StatusLeftHome extends AsyncTask<Integer, Void, StatusBean> {
     private static final String TAG = StatusLeftHome.class.getSimpleName();
     private static final boolean debug = true;
 
@@ -72,7 +74,7 @@ public class StatusLeftHome extends AsyncTask<Void, Void, StatusBean> {
     }
 
     @Override
-    protected StatusBean doInBackground(Void... params) {
+    protected StatusBean doInBackground(Integer... params) {
         if (myApiService == null) { // Only do this once
             MyApi.Builder builder = new MyApi.Builder(AndroidHttp.newCompatibleTransport(),
                     new AndroidJsonFactory(), null);
@@ -95,7 +97,11 @@ public class StatusLeftHome extends AsyncTask<Void, Void, StatusBean> {
         }
         String lastExceptionMessage = null;
         int retry = 0;
-        while (retry < 15) {
+        int retries = 15;
+        if (params.length > 0) {
+            retries = params[0];
+        }
+        while (retry < retries) {
             try {
                 if (WiFiUtils.isCurrentSsidSameAsStored(context)) {
                     if (debug) Log.d(TAG, "we're associated with home SSID, aborting");
@@ -159,6 +165,8 @@ public class StatusLeftHome extends AsyncTask<Void, Void, StatusBean> {
 
         if (tell_nest) {
             if (result != null) {
+                GcmLeftHomeNotification.clearNotification(context);
+                GcmLeftHome.cancelAllTasks(context);
                 if (result.getNestSuccess()) {
                     if (result.getNestUpdated()) {
                         NestUtils.sendNotificationTransition(context, "Away");

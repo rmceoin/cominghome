@@ -1,0 +1,106 @@
+/*
+ * Copyright (C) 2016 Randy McEoin
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Grabbed from OpenIntents OI Safe project
+ */
+package net.mceoin.cominghome.gcm;
+
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationCompat.Builder;
+import android.util.Log;
+
+import net.mceoin.cominghome.MainActivity;
+import net.mceoin.cominghome.PrefsFragment;
+import net.mceoin.cominghome.R;
+
+/**
+ * Show a notification that indicates we're trying to contact the backend
+ */
+public class GcmLeftHomeNotification {
+    private static final String TAG = "GcmLeftHomeNotif";
+    private static final boolean debug = false;
+
+    static NotificationManager mNotifyManager;
+    static Builder notificationCompat;
+
+    public static void startNotification(@NonNull Context context) {
+        if (debug) Log.d(TAG, "startNotification()");
+
+        if (!getPreferenceShowAwayDelayNotification(context)) return;
+
+        mNotifyManager = (NotificationManager) context
+                .getSystemService(Context.NOTIFICATION_SERVICE);
+
+        Intent intent = new Intent(context, MainActivity.class);
+        PendingIntent pi = PendingIntent.getActivity(
+                context, 0, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT
+        );
+
+        Intent cancelIntent = new Intent(GcmLeftHomeService.ACTION_CANCEL);
+        PendingIntent cancelPendingIntent = PendingIntent.getBroadcast(
+                context, 0, cancelIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT
+        );
+
+        Intent awayIntent = new Intent(GcmLeftHomeService.ACTION_AWAY);
+        PendingIntent awayPendingIntent = PendingIntent.getBroadcast(
+                context, 0, awayIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT
+        );
+
+        notificationCompat = new NotificationCompat.Builder(context)
+                .setContentTitle(context.getString(R.string.app_name))
+                .setContentText(context.getString(R.string.setting_away))
+                .setSmallIcon(R.drawable.home).setOngoing(true)
+                .setOngoing(true)
+                .addAction(android.R.drawable.ic_menu_close_clear_cancel, context.getString(R.string.cancel), cancelPendingIntent)
+                .addAction(android.R.drawable.ic_menu_send, context.getString(R.string.away_now), awayPendingIntent)
+                .setContentIntent(pi);
+
+        mNotifyManager.notify(MainActivity.NOTIFICATION_DELAY_AWAY, notificationCompat.build());
+    }
+
+    public static void clearNotification(@NonNull Context context) {
+        if (debug) Log.d(TAG, "clearNotification()");
+
+        NotificationManager nm = (NotificationManager) context
+                .getSystemService(Context.NOTIFICATION_SERVICE);
+        nm.cancel(MainActivity.NOTIFICATION_DELAY_AWAY);
+    }
+
+    /**
+     * Get the {@link PrefsFragment#PREFERENCE_SHOW_AWAY_DELAY_NOTIFICATION} status
+     *
+     * @param context Application context
+     * @return true or false
+     */
+    private static boolean getPreferenceShowAwayDelayNotification(Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        boolean showAwayDelayNotification = sp.getBoolean(PrefsFragment.PREFERENCE_SHOW_AWAY_DELAY_NOTIFICATION, true);
+        if (debug) {
+            Log.d(TAG, "showAwayDelayNotification=" + showAwayDelayNotification);
+        }
+        return showAwayDelayNotification;
+    }
+
+}
