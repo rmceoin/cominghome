@@ -1,0 +1,42 @@
+#!/usr/bin/env perl
+
+use strict;
+use Env qw(HOME);
+
+my $adb="$HOME/android-sdk-linux/platform-tools/adb";
+my $device="-e";
+my $cmd="$adb $device shell dumpsys alarm";
+
+my $package="net.mceoin.cominghome";
+
+print "$cmd\n";
+
+open(P,"$cmd |") || die "Failed: $!\n";
+my $inwakeup=0;
+while ( <P> )
+{
+	# look for this:
+	#
+	#   RTC_WAKEUP #1: Alarm{39e8b7b6 type 0 when 1454462322076 net.mceoin.cominghome}
+	#    tag=*walarm*:net.mceoin.cominghome/.geofence.FenceHandlingAlarm
+	#    type=0 whenElapsed=-6m13s720ms when=2016-02-02 17:18:42
+	#    window=-1 repeatInterval=900000 count=0
+	#    operation=PendingIntent{1cd3dcb7: PendingIntentRecord{3ffeec24 net.mceoin.cominghome broadcastIntent}}
+	#
+	if (/_WAKEUP .* $package/) {
+		$inwakeup=1;
+		print $_;
+	} elsif ($inwakeup && /^    /) {
+		# still in wakeup
+		print $_;
+	} elsif ($inwakeup) {
+		$inwakeup=0;
+		print "\n";
+	} elsif (/$package/) {
+		# In alarm stats like this:
+		#
+		#   u0a59:net.mceoin.cominghome +1s580ms running, 3 wakeups:
+		#    +1s580ms 3 wakes 3 alarms: *walarm*:net.mceoin.cominghome/.geofence.FenceHandlingAlarm
+		print $_;
+	}
+}
