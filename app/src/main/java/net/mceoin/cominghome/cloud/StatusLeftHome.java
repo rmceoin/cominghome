@@ -163,10 +163,16 @@ public class StatusLeftHome extends AsyncTask<Integer, Void, StatusBean> {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         tell_nest = prefs.getBoolean(PrefsFragment.key_tell_nest_on_leaving_home, true);
 
+        handleResult(context, result, tell_nest);
+        GcmLeftHomeNotification.clearNotification(context);
+        GcmLeftHome.cancelAllTasks(context);
+    }
+
+    public static void handleResult(Context context, StatusBean result, boolean tell_nest) {
+        if (debug) { Log.d(TAG, "handleResult()"); }
+
         if (tell_nest) {
             if (result != null) {
-                GcmLeftHomeNotification.clearNotification(context);
-                GcmLeftHome.cancelAllTasks(context);
                 if (result.getNestSuccess()) {
                     if (result.getNestUpdated()) {
                         NestUtils.sendNotificationTransition(context, "Away");
@@ -189,5 +195,6 @@ public class StatusLeftHome extends AsyncTask<Integer, Void, StatusBean> {
                 HistoryUpdate.add(context, "Backend updated");
             }
         }
+
     }
 }

@@ -34,9 +34,12 @@ import net.mceoin.cominghome.Installation;
 import net.mceoin.cominghome.MainActivity;
 import net.mceoin.cominghome.NestUtils;
 import net.mceoin.cominghome.PrefsFragment;
+import net.mceoin.cominghome.R;
 import net.mceoin.cominghome.api.myApi.MyApi;
 import net.mceoin.cominghome.api.myApi.model.StatusBean;
 import net.mceoin.cominghome.cloud.CloudUtil;
+import net.mceoin.cominghome.cloud.StatusLeftHome;
+import net.mceoin.cominghome.geofence.WiFiUtils;
 import net.mceoin.cominghome.history.HistoryUpdate;
 import net.mceoin.cominghome.oauth.OAuthFlowApp;
 
@@ -139,11 +142,18 @@ public class GcmLeftHome extends GcmTaskService {
         if (debug) Log.d(TAG, "onRunTask()");
         Context context = getApplicationContext();
 
+        if (WiFiUtils.isCurrentSsidSameAsStored(context)) {
+            if (debug) Log.d(TAG, "we're associated with home SSID, aborting");
+            HistoryUpdate.add(context, context.getString(R.string.back_on_home_wifi));
+            return GcmNetworkManager.RESULT_SUCCESS;
+        }
         int result = tryApiCall(context);
         if (result == GcmNetworkManager.RESULT_SUCCESS) {
             Intent intent = new Intent();
             intent.setAction(GcmLeftHomeService.ACTION_CANCEL);
             context.sendBroadcast(intent);
+
+            GcmLeftHomeNotification.clearNotification(context);
         }
         return result;
     }
@@ -188,7 +198,7 @@ public class GcmLeftHome extends GcmTaskService {
         while (retry < 2) {
             try {
                 StatusBean result = myApiService.leftHome(InstallationId, access_token, structure_id, tell_nest, false, "-", regid).execute();
-                handleResult(context, result, tell_nest);
+                StatusLeftHome.handleResult(context, result, tell_nest);
                 return GcmNetworkManager.RESULT_SUCCESS;
 
             } catch (IOException e) {
@@ -209,37 +219,5 @@ public class GcmLeftHome extends GcmTaskService {
         }
 
         return GcmNetworkManager.RESULT_RESCHEDULE;
-    }
-
-    private void handleResult(Context context, StatusBean result, boolean tell_nest) {
-        if (debug) {
-            Log.d(TAG, "handleResult()");
-        }
-
-        if (tell_nest) {
-            if (result != null) {
-                if (result.getNestSuccess()) {
-                    if (result.getNestUpdated()) {
-                        NestUtils.sendNotificationTransition(context, "Away");
-                        HistoryUpdate.add(context, "Backend updated: Nest Away");
-                    } else {
-                        if (result.getOthersAtHome()) {
-                            HistoryUpdate.add(context, "Backend updated: Nest not updated: Others at home");
-                        } else {
-                            HistoryUpdate.add(context, "Backend updated: Nest already away");
-                        }
-                    }
-                } else {
-                    if (result.getMessage().contains("Unauthorized")) {
-                        NestUtils.lostAuthorization(context);
-                    } else {
-                        HistoryUpdate.add(context, "Backend updated: Nest errored: " + result.getMessage());
-                    }
-                }
-            } else {
-                HistoryUpdate.add(context, "Backend updated");
-            }
-        }
-
     }
 }
